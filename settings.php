@@ -15,17 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Adds settings links to admin tree.
  *
- * @package    tool
- * @subpackage coursestore
- * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @package    tool_coursestore
+ * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalys IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+*/
 
-defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2015031000;
-$plugin->requires  = 2014051200;
-$plugin->component = 'tool_coursestore';
+defined('MOODLE_INTERNAL') || die();
+
+if ($hassiteconfig) {
+	if (is_siteadmin()) {
+	    $ADMIN->add('backups', new admin_externalpage('toolcoursestore',
+	        get_string('sendcoursebackups', 'tool_coursestore'), "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php"));
+	}
+}

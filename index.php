@@ -15,17 +15,31 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Send course backups offsite.
  *
- * @package    tool
- * @subpackage coursestore
- * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @package    tool_coursestore
+ * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalys IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+require(__DIR__ . '/../../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
 
-$plugin->version   = 2015031000;
-$plugin->requires  = 2014051200;
-$plugin->component = 'tool_coursestore';
+// Only for admins or CLI.
+if (!defined('CLI_SCRIPT') && !is_siteadmin()) {
+    print_error('noaccesstofeature', 'tool_coursestore');
+}
+
+admin_externalpage_setup('toolcoursestore');
+
+// Get a list of the course backups.
+$sql = "SELECT * 
+		FROM {files} 
+		WHERE component = 'backup' 
+		AND filearea = 'course'
+		AND contextid = " . "
+		ORDER BY ";
+
+
+
