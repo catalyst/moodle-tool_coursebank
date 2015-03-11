@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="admin/tool/customlang/db" VERSION="20120122" COMMENT="XMLDB file for Moodle admin/tool/customlang"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="tool_coursestore" COMMENT="Keeps details of the backups that have been sent and their status.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="backupfilename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the backup."/>
+        <FIELD NAME="fileid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key into the files table."/>
+        <FIELD NAME="chunksize" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How big the pieces of the file will be broken into."/>
+        <FIELD NAME="totalchunks" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How many chuncks will get sent."/>
+        <FIELD NAME="chunknumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Which chunck is currently getting sent."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup started to get sent."/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup completed getting sent."/>
+        <FIELD NAME="timechunksent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunck was started to get sent."/>
+        <FIELD NAME="timechunkcompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunck was completed getting sent."/>
+        <FIELD NAME="status" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The status of sending this backup."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="uq_fileid" UNIQUE="true" FIELDS="fileid" COMMENT="The linked file id into the files table."/>
+        <INDEX NAME="ix_filedata" UNIQUE="false" FIELDS="fileid,backupfilename" COMMENT="Index to easily retrieve the backup file details."/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

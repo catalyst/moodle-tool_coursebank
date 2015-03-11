@@ -15,16 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for tool_coursestore
+ * Post installation and migration code.
  *
- * @package    tool_coursestore
- * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
- * @copyright  2015 Catalys IT
+ * @package    tool
+ * @subpackage customlang
+ * @copyright  2011 Petr Skoda {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Course Store';
-$string['sendcoursebackups'] = 'Send course backups';
-$string['noaccesstofeature'] = 'Sorry, only admin or CLI has access to this feature.';
-//$string['coursestore:edit'] = 'Edit course store';
-//$string['coursestore:view'] = 'View course store';
+defined('MOODLE_INTERNAL') || die;
+
+function xmldb_tool_coursestore_install() {
+    global $CFG, $OUTPUT, $DB;
+
+}
+
+

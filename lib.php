@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for tool_coursestore
+ * Constants for the course store.
  *
  * @package    tool_coursestore
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
@@ -23,8 +23,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Course Store';
-$string['sendcoursebackups'] = 'Send course backups';
-$string['noaccesstofeature'] = 'Sorry, only admin or CLI has access to this feature.';
-//$string['coursestore:edit'] = 'Edit course store';
-//$string['coursestore:view'] = 'View course store';
+abstract class tool_coursestore {
+
+    // status
+    const STATUS_NOTSTARTED  = 0;
+    const STATUS_INPROGRESS  = 1;
+    const STATUS_FINISHED    = 2;
+    const STATUS_ERROR       = 99;
+
+    public static function get_config_chunck_size() {
+        return 100;
+    }
+
+    public static function calculate_total_chunks($chuncksize, $filesize) {
+        return ceil($filesize / $chuncksize);
+    }
+
+}
