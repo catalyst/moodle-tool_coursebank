@@ -61,19 +61,30 @@ $sql = "SELECT tcs.id,
                f.userid,
                f.filesize,
                f.timecreated,
-               f.timemodified
+               f.timemodified,
+               cr.fullname,
+               cr.shortname,
+               cr.category,
+               cr.startdate,
+               cc.name as categoryname
         FROM {files} f
-        INNER JOIN {context} c on f.contextid = c.id
+        INNER JOIN {context} ct on f.contextid = ct.id
+        INNER JOIN {course} cr on ct.instanceid = cr.id
+        INNER JOIN {course_categories} cc on cr.category = cc.id
         LEFT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
-            AND  f.timemodified > tcs.timecompleted
-        WHERE c.contextlevel = " . CONTEXT_COURSE . "
+            AND (tcs.status IN (:statusnotstarted, :statuserror))
+        WHERE ct.contextlevel = :contextcourse
         AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
         ORDER BY f.timecreated";
 
-$rs = $DB->get_recordset_sql($sql);
+$params = array('statusnotstarted' => tool_coursestore::STATUS_NOTSTARTED,
+                'statuserror' => tool_coursestore::STATUS_ERROR,
+                'contextcourse' => CONTEXT_COURSE,
+                );
+$rs = $DB->get_recordset_sql($sql, $params);
 $backupids = array();
 foreach ($rs as $course) {
-    echo "Course: " . $course->filename . "; id=" . $course->id . "<br />\n";
+    echo "Backup: " . $course->filename . "; Course= " . $course->shortname . "; category=" . $course->categoryname . "; id=" . $course->id . "<br />\n";
     if (!$course->id) {
         // The record hasn't been input in the course restore table yet.
         $cs = new stdClass();
@@ -92,18 +103,4 @@ foreach ($rs as $course) {
 }
 
 echo "backupids=" . print_r($backupids, true);
-
-// Get all the automated backups that have completed.
-// $params = array('type'      => backup::TYPE_1COURSE,
-//                 'operation' => backup::OPERATION_BACKUP,
-//                 'status'    => backup::STATUS_FINISHED_OK,
-//                 );
-
-// $sql = "SELECT *
-//         FROM {backup_controllers} bc
-//         LEFT JOIN {tool_coursestore} tcs on bc.backupid = tcs.backupid
-//         WHERE bc.type = :type
-//         AND bc.operation = :operation
-//         AND bc.status = :status
-//         ";
 
