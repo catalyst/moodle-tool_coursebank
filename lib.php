@@ -39,4 +39,7 @@ abstract class tool_coursestore {
         return ceil($filesize / $chuncksize);
     }
 
+    public static function send_backup($backup) {
+        return true;
+    }
 }

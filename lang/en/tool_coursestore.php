@@ -28,3 +28,4 @@ $string['sendcoursebackups'] = 'Send course backups';
 $string['noaccesstofeature'] = 'Sorry, only admin or CLI has access to this feature.';
 //$string['coursestore:edit'] = 'Edit course store';
 //$string['coursestore:view'] = 'View course store';
+$string['backupfailed'] = 'Failed sending backup %s.';

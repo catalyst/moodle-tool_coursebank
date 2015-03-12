@@ -56,16 +56,17 @@ $sql = "SELECT tcs.id,
                f.id AS f_fileid,
                f.contenthash,
                f.pathnamehash,
-               f.contextid,
                f.filename,
                f.userid,
                f.filesize,
                f.timecreated,
                f.timemodified,
+               cr.id AS courseid,
                cr.fullname,
                cr.shortname,
                cr.category,
                cr.startdate,
+               cc.id as categoryid,
                cc.name as categoryname
         FROM {files} f
         INNER JOIN {context} ct on f.contextid = ct.id
@@ -82,25 +83,44 @@ $params = array('statusnotstarted' => tool_coursestore::STATUS_NOTSTARTED,
                 'contextcourse' => CONTEXT_COURSE,
                 );
 $rs = $DB->get_recordset_sql($sql, $params);
-$backupids = array();
-foreach ($rs as $course) {
-    echo "Backup: " . $course->filename . "; Course= " . $course->shortname . "; category=" . $course->categoryname . "; id=" . $course->id . "<br />\n";
-    if (!$course->id) {
+$backups = array();
+$totalbackups = 0;
+foreach ($rs as $coursebackup) {
+    echo "Backup: " . $coursebackup->filename . "; Course= " . $coursebackup->shortname . "; category=" . $coursebackup->categoryname . "; id=" . $coursebackup->id . "<br />\n";
+    if (!$coursebackup->id) {
         // The record hasn't been input in the course restore table yet.
         $cs = new stdClass();
-        $cs->backupfilename = $course->filename;
-        $cs->fileid = $course->f_fileid;
+        $cs->backupfilename = $coursebackup->filename;
+        $cs->fileid = $coursebackup->f_fileid;
         $cs->chunksize = tool_coursestore::get_config_chunck_size();
-        $cs->totalchunks = tool_coursestore::calculate_total_chunks($cs->chunksize, $course->filesize);
+        $cs->totalchunks = tool_coursestore::calculate_total_chunks($cs->chunksize, $coursebackup->filesize);
         $cs->chunknumber = 0;
         $cs->status = tool_coursestore::STATUS_NOTSTARTED;
-        $backupids[] = $DB->insert_record('tool_coursestore', $cs);
-     }
-     else {
-         // Insert the id of backups we need to send.
-         $backupids[] = $course->id;
-     }
+        $backupid = $DB->insert_record('tool_coursestore', $cs);
+
+        $coursebackup->id = $backupid;
+        $coursebackup->backupfilename;
+        $coursebackup->fileid = $cs->fileid;
+        $coursebackup->chunksize = $cs->chunksize;
+        $coursebackup->totalchunks = $cs->totalchunks;
+        $coursebackup->chunknumber = $cs->chunknumber;
+        $coursebackup->timecreated = 0;
+        $coursebackup->timecompleted = 0;
+        $coursebackup->timechunksent = 0;
+        $coursebackup->timechunkcompleted = 0;
+        $coursebackup->status = $cs->status;
+    }
+    $backups[] = $coursebackup;
+    $totalbackups++;
 }
 
-echo "backupids=" . print_r($backupids, true);
+echo "backupids=" . print_r($backups, true);
+
+// Now send the backups.
+foreach ($backups as $backup) {
+    $result = tool_coursestore::send_backup($backup);
+    if (!$result) {
+        echo(get_string('backupfailed', 'tool_coursestore', $course->backupfilename) . "\n");
+    }
+}
 
