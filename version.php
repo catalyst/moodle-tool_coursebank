@@ -19,13 +19,14 @@
  *
  * @package    tool
  * @subpackage coursestore
+ * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @author     Adam Riddell <adamr@catalyst-au.net>
- * @copyright  2015 Catalys IT
+ * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2015031000;
+$plugin->version   = 2015031101;
 $plugin->requires  = 2014051200;
 $plugin->component = 'tool_coursestore';
