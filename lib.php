@@ -32,7 +32,7 @@ abstract class tool_coursestore {
     const STATUS_ERROR       = 99;
 
     public static function get_config_chunk_size() {
-        return 100;
+        return get_config('tool_coursestore', 'chunksize');
     }
 
     public static function calculate_total_chunks($chunksize, $filesize) {
@@ -40,6 +40,19 @@ abstract class tool_coursestore {
     }
 
     public static function send_backup($backup) {
-        return true;
+        global $CFG;
+
+        require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+
+        // Construct the full path of the backup file
+        $backup->filepath = $CFG->dataroot . '/filedir/' .
+                substr($backup->contenthash, 0, 2) . '/' .
+                substr($backup->contenthash, 2,2) .'/' . $backup->contenthash;
+
+        if(!is_readable($backup->filepath)) {
+            return false;
+        }
+
+        return send_file($backup->filepath, (array) $backup);
     }
 }

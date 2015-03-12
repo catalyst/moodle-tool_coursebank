@@ -23,23 +23,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('CLI_SCRIPT', true);
 require(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/admin/tool/coursestore/lib.php');
-
-//require_once($CFG->dirroot . '/backup/backup.class.php');
-//require_once($CFG->dirroot . '/backup/controller/backup_controller.class.php');
-
-// Only for admins or CLI.
-if (!defined('CLI_SCRIPT') && !is_siteadmin()) {
-    print_error('noaccesstofeature', 'tool_coursestore');
-}
-
-//require_login(null, false);
-//require_capability('tool/coursestore:view', context_system::instance());
-
-
-admin_externalpage_setup('toolcoursestore');
 
 // Get a list of the course backups.
 $sql = "SELECT tcs.id,
