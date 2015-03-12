@@ -20,7 +20,7 @@
  * @package    tool
  * @subpackage coursestore
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
- * @copyright  2015 Catalys IT
+ * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

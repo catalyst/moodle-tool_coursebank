@@ -19,7 +19,7 @@
  *
  * @package    tool_coursestore
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
- * @copyright  2015 Catalys IT
+ * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -92,7 +92,7 @@ foreach ($rs as $coursebackup) {
         $cs = new stdClass();
         $cs->backupfilename = $coursebackup->filename;
         $cs->fileid = $coursebackup->f_fileid;
-        $cs->chunksize = tool_coursestore::get_config_chunck_size();
+        $cs->chunksize = tool_coursestore::get_config_chunk_size();
         $cs->totalchunks = tool_coursestore::calculate_total_chunks($cs->chunksize, $coursebackup->filesize);
         $cs->chunknumber = 0;
         $cs->status = tool_coursestore::STATUS_NOTSTARTED;

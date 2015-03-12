@@ -19,7 +19,7 @@
  *
  * @package    tool_coursestore
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
- * @copyright  2015 Catalys IT
+ * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,12 +31,12 @@ abstract class tool_coursestore {
     const STATUS_FINISHED    = 2;
     const STATUS_ERROR       = 99;
 
-    public static function get_config_chunck_size() {
+    public static function get_config_chunk_size() {
         return 100;
     }
 
-    public static function calculate_total_chunks($chuncksize, $filesize) {
-        return ceil($filesize / $chuncksize);
+    public static function calculate_total_chunks($chunksize, $filesize) {
+        return ceil($filesize / $chunksize);
     }
 
     public static function send_backup($backup) {

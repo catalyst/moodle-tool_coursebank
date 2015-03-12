@@ -10,12 +10,12 @@
         <FIELD NAME="backupfilename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the backup."/>
         <FIELD NAME="fileid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key into the files table."/>
         <FIELD NAME="chunksize" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How big the pieces of the file will be broken into."/>
-        <FIELD NAME="totalchunks" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How many chuncks will get sent."/>
-        <FIELD NAME="chunknumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Which chunck is currently getting sent."/>
+        <FIELD NAME="totalchunks" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How many chunks will get sent."/>
+        <FIELD NAME="chunknumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Which chunk is currently getting sent."/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup started to get sent."/>
         <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup completed getting sent."/>
-        <FIELD NAME="timechunksent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunck was started to get sent."/>
-        <FIELD NAME="timechunkcompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunck was completed getting sent."/>
+        <FIELD NAME="timechunksent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunk was started to get sent."/>
+        <FIELD NAME="timechunkcompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunk was completed getting sent."/>
         <FIELD NAME="status" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The status of sending this backup."/>
       </FIELDS>
       <KEYS>
