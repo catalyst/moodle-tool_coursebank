@@ -24,8 +24,20 @@
  */
 
 $string['pluginname'] = 'Course Store';
-$string['sendcoursebackups'] = 'Send course backups';
-$string['noaccesstofeature'] = 'Sorry, only admin or CLI has access to this feature.';
-//$string['coursestore:edit'] = 'Edit course store';
-//$string['coursestore:view'] = 'View course store';
 $string['backupfailed'] = 'Failed sending backup %s.';
+$string['sendcoursebackups'] = 'External course backups';
+$string['noaccesstofeature'] = 'Sorry, only admin or CLI has access to this feature.';
+$string['settingspage'] = 'Configuration';
+$string['settings_header'] = 'Course Store configuration options';
+$string['settings_url'] = 'Target URL';
+$string['settings_url_desc'] = 'Location of the target backup server.';
+$string['settings_chunksize'] = 'Chunk size (kB)';
+$string['settings_chunksize_desc'] = 'Size (in Kilobytes) of individual backup chunks to be sent to the backup server.';
+$string['settings_timeout'] = 'Web service time out';
+$string['settings_timeout_desc'] = 'Time out (in seconds) for individual HTTP requests.';
+$string['settings_conntimeout'] = 'Connection time out';
+$string['settings_conntimeout_desc'] = 'Time out (in seconds) for HTTP connection attempts.';
+$string['settings_enable'] = 'Active';
+$string['settings_enable_desc'] = 'Enable or disable sending of course backups.';
+$string['settings_enablestring'] = 'Enable';
+$string['settings_disablestring'] = 'Disable';
