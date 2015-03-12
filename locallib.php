@@ -95,6 +95,7 @@ function send_file($filepath, $data) {
     $urltarget = get_config('tool_coursestore', 'url');
     $conntimeout = get_config('tool_coursestore', 'conntimeout');
     $timeout = get_config('tool_coursestore', 'timeout');
+    $maxatt = get_config('tool_coursestore', 'maxatt');
 
     // Initialise, check connection
     $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
@@ -130,7 +131,7 @@ function send_file($filepath, $data) {
         $data['data'] = base64_encode($contents);
         $data['chunksum'] = md5($data['data']);
         $data['chunkno'] = $chunkno;
-        if(!$ws_manager->send($data)) {
+        if(!$ws_manager->send($data, $maxatt)) {
             // Failed to send a chunk
             return false;
         }

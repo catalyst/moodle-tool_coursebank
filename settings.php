@@ -72,6 +72,12 @@ if ($ADMIN->fulltree) {
             5,
             PARAM_INT)
     );
+    $settings->add(new admin_setting_configtext('tool_coursestore/maxatt',
+            get_string('settings_maxatt', 'tool_coursestore'),
+            get_string('settings_maxatt_desc', 'tool_coursestore'),
+            5,
+            PARAM_INT)
+    );
 
     $ADMIN->add('tools', $settings);
 }

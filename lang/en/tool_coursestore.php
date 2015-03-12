@@ -41,3 +41,5 @@ $string['settings_enable'] = 'Active';
 $string['settings_enable_desc'] = 'Enable or disable sending of course backups.';
 $string['settings_enablestring'] = 'Enable';
 $string['settings_disablestring'] = 'Disable';
+$string['settings_maxatt'] = 'HTTP request limit';
+$string['settings_maxatt_desc'] = 'Number of unsuccessful HTTP requests to make before giving up on an individual file chunk.' ;
