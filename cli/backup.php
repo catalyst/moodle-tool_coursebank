@@ -60,20 +60,19 @@ $sql = "SELECT tcs.id,
         INNER JOIN {course} cr on ct.instanceid = cr.id
         INNER JOIN {course_categories} cc on cr.category = cc.id
         LEFT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
-            AND (tcs.status IN (:statusnotstarted, :statuserror))
+            AND (tcs.status != :statuserror)
         WHERE ct.contextlevel = :contextcourse
         AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
         ORDER BY f.timecreated";
 
-$params = array('statusnotstarted' => tool_coursestore::STATUS_NOTSTARTED,
-                'statuserror' => tool_coursestore::STATUS_ERROR,
-                'contextcourse' => CONTEXT_COURSE,
+$params = array('statusnotstarted' => STATUS_NOTSTARTED,
+                'statuserror' => STATUS_ERROR,
+                'contextcourse' => CONTEXT_COURSE
                 );
 $rs = $DB->get_recordset_sql($sql, $params);
 $backups = array();
 $totalbackups = 0;
 foreach ($rs as $coursebackup) {
-    echo "Backup: " . $coursebackup->filename . "; Course= " . $coursebackup->shortname . "; category=" . $coursebackup->categoryname . "; id=" . $coursebackup->id . "<br />\n";
     if (!$coursebackup->id) {
         // The record hasn't been input in the course restore table yet.
         $cs = new stdClass();
@@ -82,11 +81,11 @@ foreach ($rs as $coursebackup) {
         $cs->chunksize = tool_coursestore::get_config_chunk_size();
         $cs->totalchunks = tool_coursestore::calculate_total_chunks($cs->chunksize, $coursebackup->filesize);
         $cs->chunknumber = 0;
-        $cs->status = tool_coursestore::STATUS_NOTSTARTED;
+        $cs->status = STATUS_NOTSTARTED;
         $backupid = $DB->insert_record('tool_coursestore', $cs);
 
         $coursebackup->id = $backupid;
-        $coursebackup->backupfilename;
+        $coursebackup->backupfilename = $cs->backupfilename;
         $coursebackup->fileid = $cs->fileid;
         $coursebackup->chunksize = $cs->chunksize;
         $coursebackup->totalchunks = $cs->totalchunks;
@@ -101,13 +100,14 @@ foreach ($rs as $coursebackup) {
     $totalbackups++;
 }
 
-echo "backupids=" . print_r($backups, true);
 
 // Now send the backups.
 foreach ($backups as $backup) {
-    $result = tool_coursestore::send_backup($backup);
-    if (!$result) {
-        echo(get_string('backupfailed', 'tool_coursestore', $course->backupfilename) . "\n");
+    if($backup->status == STATUS_NOTSTARTED || $backup->status == STATUS_INPROGRESS) {
+        $result = tool_coursestore::send_backup($backup);
+        if (!$result) {
+            echo(get_string('backupfailed', 'tool_coursestore', $backup->filename) . "\n");
+        }
     }
 }
 
