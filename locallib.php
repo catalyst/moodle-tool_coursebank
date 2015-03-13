@@ -57,6 +57,8 @@ class coursestore_ws_manager {
      *
      * @param array $data    Associative array of request data to send
      * @param int   $maxatt  Max number of attempts to make before failing
+     *
+     * @return bool          True if request was successful, false otherwise
      */
     function send($data, $maxatt = 5) {
         $postdata = json_encode($data);

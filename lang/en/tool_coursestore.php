@@ -43,3 +43,5 @@ $string['settings_enablestring'] = 'Enable';
 $string['settings_disablestring'] = 'Disable';
 $string['settings_maxatt'] = 'HTTP request limit';
 $string['settings_maxatt_desc'] = 'Number of unsuccessful HTTP requests to make before giving up on an individual file chunk.' ;
+$string['conncheckfail'] = 'Connection check failed!' ;
+$string['connchecksuccess'] = 'Connection check passed!' ;
