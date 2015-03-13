@@ -23,20 +23,21 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// status
+define('STATUS_NOTSTARTED', 0);
+define('STATUS_INPROGRESS', 1);
+define('STATUS_FINISHED', 2);
+define('STATUS_ERROR', 9);
+
 abstract class tool_coursestore {
 
-    // status
-    const STATUS_NOTSTARTED  = 0;
-    const STATUS_INPROGRESS  = 1;
-    const STATUS_FINISHED    = 2;
-    const STATUS_ERROR       = 99;
 
     public static function get_config_chunk_size() {
         return get_config('tool_coursestore', 'chunksize');
     }
 
     public static function calculate_total_chunks($chunksize, $filesize) {
-        return ceil($filesize / $chunksize);
+        return ceil($filesize / ($chunksize * 1000));
     }
 
     public static function send_backup($backup) {
@@ -53,6 +54,6 @@ abstract class tool_coursestore {
             return false;
         }
 
-        return send_file($backup->filepath, (array) $backup);
+        return send_file($backup);
     }
 }

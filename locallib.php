@@ -82,13 +82,12 @@ class coursestore_ws_manager {
  * Convenience function to handle sending a file along with the relevant
  * metatadata.
  *
- * @param string $filepath  Path to the file to be sent.
- * @param array  $data      Associative Array containing the relevant metadata.
- *                          This array must include a value with a key of
- *                          "filename".
+ * @param object $backup    Course store database record object
+ *
  */
-function send_file($filepath, $data) {
-    global $CFG;
+function send_file($backup) {
+    global $CFG, $DB;
+
     require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
 
     // Get required config variables
@@ -106,36 +105,38 @@ function send_file($filepath, $data) {
     }
 
     // Chunk size is set in kilobytes
-    $chunksize = tool_coursestore::get_config_chunk_size();
+    $chunksize = $backup->chunksize * 1000;
+
+    $backup->operation = 'transfer';
+    $backup->status = STATUS_INPROGRESS;
 
     // Open input file
-    $file = fopen($filepath, 'r');
-    $filesum = sha1_file($filepath);
-    $filesize = filesize($filepath);
+    $file = fopen($backup->filepath, 'r');
 
-    // Set file-wide data
-    $data = array_merge(
-            $data,
-            array(
-                'operation'  => 'transfer',
-                'filename'   => $data['filename'],
-                'filesum'    => $filesum,
-                'chunksize'  => $chunksize,
-                'chunkcount' => ceil($filesize/$chunksize)
-            )
-    );
+    // Set offset based on chunk number
+    if($backup->chunknumber != 0) {
+        fseek($file, $backup->chunknumber * $chunksize);
+    }
 
     // Read the file in chunks, attempt to send them
-    $chunkno = 0;
     while($contents = fread($file, $chunksize)) {
-        $data['data'] = base64_encode($contents);
-        $data['chunksum'] = md5($data['data']);
-        $data['chunkno'] = $chunkno;
-        if(!$ws_manager->send($data, $maxatt)) {
-            // Failed to send a chunk
+        $backup->data = base64_encode($contents);
+        $backup->chunksum = md5($backup->data);
+        $backup->timechunksent = time();
+
+        if($ws_manager->send($backup, 5)) {
+            $backup->timechunkcompleted = time();
+            $backup->chunknumber++;
+            if($backup->chunknumber == $backup->totalchunks) {
+                $backup->status = STATUS_FINISHED;
+            }
+            $DB->update_record('tool_coursestore', $backup);
+        }
+        else {
+            $backup->status = STATUS_ERROR;
+            $DB->update_record('tool_coursestore', $backup);
             return false;
         }
-        $chunkno++;
     }
 
     $ws_manager->close();
