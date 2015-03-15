@@ -24,12 +24,31 @@
 */
 
 require_once('../../../config.php');
+require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
 $context = context_system::instance();
 require_login();
 
-$redirect = new moodle_url('/admin/tool/coursestore/index.php');
+// Get required config variables
+$urltarget = get_config('tool_coursestore', 'url');
+$conntimeout = get_config('tool_coursestore', 'conntimeout');
+$timeout = get_config('tool_coursestore', 'timeout');
+$maxatt = get_config('tool_coursestore', 'maxatt');
+
+// Initialise, check connection
+$ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
+$check = array('operation' => 'check');
+
+if($ws_manager->send($check)) {
+    $params = array('conn' => true);
+}
+else {
+    $params = array('conn' => false);
+}
+
+
+$redirect = new moodle_url('/admin/tool/coursestore/index.php', $params);
 
 redirect($redirect);

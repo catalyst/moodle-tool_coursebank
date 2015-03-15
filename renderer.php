@@ -26,15 +26,53 @@
 defined('MOODLE_INTERNAL') || die;
 
 class tool_coursestore_renderer extends plugin_renderer_base {
-    public function course_store_main($connectioncheck) {
+
+    /**
+     * Output main body of course store interface
+     *
+     * @return string $html          Body HTML output
+     */
+    public function course_store_main() {
         global $CFG;
-        if(!$connectioncheck) {
-            $redirect = new moodle_url(
-                    $CFG->wwwroot.'/admin/tool/coursestore/check_connection.php',
-                    array('conn' => true)
-            );
-            $html = $this->single_button($redirect, 'Check connection', 'get');
+        return true;
+    }
+    /**
+     * Output result of connection check
+     *
+     * @param bool/null $conncheck   Pass or fail result of connection check,
+     *                               or null if no check has been made.
+     *
+     * @return string $html          Result HTML output
+     */
+    public function course_store_conncheck($conncheck=null) {
+        global $CFG;
+
+        $html = $this->heading(
+                get_string('connchecktitle', 'tool_coursestore'),
+                3
+        );
+
+        $redirect = new moodle_url(
+                $CFG->wwwroot.'/admin/tool/coursestore/check_connection.php',
+                array('conn' => true)
+        );
+        $html .= $this->single_button($redirect, 'Check connection', 'get');
+
+        if(isset($conncheck)) {
+            if($conncheck) {
+                $html .= $this->notification(
+                        get_string('connchecksuccess', 'tool_coursestore'),
+                        'notifysuccess'
+                );
+            }
+            else {
+                $html .= $this->notification(
+                        get_string('conncheckfail', 'tool_coursestore'),
+                        'notifyproblem'
+                );
+            }
         }
+
         return $html;
     }
 }

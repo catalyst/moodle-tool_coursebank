@@ -33,7 +33,7 @@ require_login();
 
 admin_externalpage_setup('tool_coursestore');
 
-$conncheck = optional_param('conn', false, PARAM_BOOL);
+$conncheck = optional_param('conn', null, PARAM_BOOL);
 $url = new moodle_url('/admin/tool/coursestore/index.php');
 $PAGE->set_url($url);
 $PAGE->set_context($context);
@@ -46,6 +46,6 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->box_start();     // The forms section at the top
 echo $OUTPUT->heading($header);
-echo $renderer->course_store_main($conncheck);
+echo $renderer->course_store_conncheck($conncheck);
 echo $OUTPUT->box_end();
 echo $OUTPUT->footer();
