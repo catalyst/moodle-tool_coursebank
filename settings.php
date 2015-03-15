@@ -29,6 +29,10 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/adminlib.php');
 
+if ($hassiteconfig) {
+    $ADMIN->add('backups', new admin_externalpage('tool_coursestore', get_string('pluginname', 'tool_coursestore'), "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'moodle/site:config'));
+}
+
 if ($ADMIN->fulltree) {
     $settings = new admin_settingpage('coursestore_settings',
             get_string('pluginname', 'tool_coursestore')
