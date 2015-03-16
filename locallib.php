@@ -40,7 +40,28 @@ abstract class tool_coursestore {
     public static function calculate_total_chunks($chunksize, $filesize) {
         return ceil($filesize / ($chunksize * 1000));
     }
+    /**
+     * Function to fetch course store records for display on the summary
+     * page.
+     *
+     */
+    public static function get_summary_data() {
+        global $CFG, $DB;
 
+        $sql = "SELECT c.shortname, f.timemodified, f.filename,
+                       f.filesize, tcs.status
+                  FROM {tool_coursestore} tcs
+            INNER JOIN {files} f ON (tcs.fileid = f.id)
+            INNER JOIN {context} cx
+                       ON (f.contextid = cx.id)
+                       AND (cx.contextlevel = :contextcourse)
+            INNER JOIN {course} c ON (cx.instanceid = c.id)";
+        $params = array('contextcourse' => CONTEXT_COURSE);
+        $results = $DB->get_records_sql($sql, $params);
+
+        return $results;
+
+    }
     /**
      * Convenience function to handle sending a file along with the relevant
      * metatadata.

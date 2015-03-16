@@ -25,6 +25,7 @@
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -44,8 +45,8 @@ $PAGE->set_title($header);
 $renderer = $PAGE->get_renderer('tool_coursestore');
 echo $OUTPUT->header();
 
-echo $OUTPUT->box_start();     // The forms section at the top
 echo $OUTPUT->heading($header);
 echo $renderer->course_store_conncheck($conncheck);
-echo $OUTPUT->box_end();
+$results = tool_coursestore::get_summary_data();
+echo $renderer->course_store_main($results);
 echo $OUTPUT->footer();

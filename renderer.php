@@ -32,9 +32,45 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      *
      * @return string $html          Body HTML output
      */
-    public function course_store_main() {
+    public function course_store_main($results) {
         global $CFG;
-        return true;
+
+        $columns = array(
+                'Course name'    => 'shortname',
+                'Backup date'    => 'timemodified',
+                'File name'      => 'filename',
+                'File size'      => 'filesize',
+                'Status'         => 'status'
+        );
+
+        $html = $this->box_start();
+        $html .= $this->heading(
+                get_string('backupsummary', 'tool_coursestore'),
+                3
+        );
+        $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
+        $html .= html_writer::start_tag('thead');
+        $html .= html_writer::start_tag('tr');
+        foreach($columns as $column => $name) {
+            $html .= html_writer::tag('th', $column);
+        }
+        $html .= html_writer::end_tag('tr');
+        $html .= html_writer::end_tag('thead');
+
+        $html .= html_writer::start_tag('tbody');
+        foreach($results as $result) {
+            $html .= html_writer::start_tag('tr');
+            $html .= html_writer::tag('td', $result->shortname);
+            $html .= html_writer::tag('td', userdate($result->timemodified));
+            $html .= html_writer::tag('td', $result->filename);
+            $html .= html_writer::tag('td', display_size($result->filesize));
+            $html .= html_writer::tag('td', $result->status);
+            $html .= html_writer::start_tag('tr');
+        }
+        $html .= html_writer::end_tag('tbody');
+        $html .= html_writer::end_tag('table');
+        $html .= $this->box_end();
+        return $html;
     }
     /**
      * Output result of connection check
@@ -47,7 +83,8 @@ class tool_coursestore_renderer extends plugin_renderer_base {
     public function course_store_conncheck($conncheck=null) {
         global $CFG;
 
-        $html = $this->heading(
+        $html = $this->box_start();
+        $html .= $this->heading(
                 get_string('connchecktitle', 'tool_coursestore'),
                 3
         );
@@ -72,6 +109,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 );
             }
         }
+        $html .= $this->box_end();
 
         return $html;
     }
