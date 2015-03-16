@@ -74,9 +74,9 @@ if ($hassiteconfig) {
             5,
             PARAM_INT)
     );
-    $settings->add(new admin_setting_configtext('tool_coursestore/maxatt',
-            get_string('settings_maxatt', 'tool_coursestore'),
-            get_string('settings_maxatt_desc', 'tool_coursestore'),
+    $settings->add(new admin_setting_configtext('tool_coursestore/maxattempts',
+            get_string('settings_maxattempts', 'tool_coursestore'),
+            get_string('settings_maxattempts_desc', 'tool_coursestore'),
             5,
             PARAM_INT)
     );

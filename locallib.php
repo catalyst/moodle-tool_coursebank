@@ -87,7 +87,7 @@ abstract class tool_coursestore {
         $urltarget = get_config('tool_coursestore', 'url');
         $conntimeout = get_config('tool_coursestore', 'conntimeout');
         $timeout = get_config('tool_coursestore', 'timeout');
-        $maxatt = get_config('tool_coursestore', 'maxatt');
+        $maxattempts = get_config('tool_coursestore', 'maxattattempts');
 
         // Initialise, check connection
         $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
@@ -117,7 +117,7 @@ abstract class tool_coursestore {
             $backup->chunksum = md5($backup->data);
             $backup->timechunksent = time();
 
-            if($ws_manager->send($backup, 5)) {
+            if($ws_manager->send($backup, $maxattempts)) {
                 $backup->timechunkcompleted = time();
                 $backup->chunknumber++;
                 if($backup->chunknumber == $backup->totalchunks) {
@@ -180,12 +180,12 @@ class coursestore_ws_manager {
     /**
      * Send a the provided data in JSON encoding as a POST request
      *
-     * @param array $data    Associative array of request data to send
-     * @param int   $maxatt  Max number of attempts to make before failing
+     * @param array $data         Associative array of request data to send
+     * @param int   $maxattempts  Max number of attempts to make before failing
      *
-     * @return bool          True if request was successful, false otherwise
+     * @return bool               Return true if successful
      */
-    function send($data, $maxatt = 5) {
+    function send($data, $maxattempts = 5) {
         $postdata = json_encode($data);
         curl_setopt($this->curlhandle, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($this->curlhandle, CURLOPT_HTTPHEADER, array(
@@ -193,7 +193,7 @@ class coursestore_ws_manager {
                 'Content-Length: ' . strlen($postdata))
         );
         //Make $maxatt number of attempts to send request
-        for($attempt=0; $attempt < $maxatt; $attempt++) {
+        for($attempt=0; $attempt < $maxattempts; $attempt++) {
             $result = curl_exec($this->curlhandle);
             $response = curl_getinfo($this->curlhandle);
             $httpcode = $response['http_code'];
