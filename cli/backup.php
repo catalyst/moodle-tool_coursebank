@@ -101,7 +101,7 @@ foreach ($rs as $coursebackup) {
     $backups[] = $coursebackup;
     $totalbackups++;
 }
-
+$rs->close();
 
 // Now send the backups.
 foreach ($backups as $backup) {
