@@ -46,3 +46,8 @@ $string['settings_maxatt_desc'] = 'Number of unsuccessful HTTP requests to make 
 $string['conncheckfail'] = 'Connection check failed!';
 $string['connchecksuccess'] = 'Connection check passed!';
 $string['connchecktitle'] = 'Connection check';
+
+// Error codes.
+$string['ERROR_TIMEOUT']              = 'The connection has timed out.';
+$string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
+// etc...

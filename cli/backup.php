@@ -39,6 +39,7 @@ $sql = "SELECT tcs.id,
                tcs.timecompleted,
                tcs.timechunksent,
                tcs.timechunkcompleted,
+               tcs.chunkretries,
                tcs.status,
                f.id AS f_fileid,
                f.contenthash,
@@ -94,6 +95,7 @@ foreach ($rs as $coursebackup) {
         $coursebackup->timecompleted = 0;
         $coursebackup->timechunksent = 0;
         $coursebackup->timechunkcompleted = 0;
+        $coursebackup->chunkretries = 0;
         $coursebackup->status = $cs->status;
     }
     $backups[] = $coursebackup;

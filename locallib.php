@@ -118,6 +118,17 @@ abstract class tool_coursestore {
 }
 
 /**
+ * Class to keep errors specific to this plugin.
+ *
+ */
+abstract class tool_coursestore_error {
+    // errors
+    const ERROR_TIMEOUT              = 100;
+    const ERROR_MAX_ATTEMPTS_REACHED = 101;
+    // etc. populate as needed.
+}
+
+/**
  * Class that handles outgoing web service requests.
  *
  */
