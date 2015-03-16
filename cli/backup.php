@@ -29,7 +29,7 @@ require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/admin/tool/coursestore/locallib.php');
 
 // Get a list of the course backups.
-$sql = "SELECT tcs.id,
+$sqlcommon = "SELECT tcs.id,
                tcs.backupfilename,
                tcs.fileid,
                tcs.chunksize,
@@ -59,22 +59,32 @@ $sql = "SELECT tcs.id,
         FROM {files} f
         INNER JOIN {context} ct on f.contextid = ct.id
         INNER JOIN {course} cr on ct.instanceid = cr.id
-        INNER JOIN {course_categories} cc on cr.category = cc.id
-        LEFT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
-            AND (tcs.status != :statuserror)
-        WHERE ct.contextlevel = :contextcourse
-        AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
-        ORDER BY f.timecreated";
+        INNER JOIN {course_categories} cc on cr.category = cc.id";
 
+$sql = $sqlcommon . "
+        LEFT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
+        WHERE tcs.id IS NULL
+        AND ct.contextlevel = :contextcourse1
+        AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
+        UNION
+        " . $sqlcommon . "
+        INNER JOIN {tool_coursestore} tcs on tcs.fileid = f.id
+        WHERE ct.contextlevel = :contextcourse2
+        AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
+        AND   (tcs.status IN (:statusnotstarted, :statusinprogress)
+              OR (tcs.status = :statuserror AND tcs.chunkretries <= :maxattempts))";
+$maxattempts = get_config('maxattempts', 'tool_coursestore');
 $params = array('statusnotstarted' => tool_coursestore::STATUS_NOTSTARTED,
                 'statuserror' => tool_coursestore::STATUS_ERROR,
-                'contextcourse' => CONTEXT_COURSE
+                'statusinprogress' => tool_coursestore::STATUS_INPROGRESS,
+                'contextcourse1' => CONTEXT_COURSE,
+                'contextcourse2' => CONTEXT_COURSE,
+                'maxattempts' => $maxattempts
                 );
 $rs = $DB->get_recordset_sql($sql, $params);
-$backups = array();
-$totalbackups = 0;
+
 foreach ($rs as $coursebackup) {
-    if (!$coursebackup->id) {
+    if (!isset($coursebackup->status)) {
         // The record hasn't been input in the course restore table yet.
         $cs = new stdClass();
         $cs->backupfilename = $coursebackup->filename;
@@ -98,18 +108,9 @@ foreach ($rs as $coursebackup) {
         $coursebackup->chunkretries = 0;
         $coursebackup->status = $cs->status;
     }
-    $backups[] = $coursebackup;
-    $totalbackups++;
-}
-$rs->close();
-
-// Now send the backups.
-foreach ($backups as $backup) {
-    if($backup->status == tool_coursestore::STATUS_NOTSTARTED || $backup->status == tool_coursestore::STATUS_INPROGRESS) {
-        $result = tool_coursestore::send_backup($backup);
-        if (!$result) {
-            echo(get_string('backupfailed', 'tool_coursestore', $backup->filename) . "\n");
-        }
+    $result = tool_coursestore::send_backup($coursebackup);
+    if (!$result) {
+        echo(get_string('backupfailed', 'tool_coursestore', $coursebackup->filename) . "\n");
     }
 }
-
+$rs->close();

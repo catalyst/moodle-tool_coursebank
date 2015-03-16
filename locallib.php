@@ -93,7 +93,9 @@ abstract class tool_coursestore {
         $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
         $check = array('operation' => 'check');
         if(!$ws_manager->send($check)) {
-            //Connection check failed
+            //TODO: Add additional error code for failed connection check
+            $backup->status = tool_coursestore::STATUS_ERROR;
+            $DB->update_record('tool_coursestore', $backup);
             return false;
         }
 
@@ -101,7 +103,9 @@ abstract class tool_coursestore {
         $chunksize = $backup->chunksize * 1000;
 
         $backup->operation = 'transfer';
-        $backup->status = tool_coursestore::STATUS_INPROGRESS;
+        if($backup->status == tool_coursestore::STATUS_NOTSTARTED) {
+            $backup->status = tool_coursestore::STATUS_INPROGRESS;
+        }
 
         // Open input file
         $file = fopen($backup->filepath, 'r');
@@ -120,13 +124,22 @@ abstract class tool_coursestore {
             if($ws_manager->send($backup, $maxhttprequests)) {
                 $backup->timechunkcompleted = time();
                 $backup->chunknumber++;
+                if($backup->status == tool_coursestore::STATUS_ERROR) {
+                    $backup->chunkretries = 0;
+                    $backup->status = tool_coursestore::STATUS_INPROGRESS;
+                }
                 if($backup->chunknumber == $backup->totalchunks) {
                     $backup->status = tool_coursestore::STATUS_FINISHED;
                 }
                 $DB->update_record('tool_coursestore', $backup);
             }
             else {
-                $backup->status = tool_coursestore::STATUS_ERROR;
+                if($backup->status == tool_coursestore::STATUS_ERROR) {
+                    $backup->chunkretries++;
+                }
+                else {
+                    $backup->status = tool_coursestore::STATUS_ERROR;
+                }
                 $DB->update_record('tool_coursestore', $backup);
                 return false;
             }
