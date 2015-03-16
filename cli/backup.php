@@ -26,7 +26,7 @@
 define('CLI_SCRIPT', true);
 require(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
-require_once($CFG->dirroot . '/admin/tool/coursestore/lib.php');
+require_once($CFG->dirroot . '/admin/tool/coursestore/locallib.php');
 
 // Get a list of the course backups.
 $sql = "SELECT tcs.id,
@@ -65,8 +65,8 @@ $sql = "SELECT tcs.id,
         AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
         ORDER BY f.timecreated";
 
-$params = array('statusnotstarted' => STATUS_NOTSTARTED,
-                'statuserror' => STATUS_ERROR,
+$params = array('statusnotstarted' => tool_coursestore::STATUS_NOTSTARTED,
+                'statuserror' => tool_coursestore::STATUS_ERROR,
                 'contextcourse' => CONTEXT_COURSE
                 );
 $rs = $DB->get_recordset_sql($sql, $params);
@@ -81,7 +81,7 @@ foreach ($rs as $coursebackup) {
         $cs->chunksize = tool_coursestore::get_config_chunk_size();
         $cs->totalchunks = tool_coursestore::calculate_total_chunks($cs->chunksize, $coursebackup->filesize);
         $cs->chunknumber = 0;
-        $cs->status = STATUS_NOTSTARTED;
+        $cs->status = tool_coursestore::STATUS_NOTSTARTED;
         $backupid = $DB->insert_record('tool_coursestore', $cs);
 
         $coursebackup->id = $backupid;
@@ -103,7 +103,7 @@ foreach ($rs as $coursebackup) {
 
 // Now send the backups.
 foreach ($backups as $backup) {
-    if($backup->status == STATUS_NOTSTARTED || $backup->status == STATUS_INPROGRESS) {
+    if($backup->status == tool_coursestore::STATUS_NOTSTARTED || $backup->status == tool_coursestore::STATUS_INPROGRESS) {
         $result = tool_coursestore::send_backup($backup);
         if (!$result) {
             echo(get_string('backupfailed', 'tool_coursestore', $backup->filename) . "\n");

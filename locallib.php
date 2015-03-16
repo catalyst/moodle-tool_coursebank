@@ -18,11 +18,104 @@
  *
  * @package    tool_coursestore
  * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
 
 defined('MOODLE_INTERNAL') || die;
+
+abstract class tool_coursestore {
+
+    // status
+    const STATUS_NOTSTARTED = 0;
+    const STATUS_INPROGRESS = 1;
+    const STATUS_FINISHED = 2;
+    const STATUS_ERROR = 99;
+
+    public static function get_config_chunk_size() {
+        return get_config('tool_coursestore', 'chunksize');
+    }
+
+    public static function calculate_total_chunks($chunksize, $filesize) {
+        return ceil($filesize / ($chunksize * 1000));
+    }
+
+    /**
+     * Convenience function to handle sending a file along with the relevant
+     * metatadata.
+     *
+     * @param object $backup    Course store database record object
+     *
+     */
+    public static function send_backup($backup) {
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+
+        // Construct the full path of the backup file
+        $backup->filepath = $CFG->dataroot . '/filedir/' .
+                substr($backup->contenthash, 0, 2) . '/' .
+                substr($backup->contenthash, 2,2) .'/' . $backup->contenthash;
+
+        if(!is_readable($backup->filepath)) {
+            return false;
+        }
+
+        // Get required config variables
+        $urltarget = get_config('tool_coursestore', 'url');
+        $conntimeout = get_config('tool_coursestore', 'conntimeout');
+        $timeout = get_config('tool_coursestore', 'timeout');
+        $maxatt = get_config('tool_coursestore', 'maxatt');
+
+        // Initialise, check connection
+        $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
+        $check = array('operation' => 'check');
+        if(!$ws_manager->send($check)) {
+            //Connection check failed
+            return false;
+        }
+
+        // Chunk size is set in kilobytes
+        $chunksize = $backup->chunksize * 1000;
+
+        $backup->operation = 'transfer';
+        $backup->status = tool_coursestore::STATUS_INPROGRESS;
+
+        // Open input file
+        $file = fopen($backup->filepath, 'r');
+
+        // Set offset based on chunk number
+        if($backup->chunknumber != 0) {
+            fseek($file, $backup->chunknumber * $chunksize);
+        }
+
+        // Read the file in chunks, attempt to send them
+        while($contents = fread($file, $chunksize)) {
+            $backup->data = base64_encode($contents);
+            $backup->chunksum = md5($backup->data);
+            $backup->timechunksent = time();
+
+            if($ws_manager->send($backup, 5)) {
+                $backup->timechunkcompleted = time();
+                $backup->chunknumber++;
+                if($backup->chunknumber == $backup->totalchunks) {
+                    $backup->status = tool_coursestore::STATUS_FINISHED;
+                }
+                $DB->update_record('tool_coursestore', $backup);
+            }
+            else {
+                $backup->status = tool_coursestore::STATUS_ERROR;
+                $DB->update_record('tool_coursestore', $backup);
+                return false;
+            }
+        }
+
+        $ws_manager->close();
+        fclose($file);
+        return true;
+    }
+}
 
 /**
  * Class that handles outgoing web service requests.
@@ -79,69 +172,4 @@ class coursestore_ws_manager {
         return false;
     }
 
-}
-/**
- * Convenience function to handle sending a file along with the relevant
- * metatadata.
- *
- * @param object $backup    Course store database record object
- *
- */
-function send_file($backup) {
-    global $CFG, $DB;
-
-    require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
-
-    // Get required config variables
-    $urltarget = get_config('tool_coursestore', 'url');
-    $conntimeout = get_config('tool_coursestore', 'conntimeout');
-    $timeout = get_config('tool_coursestore', 'timeout');
-    $maxatt = get_config('tool_coursestore', 'maxatt');
-
-    // Initialise, check connection
-    $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
-    $check = array('operation' => 'check');
-    if(!$ws_manager->send($check)) {
-        //Connection check failed
-        return false;
-    }
-
-    // Chunk size is set in kilobytes
-    $chunksize = $backup->chunksize * 1000;
-
-    $backup->operation = 'transfer';
-    $backup->status = STATUS_INPROGRESS;
-
-    // Open input file
-    $file = fopen($backup->filepath, 'r');
-
-    // Set offset based on chunk number
-    if($backup->chunknumber != 0) {
-        fseek($file, $backup->chunknumber * $chunksize);
-    }
-
-    // Read the file in chunks, attempt to send them
-    while($contents = fread($file, $chunksize)) {
-        $backup->data = base64_encode($contents);
-        $backup->chunksum = md5($backup->data);
-        $backup->timechunksent = time();
-
-        if($ws_manager->send($backup, 5)) {
-            $backup->timechunkcompleted = time();
-            $backup->chunknumber++;
-            if($backup->chunknumber == $backup->totalchunks) {
-                $backup->status = STATUS_FINISHED;
-            }
-            $DB->update_record('tool_coursestore', $backup);
-        }
-        else {
-            $backup->status = STATUS_ERROR;
-            $DB->update_record('tool_coursestore', $backup);
-            return false;
-        }
-    }
-
-    $ws_manager->close();
-    fclose($file);
-    return true;
 }
