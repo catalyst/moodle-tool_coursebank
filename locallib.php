@@ -48,7 +48,7 @@ abstract class tool_coursestore {
     public static function get_summary_data() {
         global $CFG, $DB;
 
-        $sql = "SELECT c.shortname, f.timemodified, f.filename,
+        $sql = "SELECT tcs.id, c.shortname, f.timemodified, f.filename,
                        f.filesize, tcs.status
                   FROM {tool_coursestore} tcs
             INNER JOIN {files} f ON (tcs.fileid = f.id)
