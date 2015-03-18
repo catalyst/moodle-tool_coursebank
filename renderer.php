@@ -93,22 +93,24 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 $CFG->wwwroot.'/admin/tool/coursestore/check_connection.php',
                 array('conn' => true)
         );
-        $html .= $this->single_button($redirect, 'Check connection', 'get');
+        $html .= $this->single_button($redirect, 'Check connection', 'get', array('id' => 'conncheck'));
+        $html .= '<input type = "hidden" name = "wwwroot" value = "' . $CFG->wwwroot . '" class = "wwwroot">';
 
-        if(isset($conncheck)) {
-            if($conncheck) {
-                $html .= $this->notification(
-                        get_string('connchecksuccess', 'tool_coursestore'),
-                        'notifysuccess'
-                );
-            }
-            else {
-                $html .= $this->notification(
-                        get_string('conncheckfail', 'tool_coursestore'),
-                        'notifyproblem'
-                );
-            }
-        }
+
+        $html .= '<div class = "notification-success hide">';
+        $html .= $this->notification(
+                get_string('connchecksuccess', 'tool_coursestore'),
+                'notifysuccess'
+        );
+        $html .= '</div>';
+
+        $html .= '<div class = "notification-fail hide">';
+        $html .= $this->notification(
+                get_string('conncheckfail', 'tool_coursestore'),
+                'notifyproblem'
+        );
+        $html .= '</div>';
+
         $html .= $this->box_end();
 
         return $html;

@@ -231,6 +231,7 @@ class coursestore_ws_manager {
                return true;
             }
         }
+        mtrace($httpcode);
         return false;
     }
 

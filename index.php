@@ -46,7 +46,6 @@ $renderer = $PAGE->get_renderer('tool_coursestore');
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading($header);
-echo $renderer->course_store_conncheck($conncheck);
 $results = tool_coursestore::get_summary_data();
 echo $renderer->course_store_main($results);
 echo $OUTPUT->footer();

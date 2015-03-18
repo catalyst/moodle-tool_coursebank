@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Page that handles performing connection checks 
+ * Page that handles performing connection checks
  *
  * @package    tool_coursestore
  * @author     Adam Riddell <adamr@catalyst-au.net>
@@ -42,13 +42,13 @@ $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
 $check = array('operation' => 'check');
 
 if($ws_manager->send($check)) {
-    $params = array('conn' => true);
+    $params = array('section' => 'coursestore_settings', 'result' => 1);
 }
 else {
-    $params = array('conn' => false);
+    $params = array('section' => 'coursestore_settings', 'result' => 0);
 }
 
-
-$redirect = new moodle_url('/admin/tool/coursestore/index.php', $params);
+$redirect = new moodle_url('/admin/settings.php', $params);
+//$redirect = new moodle_url('/admin/tool/coursestore/settings.php', $params);
 
 redirect($redirect);

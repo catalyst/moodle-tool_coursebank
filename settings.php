@@ -28,6 +28,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+
+$PAGE->requires->js('/admin/tool/coursestore/javascript/jquery-1.11.0.min.js');
+$PAGE->requires->js('/admin/tool/coursestore/javascript/coursestore.js');
 
 if ($hassiteconfig) {
     $ADMIN->add('backups', new admin_externalpage('tool_coursestore', get_string('pluginname', 'tool_coursestore'), "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'moodle/site:config'));
@@ -35,6 +39,30 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('coursestore_settings',
             get_string('pluginname', 'tool_coursestore')
     );
+
+    /*$timestamp = get_config('local_la_data_mapping', 'lastcronrun');
+    $time = date('h:ia d/M/Y', $timestamp);
+    $text = get_string('lastrun', 'local_la_data_mapping', $time);
+
+    $isrunning = get_config('local_la_data_mapping', 'isrunning');
+    if ($isrunning) {
+        $isrunning = 'Yes';
+    } else {
+        $isrunning = 'No';
+    }
+
+    $text .= get_string('currentlyrunning', 'local_la_data_mapping', $isrunning);
+
+    $settings->add(new admin_setting_heading('la_data_mapping_status', get_string('status', 'local_la_data_mapping'), $text));*/
+
+    $conncheck = optional_param('result', null, PARAM_INT);
+
+    $renderer = $PAGE->get_renderer('tool_coursestore');
+
+    $text = $renderer->course_store_conncheck($conncheck);
+
+    $settings->add(new admin_setting_heading('coursestore_settings_conncheck', '', $text));
+
     $settings->add(new admin_setting_heading('coursestore_header',
             get_string('settings_header', 'tool_coursestore'),
             '')
