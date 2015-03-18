@@ -124,7 +124,7 @@ abstract class tool_coursestore {
         }
 
         // Open input file
-        $file = fopen($backup->filepath, 'r');
+        $file = fopen($backup->filepath, 'rb');
 
         // Set offset based on chunk number
         if($backup->chunknumber != 0) {
