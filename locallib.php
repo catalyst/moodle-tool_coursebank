@@ -58,9 +58,25 @@ abstract class tool_coursestore {
             INNER JOIN {course} c ON (cx.instanceid = c.id)";
         $params = array('contextcourse' => CONTEXT_COURSE);
         $results = $DB->get_records_sql($sql, $params);
+        $notstarted   = get_string('statusnotstarted', 'tool_coursestore');
+        $inprogress   = get_string('statusinprogress', 'tool_coursestore');
+        $statuserror  = get_string('statuserror', 'tool_coursestore');
+        $finished     = get_string('statusfinished', 'tool_coursestore');
+
+        $statusmap = array(
+            tool_coursestore::STATUS_NOTSTARTED => $notstarted,
+            tool_coursestore::STATUS_INPROGRESS => $inprogress,
+            tool_coursestore::STATUS_FINISHED => $finished,
+            tool_coursestore::STATUS_ERROR => $statuserror
+        );
+
+        foreach($results as $result) {
+            if(isset($statusmap[$result->status])) {
+                $result->status = $statusmap[$result->status];
+            }
+        }
 
         return $results;
-
     }
     /**
      * Convenience function to handle sending a file along with the relevant

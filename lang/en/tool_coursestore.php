@@ -49,6 +49,10 @@ $string['conncheckfail'] = 'Connection check failed!';
 $string['connchecksuccess'] = 'Connection check passed!';
 $string['connchecktitle'] = 'Connection check';
 $string['backupsummary'] = 'Backups summary';
+$string['statuserror'] = 'Error';
+$string['statusinprogress'] = 'Transfer in progress';
+$string['statusnotstarted'] = 'Transfer pending';
+$string['statusfinished'] = 'Transfer complete';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
