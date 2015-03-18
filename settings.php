@@ -40,23 +40,6 @@ if ($hassiteconfig) {
             get_string('pluginname', 'tool_coursestore')
     );
 
-    /*$timestamp = get_config('local_la_data_mapping', 'lastcronrun');
-    $time = date('h:ia d/M/Y', $timestamp);
-    $text = get_string('lastrun', 'local_la_data_mapping', $time);
-
-    $isrunning = get_config('local_la_data_mapping', 'isrunning');
-    if ($isrunning) {
-        $isrunning = 'Yes';
-    } else {
-        $isrunning = 'No';
-    }
-
-    $text .= get_string('currentlyrunning', 'local_la_data_mapping', $isrunning);
-
-    $settings->add(new admin_setting_heading('la_data_mapping_status', get_string('status', 'local_la_data_mapping'), $text));*/
-
-    $conncheck = optional_param('result', null, PARAM_INT);
-
     $renderer = $PAGE->get_renderer('tool_coursestore');
 
     $text = $renderer->course_store_conncheck($conncheck);

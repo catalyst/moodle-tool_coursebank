@@ -89,11 +89,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 3
         );
 
-        $redirect = new moodle_url(
-                $CFG->wwwroot.'/admin/tool/coursestore/check_connection.php',
-                array('conn' => true)
-        );
-        $html .= $this->single_button($redirect, 'Check connection', 'get', array('id' => 'conncheck'));
+        $html .= $this->single_button('', 'Check connection', 'get', array('id' => 'conncheck'));
         $html .= '<input type = "hidden" name = "wwwroot" value = "' . $CFG->wwwroot . '" class = "wwwroot">';
 
 

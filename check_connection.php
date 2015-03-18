@@ -49,6 +49,5 @@ else {
 }
 
 $redirect = new moodle_url('/admin/settings.php', $params);
-//$redirect = new moodle_url('/admin/tool/coursestore/settings.php', $params);
 
 redirect($redirect);
