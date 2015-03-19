@@ -93,6 +93,7 @@ foreach ($rs as $coursebackup) {
         $cs->totalchunks = tool_coursestore::calculate_total_chunks($cs->chunksize, $coursebackup->filesize);
         $cs->chunknumber = 0;
         $cs->status = tool_coursestore::STATUS_NOTSTARTED;
+        $cs->isbackedup = 0; // No copy has been created yet.
         $backupid = $DB->insert_record('tool_coursestore', $cs);
 
         $coursebackup->id = $backupid;

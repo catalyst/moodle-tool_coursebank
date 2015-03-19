@@ -88,14 +88,11 @@ abstract class tool_coursestore {
     public static function send_backup($backup) {
         global $CFG, $DB;
 
-        require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+        // Copy the backup file into our storage area so there are no changes to the file
+        // during transfer.
+        $backup = self::copy_backup($backup);
 
-        // Construct the full path of the backup file
-        $backup->filepath = $CFG->dataroot . '/filedir/' .
-                substr($backup->contenthash, 0, 2) . '/' .
-                substr($backup->contenthash, 2,2) .'/' . $backup->contenthash;
-
-        if(!is_readable($backup->filepath)) {
+        if($backup === false) {
             return false;
         }
 
@@ -164,6 +161,38 @@ abstract class tool_coursestore {
         $ws_manager->close();
         fclose($file);
         return true;
+    }
+
+    /**
+     * Convenience function to handle copying the backup file to the designated storage area.
+     *
+     * @param object $backup    Course store database record object
+     *
+     */
+    public static function copy_backup($backup) {
+        global $CFG, $DB;
+
+        $filedir = $CFG->dataroot . "/coursestore";
+
+        // Construct the full path of the backup file
+        $filepath = $CFG->dataroot . '/filedir/' .
+                substr($backup->contenthash, 0, 2) . '/' .
+                substr($backup->contenthash, 2,2) .'/' . $backup->contenthash;
+
+        if (!is_readable($filepath)) {
+            return false;
+        }
+        if (!is_writable($filedir)) {
+            return false;
+        }
+
+        $backup->filepath = $filedir . "/" . $backup->contenthash;
+        copy($filepath, $backup->filepath);
+
+        $backup->isbackedup = 1; // We have created a copy.
+        $DB->update_record('tool_coursestore', $backup);
+
+        return $backup;
     }
 }
 
