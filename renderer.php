@@ -75,12 +75,9 @@ class tool_coursestore_renderer extends plugin_renderer_base {
     /**
      * Output result of connection check
      *
-     * @param bool/null $conncheck   Pass or fail result of connection check,
-     *                               or null if no check has been made.
-     *
      * @return string $html          Result HTML output
      */
-    public function course_store_conncheck($conncheck=null) {
+    public function course_store_conncheck() {
         global $CFG;
 
         $html = $this->box_start();
