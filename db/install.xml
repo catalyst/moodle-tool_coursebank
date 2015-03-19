@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/customlang/db" VERSION="20120122" COMMENT="XMLDB file for Moodle admin/tool/customlang"
+<XMLDB PATH="admin/tool/customlang/db" VERSION="20150319" COMMENT="XMLDB file for Moodle admin/tool/customlang"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -18,13 +18,14 @@
         <FIELD NAME="timechunkcompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunk was completed getting sent."/>
         <FIELD NAME="chunkretries" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The total number of retries sending the current chunk."/>
         <FIELD NAME="status" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The status of sending this backup."/>
+        <FIELD NAME="isbackedup" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="uq_fileid" UNIQUE="true" FIELDS="fileid" COMMENT="The linked file id into the files table."/>
-        <INDEX NAME="ix_filedata" UNIQUE="false" FIELDS="fileid,status,backupfilename" COMMENT="Index to easily retrieve the backup file details."/>
+        <INDEX NAME="ix_filedata" UNIQUE="false" FIELDS="fileid, status, backupfilename" COMMENT="Index to easily retrieve the backup file details."/>
         <INDEX NAME="ix_timecreated" UNIQUE="false" FIELDS="timecreated" COMMENT="Index to easily retrieve the backup files in chronological order."/>
       </INDEXES>
     </TABLE>
@@ -32,7 +33,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="coursestoreid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key into the tool_coursestore table."/>
-        <FIELD NAME="errorid" TYPE="int" LENGTH="10" NOTNULL="true"  DEFAULT="0" SEQUENCE="false" COMMENT="The error code corresponding to this log. 0 if no error."/>
+        <FIELD NAME="errorid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The error code corresponding to this log. 0 if no error."/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time the error occurred."/>
       </FIELDS>
       <KEYS>
@@ -40,7 +41,7 @@
         <KEY NAME="fk_coursestoreid" TYPE="foreign" FIELDS="coursestoreid" REFTABLE="tool_coursestore" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="ix_errorid" UNIQUE="false" FIELDS="errorid" COMMENT="Index to easily retrieve log records based on specific error code." />
+        <INDEX NAME="ix_errorid" UNIQUE="false" FIELDS="errorid" COMMENT="Index to easily retrieve log records based on specific error code."/>
         <INDEX NAME="ix_timecreated" UNIQUE="false" FIELDS="timecreated" COMMENT="Index to easily retrieve the log records in chronological order."/>
       </INDEXES>
     </TABLE>
