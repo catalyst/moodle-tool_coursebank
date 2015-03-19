@@ -194,6 +194,33 @@ abstract class tool_coursestore {
 
         return $backup;
     }
+
+    /**
+     * Convenience function to handle copying the backup file to the designated storage area.
+     *
+     * @param object $backup    Course store database record object
+     *
+     */
+    public static function delete_backup($backup) {
+        global $CFG, $DB;
+
+        $filedir = $CFG->dataroot . "/coursestore";
+        $filepath = $filedir . "/" . $backup->contenthash;
+
+        if (!is_readable($filepath)) {
+            return false;
+        }
+        if (!is_writable($filedir)) {
+            return false;
+        }
+
+        unlink($filepath);
+
+        $backup->isbackedup = 0; // We have deleted the copy.
+        $DB->update_record('tool_coursestore', $backup);
+
+        return true;
+    }
 }
 
 /**

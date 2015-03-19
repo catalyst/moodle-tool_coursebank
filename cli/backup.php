@@ -110,7 +110,12 @@ foreach ($rs as $coursebackup) {
         $coursebackup->status = $cs->status;
     }
     $result = tool_coursestore::send_backup($coursebackup);
-    if (!$result) {
+    if ($result) {
+        $delete = tool_coursestore::delete_backup($coursebackup);
+        if (!$delete) {
+            echo(get_string('deletefailed', 'tool_coursestore', $coursebackup->filename) . "\n");
+        }
+    } else {
         echo(get_string('backupfailed', 'tool_coursestore', $coursebackup->filename) . "\n");
     }
 }
