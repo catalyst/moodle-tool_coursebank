@@ -50,6 +50,7 @@ $string['connchecksuccess'] = 'Connection check passed!';
 $string['speedtestsuccess'] = 'Connection speed test passed!';
 $string['speedtestfail'] = 'Connection error. Please confirm that your course bank settings and network configuration are correct.';
 $string['speedtestslow'] = 'Outbound transfers are very slow. The test transfer speed was approximately ';
+$string['checking'] = 'Checking...';
 $string['connchecktitle'] = 'Connection check';
 $string['speedtesttitle'] = 'Connection speed test';
 $string['backupsummary'] = 'Backups summary';
