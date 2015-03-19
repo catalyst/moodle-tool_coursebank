@@ -41,8 +41,111 @@ function xmldb_tool_coursestore_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // Customlang savepoint reached.
+        // Coursestore savepoint reached.
         upgrade_plugin_savepoint(true, 2015031900, 'tool', 'coursestore');
+    }
+
+    if ($oldversion < 2015032000) {
+
+        // Define field contenthash to be added to tool_coursestore.
+        $table = new xmldb_table('tool_coursestore');
+        $field = new xmldb_field('contenthash', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null, 'isbackedup');
+
+        // Conditionally launch add field contenthash.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field pathnamehash to be added to tool_coursestore.
+        $field = new xmldb_field('pathnamehash', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null, 'contenthash');
+
+        // Conditionally launch add field pathnamehash.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field userid to be added to tool_coursestore.
+        $field = new xmldb_field('userid', XMLDB_TYPE_INTEGER, '20', null, null, null, null, 'pathnamehash');
+
+        // Conditionally launch add field userid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field filesize to be added to tool_coursestore.
+        $field = new xmldb_field('filesize', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null, 'userid');
+
+        // Conditionally launch add field filesize.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field filetimecreated to be added to tool_coursestore.
+        $field = new xmldb_field('filetimecreated', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null, 'filesize');
+
+        // Conditionally launch add field filetimecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field filetimemodified to be added to tool_coursestore.
+        $field = new xmldb_field('filetimemodified', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null, 'filetimecreated');
+
+        // Conditionally launch add field filetimemodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field courseid to be added to tool_coursestore.
+        $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null, 'filetimemodified');
+
+        // Conditionally launch add field courseid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field coursefullname to be added to tool_coursestore.
+        $field = new xmldb_field('coursefullname', XMLDB_TYPE_CHAR, '254', null, XMLDB_NOTNULL, null, null, 'courseid');
+
+        // Conditionally launch add field coursefullname.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field courseshortname to be added to tool_coursestore.
+        $field = new xmldb_field('courseshortname', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'coursefullname');
+
+        // Conditionally launch add field courseshortname.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field coursestartdate to be added to tool_coursestore.
+        $field = new xmldb_field('coursestartdate', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0', 'courseshortname');
+
+        // Conditionally launch add field coursestartdate.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field categoryid to be added to tool_coursestore.
+        $field = new xmldb_field('categoryid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0', 'coursestartdate');
+
+        // Conditionally launch add field categoryid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field categoryname to be added to tool_coursestore.
+        $field = new xmldb_field('categoryname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'categoryid');
+
+        // Conditionally launch add field categoryname.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Coursestore savepoint reached.
+        upgrade_plugin_savepoint(true, 2015032000, 'tool', 'coursestore');
     }
 
 
