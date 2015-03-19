@@ -32,7 +32,62 @@ abstract class tool_coursestore {
     const STATUS_INPROGRESS = 1;
     const STATUS_FINISHED = 2;
     const STATUS_ERROR = 99;
+    /**
+     * Test that a connection to the configured web service consumer can be
+     * made successfully.
+     *
+     * @param coursestore_ws_manager $wsman  Web service manager object
+     * @return bool                          True for success, false otherwise
+     */
+    public static function check_connection(coursestore_ws_manager $wsman) {
 
+        $check = array('operation' => 'check');
+        $checkresult = $wsman->send($check);
+        if($checkresult['http_code'] == '200') {
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Test the speed of a transfer of $testsize kilobytes. A total
+     * of $count HTTP requests will be sent. For each request, the
+     * function will make $maxhttp attempts.
+     *
+     * @param int                 $testsize  Approximate size of test transfer
+     *                                       in kB
+     * @param int                    $count  Number of HTTP requests to make
+     * @param int                  $maxhttp  Maximum number of http requests to
+     *                                       try
+     * @param coursestore_ws_manager $wsman  Web service manager object
+     *
+     * @return int                  Approximate connection speed in kbps
+     */
+    public static function check_connection_speed($testsize, $count, $maxhttp,
+            coursestore_ws_manager $wsman) {
+
+        $check = array('operation' => 'speedtest');
+        $check['data'] = str_pad('', $testsize*1000, '0');
+        $check['checksum'] = md5($check['data']);
+        $start = microtime(true);
+
+        // Make $count requests with the dummy data
+        for($i=0; $i<$count; $i++) {
+            for($j=0; $j<$maxhttp; $j++) {
+                $response = $wsman->send($check);
+                if($response['http_code'] == 200) {
+                    break;
+                }
+            }
+            // If $maxhttps unsuccessful attempts have been made
+            if($response['http_code'] != 200) {
+                return 0;
+            }
+        }
+        $elapsed = microtime(true) - $start;
+
+        // Convert 'total kB transferred'/'total time' into kb/s
+        return round(($testsize*$count*8)/$elapsed, 2);
+    }
     public static function get_config_chunk_size() {
         return get_config('tool_coursestore', 'chunksize');
     }
@@ -107,11 +162,10 @@ abstract class tool_coursestore {
 
         // Initialise, check connection
         $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
-        $check = array('operation' => 'check');
-        if(!$ws_manager->send($check)) {
-            //TODO: Add additional error code for failed connection check
+        if(!tool_coursestore::check_connection($ws_manager)) {
             $backup->status = tool_coursestore::STATUS_ERROR;
             $DB->update_record('tool_coursestore', $backup);
+            $ws_manager-close();
             return false;
         }
 
@@ -137,7 +191,8 @@ abstract class tool_coursestore {
             $backup->chunksum = md5($backup->data);
             $backup->timechunksent = time();
 
-            if($ws_manager->send($backup, $maxhttprequests)) {
+            $result = $ws_manager->send($backup, $maxhttprequests);
+            if($result['http_code'] == '200') {
                 $backup->timechunkcompleted = time();
                 $backup->chunknumber++;
                 if($backup->status == tool_coursestore::STATUS_ERROR) {
@@ -227,12 +282,11 @@ class coursestore_ws_manager {
             $result = curl_exec($this->curlhandle);
             $response = curl_getinfo($this->curlhandle);
             $httpcode = $response['http_code'];
-            if($httpcode == '202' || $httpcode == '200') {
-               return true;
+            if($httpcode == '200') {
+               return $response;
             }
         }
-        mtrace($httpcode);
-        return false;
+        return $response;
     }
 
 }
