@@ -48,11 +48,17 @@ function speed_test( event ) {
                 if (!jQuery(".speedtest-fail").hasClass("hide")) {
                     jQuery(".speedtest-fail").addClass("hide");
                 }
+                if (!jQuery(".speedtest-slow").hasClass("hide")) {
+                    jQuery(".speedtest-slow").addClass("hide");
+                }
             } else if (response == 0){
                 jQuery(".speedtest-div").addClass("hide");
                 jQuery(".speedtest-fail").removeClass("hide");
                 if (!jQuery(".speedtest-success").hasClass("hide")) {
                     jQuery(".speedtest-success").addClass("hide");
+                }
+                if (!jQuery(".speedtest-slow").hasClass("hide")) {
+                    jQuery(".speedtest-slow").addClass("hide");
                 }
             }
             else {
