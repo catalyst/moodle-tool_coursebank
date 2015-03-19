@@ -43,6 +43,7 @@ if ($hassiteconfig) {
     $renderer = $PAGE->get_renderer('tool_coursestore');
 
     $text = $renderer->course_store_conncheck();
+    $text .= $renderer->course_store_speedtest();
 
     $settings->add(new admin_setting_heading('coursestore_settings_conncheck', '', $text));
 

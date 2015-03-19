@@ -16,11 +16,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package blocks-ouaforum
-* @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
-* @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * This file is used for connection test AJAX callbacks.
+ *
+ * @package    tool_coursestore
+ * @author     Tim Price <tim.price@catalyst-au.net>
+ * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @copyright  2015 Catalyst IT
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
-// This file is used for AJAX callbacks.
 
 define('MOODLE_INTERNAL', 1);
 define('AJAX_SCRIPT', 1);
@@ -47,20 +50,27 @@ switch ($action) {
         $urltarget = get_config('tool_coursestore', 'url');
         $conntimeout = get_config('tool_coursestore', 'conntimeout');
         $timeout = get_config('tool_coursestore', 'timeout');
-        $maxatt = get_config('tool_coursestore', 'maxatt');
 
         // Initialise, check connection
         $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
-        $check = array('operation' => 'check');
 
-        if($ws_manager->send($check)) {
-            $result = "1";
-        } else {
-            $result = "0";
-        }
+        $response = tool_coursestore::check_connection($ws_manager) ? 1 : 0;
+        $ws_manager->close();
 
-        $response = $result;
         break;
+    case 'speedtest':
+        $context = context_system::instance();
+
+        // Get required config variables
+        $urltarget = get_config('tool_coursestore', 'url');
+        $conntimeout = get_config('tool_coursestore', 'conntimeout');
+        $timeout = get_config('tool_coursestore', 'timeout');
+
+        // Initialise, check connection
+        $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
+
+        $response = tool_coursestore::check_connection_speed($ws_manager, 256, 1, 5);
+        $ws_manager->close();
     default:
         break;
 }

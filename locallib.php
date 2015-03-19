@@ -43,7 +43,7 @@ abstract class tool_coursestore {
 
         $check = array('operation' => 'check');
         $checkresult = $wsman->send($check);
-        if($checkresult['http_code'] == '200') {
+        if($checkresult['http_code'] == 200) {
             return true;
         }
         return false;
@@ -53,17 +53,17 @@ abstract class tool_coursestore {
      * of $count HTTP requests will be sent. For each request, the
      * function will make $maxhttp attempts.
      *
+     * @param coursestore_ws_manager $wsman  Web service manager object
      * @param int                 $testsize  Approximate size of test transfer
      *                                       in kB
      * @param int                    $count  Number of HTTP requests to make
      * @param int                  $maxhttp  Maximum number of http requests to
      *                                       try
-     * @param coursestore_ws_manager $wsman  Web service manager object
      *
      * @return int                  Approximate connection speed in kbps
      */
-    public static function check_connection_speed($testsize, $count, $maxhttp,
-            coursestore_ws_manager $wsman) {
+    public static function check_connection_speed(coursestore_ws_manager $wsman,
+            $testsize, $count, $maxhttp) {
 
         $check = array('operation' => 'speedtest');
         $check['data'] = str_pad('', $testsize*1000, '0');
