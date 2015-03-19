@@ -93,6 +93,7 @@ foreach ($rs as $coursebackup) {
         $cs->totalchunks = tool_coursestore::calculate_total_chunks($cs->chunksize, $coursebackup->filesize);
         $cs->chunknumber = 0;
         $cs->status = tool_coursestore::STATUS_NOTSTARTED;
+        $cs->isbackedup = 0; // No copy has been created yet.
         $backupid = $DB->insert_record('tool_coursestore', $cs);
 
         $coursebackup->id = $backupid;
@@ -109,7 +110,12 @@ foreach ($rs as $coursebackup) {
         $coursebackup->status = $cs->status;
     }
     $result = tool_coursestore::send_backup($coursebackup);
-    if (!$result) {
+    if ($result) {
+        $delete = tool_coursestore::delete_backup($coursebackup);
+        if (!$delete) {
+            echo(get_string('deletefailed', 'tool_coursestore', $coursebackup->filename) . "\n");
+        }
+    } else {
         echo(get_string('backupfailed', 'tool_coursestore', $coursebackup->filename) . "\n");
     }
 }

@@ -24,7 +24,8 @@
  */
 
 $string['pluginname'] = 'Course Store';
-$string['backupfailed'] = 'Failed sending backup %s.';
+$string['backupfailed'] = 'Failed sending backup {$a}.';
+$string['deletefailed'] = 'Failed deleting backup {$a}.';
 $string['sendcoursebackups'] = 'External course backups';
 $string['noaccesstofeature'] = 'Sorry, only admin or CLI has access to this feature.';
 $string['settingspage'] = 'Configuration';

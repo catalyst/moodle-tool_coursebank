@@ -29,4 +29,9 @@ defined('MOODLE_INTERNAL') || die;
 function xmldb_tool_coursestore_install() {
     global $CFG, $OUTPUT, $DB;
 
+    if (is_writable($CFG->dataroot)) {
+        mkdir($CFG->dataroot . "/coursestore");
+    } else {
+        throw new invalid_dataroot_permissions();
+    }
 }

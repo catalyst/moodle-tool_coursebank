@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,18 +16,35 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Course store upgrades
  *
  * @package    tool
  * @subpackage coursestore
- * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
- * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @author     Tim Price <timprice@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+*/
 
-defined('MOODLE_INTERNAL') || die;
+function xmldb_tool_coursestore_upgrade($oldversion) {
+    global $CFG, $DB, $OUTPUT;
 
-$plugin->version   = 2015031900;
-$plugin->requires  = 2014051200;
-$plugin->component = 'tool_coursestore';
+    $dbman = $DB->get_manager();
+
+    if ($oldversion < 2015031900) {
+
+        // Define field isbackedup to be added to tool_coursestore.
+        $table = new xmldb_table('tool_coursestore');
+        $field = new xmldb_field('isbackedup', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'status');
+
+        // Conditionally launch add field isbackedup.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Customlang savepoint reached.
+        upgrade_plugin_savepoint(true, 2015031900, 'tool', 'coursestore');
+    }
+
+
+    return true;
+}

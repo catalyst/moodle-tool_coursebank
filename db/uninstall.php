@@ -15,18 +15,35 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Course store plugin uninstallation.
  *
  * @package    tool
  * @subpackage coursestore
- * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
- * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @author     Tim Price <timprice@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2015031900;
-$plugin->requires  = 2014051200;
-$plugin->component = 'tool_coursestore';
+function xmldb_tool_coursestore_uninstall() {
+    global $CFG, $DB;
+
+    if (is_writable($CFG->dataroot)) {
+        $dir = $CFG->dataroot . "/coursestore";
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (filetype($dir."/".$object) == "dir") rrmdir($dir."/".$object); else unlink($dir."/".$object);
+                }
+            }
+            reset($objects);
+            rmdir($dir);
+       }
+    } else {
+        throw new invalid_dataroot_permissions();
+    }
+
+    return true;
+}
