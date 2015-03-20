@@ -144,8 +144,10 @@ abstract class tool_coursestore {
         global $CFG, $DB;
 
         // Copy the backup file into our storage area so there are no changes to the file
-        // during transfer.
-        $backup = self::copy_backup($backup);
+        // during transfer, unless file already exists.
+        if ($backup->isbackedup == 0) {
+            $backup = self::copy_backup($backup);
+        }
 
         if($backup === false) {
             return false;
@@ -238,7 +240,7 @@ abstract class tool_coursestore {
             return false;
         }
         if (!is_writable($filedir)) {
-            return false;
+            throw new invalid_dataroot_permissions();
         }
 
         $backup->filepath = $filedir . "/" . $backup->contenthash;
