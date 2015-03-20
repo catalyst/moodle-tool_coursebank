@@ -33,7 +33,8 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 $action = required_param('action', PARAM_TEXT);
 
-require_login();
+// Prevent checks from returning NaN if the user has since logged out
+isloggedin() || die;
 
 $response = null;
 
