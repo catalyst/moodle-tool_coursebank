@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,7 +16,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Page that handles performing connection checks
+ * This file is used to provide connection check functionality for users with
+ * javascript disabled.
  *
  * @package    tool_coursestore
  * @author     Adam Riddell <adamr@catalyst-au.net>
@@ -24,30 +26,91 @@
 */
 
 require_once('../../../config.php');
+require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
-
-defined('MOODLE_INTERNAL') || die;
 
 $context = context_system::instance();
 require_login();
+admin_externalpage_setup('tool_coursestore');
 
-// Get required config variables
-$urltarget = get_config('tool_coursestore', 'url');
-$conntimeout = get_config('tool_coursestore', 'conntimeout');
-$timeout = get_config('tool_coursestore', 'timeout');
-$maxatt = get_config('tool_coursestore', 'maxatt');
+$url = new moodle_url('/admin/tool/coursestore/check_connection.php');
+$PAGE->set_url($url);
+$PAGE->set_context($context);
+$action = required_param('action', PARAM_TEXT);
 
-// Initialise, check connection
-$ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
-$check = array('operation' => 'check');
-
-if($ws_manager->send($check)) {
-    $params = array('section' => 'coursestore_settings', 'result' => 1);
-}
-else {
-    $params = array('section' => 'coursestore_settings', 'result' => 0);
+if(!in_array($action, array('conncheck', 'speedtest'))) {
+    $action = 'conncheck';
 }
 
-$redirect = new moodle_url('/admin/settings.php', $params);
+switch ($action) {
+    case 'conncheck':
+        $header = get_string('connchecktitle', 'tool_coursestore');
 
-redirect($redirect);
+        // Get required config variables
+        $urltarget = get_config('tool_coursestore', 'url');
+        $conntimeout = get_config('tool_coursestore', 'conntimeout');
+        $timeout = get_config('tool_coursestore', 'timeout');
+
+        // Initialise, check connection
+        $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
+
+        $result = tool_coursestore::check_connection($ws_manager) ? 1 : 0;
+        if(tool_coursestore::check_connection($ws_manager)) {
+            $msgtype = 'success';
+        }
+        else {
+            $msgtype = 'fail';
+        }
+        $content = get_string('conncheck'.$msgtype, 'tool_coursestore');
+        $ws_manager->close();
+
+        break;
+    case 'speedtest':
+        $header = get_string('speedtesttitle', 'tool_coursestore');
+
+        // Get required config variables
+        $urltarget = get_config('tool_coursestore', 'url');
+        $conntimeout = get_config('tool_coursestore', 'conntimeout');
+        $timeout = get_config('tool_coursestore', 'timeout');
+
+        // Initialise, check connection
+        $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
+
+        $result = tool_coursestore::check_connection_speed($ws_manager, 256, 1, 5);
+        $ws_manager->close();
+
+        $add ='';
+        if($result >= 256) {
+            $msgtype = 'success';
+        }
+        else if($result == 0) {
+            $msgtype = 'fail';
+        }
+        else {
+            $msgtype = 'slow';
+            $add = (string) $result.' kbps.';
+        }
+
+        $content = get_string('speedtest'.$msgtype, 'tool_coursestore').$add;
+
+    default:
+        break;
+}
+$renderer = $PAGE->get_renderer('tool_coursestore');
+
+$PAGE->set_title($header);
+echo $OUTPUT->header();
+echo $OUTPUT->heading($header);
+echo $OUTPUT->box_start();
+echo $renderer->course_store_check_notification($action, $msgtype, $content, false);
+$returnurl = new moodle_url(
+        $CFG->wwwroot.'/admin/settings.php',
+        array('section' => 'coursestore_settings')
+);
+echo $renderer->single_button(
+        $returnurl,
+        get_string('return', 'tool_coursestore'),
+        'get'
+);
+echo $OUTPUT->box_end();
+echo $OUTPUT->footer();

@@ -1,6 +1,10 @@
 jQuery(document).ready(function() {
         jQuery('.conncheckbutton').click( conn_check );
         jQuery('.speedtestbutton').click( speed_test );
+        jQuery('.conncheckurl-div').addClass("hide");
+        jQuery('.speedtesturl-div').addClass("hide");
+        jQuery('.conncheckbutton-div').removeClass("hide");
+        jQuery('.speedtestbutton-div').removeClass("hide");
     }
 );
 
@@ -8,23 +12,23 @@ function conn_check( event ) {
     event.preventDefault();
     var xhr = new XMLHttpRequest();
     var wwwroot = jQuery('.wwwroot').val();
-    jQuery(".notification-fail").addClass("hide");
-    jQuery(".notification-success").addClass("hide");
+    jQuery(".conncheck-fail").addClass("hide");
+    jQuery(".conncheck-success").addClass("hide");
     jQuery(".check-div").removeClass("hide");
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4 && xhr.status == 200) {
             var response = xhr.responseText;
             if (response == "1") {
                 jQuery(".check-div").addClass("hide");
-                jQuery(".notification-success").removeClass("hide");
-                if (!jQuery(".notification-fail").hasClass("hide")) {
-                    jQuery(".notification-fail").addClass("hide");
+                jQuery(".conncheck-success").removeClass("hide");
+                if (!jQuery(".conncheck-fail").hasClass("hide")) {
+                    jQuery(".conncheck-fail").addClass("hide");
                 }
             } else {
                 jQuery(".check-div").addClass("hide");
-                jQuery(".notification-fail").removeClass("hide");
-                if (!jQuery(".notification-success").hasClass("hide")) {
-                    jQuery(".notification-success").addClass("hide");
+                jQuery(".conncheck-fail").removeClass("hide");
+                if (!jQuery(".conncheck-success").hasClass("hide")) {
+                    jQuery(".conncheck-success").addClass("hide");
                 }
             }
         }

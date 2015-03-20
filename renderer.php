@@ -85,13 +85,35 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 get_string('connchecktitle', 'tool_coursestore'),
                 3
         );
+        // Hide the button, and then show it with js if it is enabled
+        $html .= html_writer::start_tag('div',
+                array('class' => 'conncheckbutton-div hide')
+        );
         $buttonattr = array(
             'id' => 'conncheck',
             'type' => 'button',
-            'class' => 'conncheckbutton',
-            'value' => 'Check connection'
+            'class' => 'conncheckbutton hide',
+            'value' => get_string('conncheckbutton', 'tool_coursestore')
         );
         $html .= html_writer::tag('input', '', $buttonattr);
+        $html .= html_writer::end_tag('div');
+
+        // Display ordinary link, and hide it with js if it is enabled
+        $html .= html_writer::start_tag('div',
+                array('class' => 'conncheckurl-div')
+        );
+        $nonjsparams = array('action' => 'conncheck');
+        $nonjsurl = new moodle_url(
+                $CFG->wwwroot.'/admin/tool/coursestore/check_connection.php',
+                $nonjsparams
+        );
+        $html .= html_writer::link(
+                $nonjsurl,
+                get_string('conncheckbutton', 'tool_coursestore'),
+                array('class' => 'conncheckurl')
+        );
+        $html .= html_writer::end_tag('div');
+
         $html .= html_writer::start_tag('div',
                 array('class' => 'check-div hide'));
         $html .= html_writer::img(
@@ -99,7 +121,6 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 get_string('checking', 'tool_coursestore'),
                 array('class' => 'hide')
         );
-        $html .= html_writer::end_tag('div');
         $inputattr = array(
             'type' => 'hidden',
             'name' => 'wwwroot',
@@ -107,22 +128,21 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             'class' => 'wwwroot'
         );
         $html .= html_writer::tag('input', '', $inputattr);
-
-        $html .= html_writer::start_tag('div',
-                array('class' => 'notification-success hide'));
-        $html .= $this->notification(
-                get_string('connchecksuccess', 'tool_coursestore'),
-                'notifysuccess'
-        );
         $html .= html_writer::end_tag('div');
 
-        $html .= html_writer::start_tag('div',
-                array('class' => 'notification-fail hide'));
-        $html .= $this->notification(
-                get_string('conncheckfail', 'tool_coursestore'),
-                'notifyproblem'
+        // Success notification
+        $html .= $this->course_store_check_notification(
+                'conncheck',
+                'success',
+                get_string('connchecksuccess', 'tool_coursestore')
         );
-        $html .= html_writer::end_tag('div');
+
+        // Failure notification
+        $html .= $this->course_store_check_notification(
+                'conncheck',
+                'fail',
+                get_string('conncheckfail', 'tool_coursestore')
+        );
 
         $html .= $this->box_end();
 
@@ -141,13 +161,35 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 get_string('speedtesttitle', 'tool_coursestore'),
                 3
         );
+
+        // Hide the button, and then show it with js if it is enabled
+        $html .= html_writer::start_tag('div',
+                array('class' => 'speedtestbutton-div hide')
+        );
         $buttonattr = array(
             'id' => 'speedtest',
             'type' => 'button',
             'class' => 'speedtestbutton',
-            'value' => 'Test transfer speed'
+            'value' => get_string('speedtestbutton', 'tool_coursestore')
         );
         $html .= html_writer::tag('input', '', $buttonattr);
+        $html .= html_writer::end_tag('div');
+
+        // Display ordinary link, and hide it with js if it is enabled
+        $html .= html_writer::start_tag('div',
+                array('class' => 'speedtesturl-div')
+        );
+        $nonjsparams = array('action' => 'speedtest');
+        $nonjsurl = new moodle_url(
+                $CFG->wwwroot.'/admin/tool/coursestore/check_connection.php',
+                $nonjsparams
+        );
+        $html .= html_writer::link(
+                $nonjsurl,
+                get_string('speedtestbutton', 'tool_coursestore'),
+                array('class' => 'speedtesturl')
+        );
+        $html .= html_writer::end_tag('div');
         $html .= html_writer::start_tag('div',
                 array('class' => 'speedtest-div hide'));
         $html .= html_writer::img(
@@ -165,28 +207,21 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('input', '', $wwwrootattr);
 
         // Success notification
-        $html .= html_writer::start_tag('div',
-                array('class' => 'speedtest-success hide'));
 
-        $html .= html_writer::tag(
-                'div',
-                get_string('speedtestsuccess', 'tool_coursestore'),
-                array('class' => 'alert alert-success speedtest-alert')
+        $html .= $this->course_store_check_notification(
+                'speedtest',
+                'success',
+                get_string('speedtestsuccess', 'tool_coursestore')
         );
-        $html .= html_writer::end_tag('div');
 
         // Failure notification
-        $html .= html_writer::start_tag('div',
-                array('class' => 'speedtest-fail hide'));
-        $html .= $this->notification(
-                get_string('speedtestfail', 'tool_coursestore'),
-                'notifyproblem'
+        $html .= $this->course_store_check_notification(
+                'speedtest',
+                'fail',
+                get_string('speedtestfail', 'tool_coursestore')
         );
-        $html .= html_writer::end_tag('div');
 
         // Slow connection speed notification
-        $html .= html_writer::start_tag('div',
-                array('class' => 'speedtest-slow hide'));
         $attr = array(
             'type' => 'hidden',
             'name' => 'slow',
@@ -194,16 +229,49 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             'class' => 'speedtestslow'
         );
         $html .= html_writer::tag('input', '', $attr);
+        $html .= $this->course_store_check_notification(
+                'speedtest',
+                'slow',
+                get_string('speedtestslow', 'tool_coursestore')
+        );
+
+        $html .= $this->box_end();
+
+        return $html;
+    }
+    /**
+     * Output html for notification
+     *
+     * @param string $check    Check type (e.g. speedtest, conncheck)
+     * @param string $msgtype  Failure, success, slow
+     * @param string $content  Notification content
+     * @param bool   $hide     Whether or not to hide the notification
+     *
+     * @return string          Output html
+     */
+    public function course_store_check_notification($check, $msgtype, $content='', $hide=true) {
+        switch($msgtype) {
+            case 'fail':
+                $alert = 'alert-error';
+                break;
+            case 'success':
+                $alert = 'alert-success';
+                break;
+            case 'slow':
+                $alert = 'alert';
+                break;
+        }
+
+        $hidestring = $hide ? ' hide' : '';
+        $html = html_writer::start_tag('div',
+                array('class' => $check.'-'.$msgtype.$hidestring));
 
         $html .= html_writer::tag(
                 'div',
-                get_string('speedtestslow', 'tool_coursestore'),
-                array('class' => 'alert speedtest-alert-slow')
+                $content,
+                array('class' => 'alert '.$alert.' '.$check.'-alert-'.$msgtype)
         );
         $html .= html_writer::end_tag('div');
-
-
-        $html .= $this->box_end();
 
         return $html;
     }
