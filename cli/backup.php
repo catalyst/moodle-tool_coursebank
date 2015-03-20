@@ -41,21 +41,55 @@ $sqlcommon = "SELECT tcs.id,
                tcs.timechunkcompleted,
                tcs.chunkretries,
                tcs.status,
+               tcs.isbackedup,
                f.id AS f_fileid,
                f.contenthash,
                f.pathnamehash,
                f.filename,
                f.userid,
                f.filesize,
-               f.timecreated,
-               f.timemodified,
+               f.timecreated AS filetimecreated,
+               f.timemodified AS filetimemodified,
                cr.id AS courseid,
-               cr.fullname,
-               cr.shortname,
+               cr.fullname AS coursefullname,
+               cr.shortname AS courseshortname,
                cr.category,
-               cr.startdate,
+               cr.startdate AS coursestartdate,
                cc.id as categoryid,
                cc.name as categoryname
+        FROM {files} f
+        INNER JOIN {context} ct on f.contextid = ct.id
+        INNER JOIN {course} cr on ct.instanceid = cr.id
+        INNER JOIN {course_categories} cc on cr.category = cc.id";
+
+$sqlselect = "SELECT tcs.id,
+               tcs.backupfilename,
+               tcs.fileid,
+               tcs.chunksize,
+               tcs.totalchunks,
+               tcs.chunknumber,
+               tcs.timecreated,
+               tcs.timecompleted,
+               tcs.timechunksent,
+               tcs.timechunkcompleted,
+               tcs.chunkretries,
+               tcs.status,
+               tcs.isbackedup,
+               f.id AS f_fileid,
+               tcs.contenthash,
+               tcs.pathnamehash,
+               f.filename,
+               tcs.userid,
+               tcs.filesize,
+               tcs.filetimecreated,
+               tcs.filetimemodified,
+               tcs.courseid,
+               tcs.coursefullname,
+               tcs.courseshortname,
+               cr.category,
+               tcs.coursestartdate,
+               tcs.categoryid,
+               tcs.categoryname
         FROM {files} f
         INNER JOIN {context} ct on f.contextid = ct.id
         INNER JOIN {course} cr on ct.instanceid = cr.id
@@ -67,12 +101,17 @@ $sql = $sqlcommon . "
         AND ct.contextlevel = :contextcourse1
         AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
         UNION
-        " . $sqlcommon . "
+        " . $sqlselect . "
         INNER JOIN {tool_coursestore} tcs on tcs.fileid = f.id
         WHERE ct.contextlevel = :contextcourse2
         AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
         AND   (tcs.status IN (:statusnotstarted, :statusinprogress)
-              OR (tcs.status = :statuserror AND tcs.chunkretries <= :maxattempts))";
+              OR (tcs.status = :statuserror AND tcs.chunkretries <= :maxattempts))
+        UNION
+        " . $sqlselect . "
+        RIGHT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
+        WHERE f.id IS NULL
+        AND tcs.isbackedup = 1";
 $maxattempts = get_config('maxattempts', 'tool_coursestore');
 $params = array('statusnotstarted' => tool_coursestore::STATUS_NOTSTARTED,
                 'statuserror' => tool_coursestore::STATUS_ERROR,
