@@ -86,16 +86,10 @@ if ($hassiteconfig) {
             5,
             PARAM_INT)
     );
-    $settings->add(new admin_setting_configtext('tool_coursestore/maxattempts',
-            get_string('settings_maxattempts', 'tool_coursestore'),
-            get_string('settings_maxattempts_desc', 'tool_coursestore'),
-            3,
-            PARAM_INT)
-    );
-    $settings->add(new admin_setting_configtext('tool_coursestore/maxhttprequests',
-            get_string('settings_maxhttprequests', 'tool_coursestore'),
-            get_string('settings_maxhttprequests_desc', 'tool_coursestore'),
-            5,
+    $settings->add(new admin_setting_configtext('tool_coursestore/requestretries',
+            get_string('settings_requestretries', 'tool_coursestore'),
+            get_string('settings_requestretries', 'tool_coursestore'),
+            4,
             PARAM_INT)
     );
 

@@ -50,20 +50,19 @@ abstract class tool_coursestore {
     }
     /**
      * Test the speed of a transfer of $testsize kilobytes. A total
-     * of $count HTTP requests will be sent. For each request, the
-     * function will make $maxhttp attempts.
+     * of $count HTTP requests will be sent. If the request fails, make
+     * $retry number of subsequent attempts.
      *
      * @param coursestore_ws_manager $wsman  Web service manager object
      * @param int                 $testsize  Approximate size of test transfer
      *                                       in kB
      * @param int                    $count  Number of HTTP requests to make
-     * @param int                  $maxhttp  Maximum number of http requests to
-     *                                       try
+     * @param int                  $retry    Number of retry attempts
      *
      * @return int                  Approximate connection speed in kbps
      */
     public static function check_connection_speed(coursestore_ws_manager $wsman,
-            $testsize, $count, $maxhttp) {
+            $testsize, $count, $retry) {
 
         $check = array('operation' => 'speedtest');
         $check['data'] = str_pad('', $testsize*1000, '0');
@@ -72,7 +71,7 @@ abstract class tool_coursestore {
 
         // Make $count requests with the dummy data
         for($i=0; $i<$count; $i++) {
-            for($j=0; $j<$maxhttp; $j++) {
+            for($j=0; $j<=$retry; $j++) {
                 $response = $wsman->send($check);
                 if($response['http_code'] == 200) {
                     break;
@@ -157,7 +156,7 @@ abstract class tool_coursestore {
         $urltarget = get_config('tool_coursestore', 'url');
         $conntimeout = get_config('tool_coursestore', 'conntimeout');
         $timeout = get_config('tool_coursestore', 'timeout');
-        $maxhttprequests = get_config('tool_coursestore', 'maxhttprequests');
+        $retries = get_config('tool_coursestore', 'requestretries');
 
         // Initialise, check connection
         $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
@@ -190,7 +189,7 @@ abstract class tool_coursestore {
             $backup->chunksum = md5($backup->data);
             $backup->timechunksent = time();
 
-            $result = $ws_manager->send($backup, $maxhttprequests);
+            $result = $ws_manager->send($backup, $retries);
             if($result['http_code'] == '200') {
                 $backup->timechunkcompleted = time();
                 $backup->chunknumber++;
@@ -484,20 +483,19 @@ class coursestore_ws_manager {
      * Send a the provided data in JSON encoding as a POST request
      *
      * @param array $data             Associative array of request data to send
-     * @param int   $maxhttprequests  Max number of attempts to make before
+     * @param int   $retries  Max number of attempts to make before
      *                                failing
      *
      * @return bool                   Return true if successful
      */
-    function send($data, $maxhttprequests = 5) {
+    function send($data, $retries = 5) {
         $postdata = json_encode($data);
         curl_setopt($this->curlhandle, CURLOPT_POSTFIELDS, $postdata);
         curl_setopt($this->curlhandle, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
                 'Content-Length: ' . strlen($postdata))
         );
-        //Make $maxatt number of attempts to send request
-        for($attempt=0; $attempt < $maxhttprequests; $attempt++) {
+        for($attempt=0; $attempt <= $retries; $attempt++) {
             $result = curl_exec($this->curlhandle);
             $response = curl_getinfo($this->curlhandle);
             $httpcode = $response['http_code'];
