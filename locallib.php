@@ -457,6 +457,7 @@ abstract class tool_coursestore_error {
  */
 class coursestore_ws_manager {
     private $curlhandle;
+    private $baseurl;
 
     /**
      * @param string  $url            Target URL
@@ -464,8 +465,8 @@ class coursestore_ws_manager {
      * @param int     $timeout        Request time out (seconds)
      */
     function __construct($url, $conntimeout, $timeout) {
+        $this->baseurl = $url;
         $curlopts = array(
-            CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => $conntimeout,
             CURLOPT_URL => $url
@@ -482,28 +483,128 @@ class coursestore_ws_manager {
     /**
      * Send a the provided data in JSON encoding as a POST request
      *
-     * @param array $data             Associative array of request data to send
-     * @param int   $retries  Max number of attempts to make before
+     * @param string  $resource URL fragment to append to the base URL
+     * @param array   $data     Associative array of request data to send
+     * @param string  $method   Request method. Defaults to POST.
+     * @param int     $retries  Max number of attempts to make before
      *                                failing
+     * @param string  $auth     Authorization string
      *
      * @return bool                   Return true if successful
      */
-    function send($data, $retries = 5) {
+    function send($resource='', $data=array(), $method='POST', $auth=null, $retries = 5) {
         $postdata = json_encode($data);
-        curl_setopt($this->curlhandle, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($this->curlhandle, CURLOPT_HTTPHEADER, array(
+        $header = array(
             'Content-Type: application/json',
-                'Content-Length: ' . strlen($postdata))
+            'Content-Length: ' . strlen($postdata)
         );
+        if(isset($auth)) {
+            $header[] = 'Authorization: '.$auth;
+        }
+        $curlopts = array(
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_POSTFIELDS => $postdata,
+            CURLOPT_HTTPHEADER => $header,
+            CURLOPT_URL => $this->baseurl.'/'.$resource
+        );
+        curl_setopt_array($this->curlhandle, $curlopts);
         for($attempt=0; $attempt <= $retries; $attempt++) {
             $result = curl_exec($this->curlhandle);
             $response = curl_getinfo($this->curlhandle);
             $httpcode = $response['http_code'];
             if($httpcode == '200') {
-               return $response;
+               return $result;
             }
         }
-        return $response;
+        return $result;
     }
+    /**
+     * Send a test request
+     *
+     * @param string  $auth  Authorization string
+     */
+    function send_test($auth) {
+        return $this->send('test', array(), 'GET', $auth);
+    }
+    /**
+     * Send a session start request.
+     *
+     * @param string  $auth  Authorization string
+     */
+    function start_session($auth) {
+        return $this->send('sessions', array(), 'POST', $auth);
+    }
+    /**
+     * Get a backup resource.
+     *
+     * @param string $auth      Authorization string
+     * @param int    $backupid  ID referencing course bank backup resource
+     */
+    function get_backup($auth, $backupid) {
+        return $this->send('backup'.$backupid, array(), 'GET', $auth);
 
+    }
+    /**
+     * Create a backup resource.
+     *
+     * @param string $auth      Authorization string
+     *
+     */
+     function create_backup($auth) {
+         return $this->send('backup', array(), 'POST', $auth);
+     }
+    /**
+     * Update a backup resource.
+     *
+     * @param string $auth      Authorization string
+     * @param int    $backupid  ID referencing course bank backup resource
+     *
+     */
+     function update_backup($auth, $backupid) {
+         return $this->send('backup'.$backupid, array(), 'PUT', $auth);
+     }
+    /**
+     * Get most recent chunk transferred for specific backup.
+     *
+     * @param string $auth      Authorization string
+     * @param int    $backupid  ID referencing course bank backup resource
+     *
+     */
+     function get_chunk($auth, $backupid) {
+         return $this->send('chunks'.$backupid, array(), 'GET', $auth);
+     }
+    /**
+     * Transfer chunk
+     *
+     * @param string $auth      Authorization string
+     * @param int    $backupid  ID referencing course bank backup resource
+     * @param int    $chunk     Chunk number
+     * @param array  $data      Data for transfer
+     *
+     */
+     function transfer_chunk($auth, $backupid, $chunk, $data) {
+         return $this->send('chunks'.$backupid.'/'.$chunk, array(), 'PUT', $auth);
+     }
+    /**
+     * Update chunk status to confirmed
+     *
+     * @param string $auth      Authorization string
+     * @param int    $backupid  ID referencing course bank backup resource
+     * @param int    $chunk     Chunk number
+     *
+     */
+     function confirm_chunk($auth, $backupid, $chunk) {
+         return $this->send('chunks'.$backupid.'/'.$chunk, array(), 'PUT', $auth);
+     }
+    /**
+     * Remove chunk
+     *
+     * @param string $auth      Authorization string
+     * @param int    $backupid  ID referencing course bank backup resource
+     * @param int    $chunk     Chunk number
+     *
+     */
+     function remove_chunk($auth, $backupid, $chunk) {
+         return $this->send('chunks'.$backupid.'/'.$chunk, array(), 'DELETE', $auth);
+     }
 }
