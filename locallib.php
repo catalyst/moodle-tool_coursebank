@@ -499,7 +499,7 @@ class coursestore_ws_manager {
             'Content-Length: ' . strlen($postdata)
         );
         if(isset($auth)) {
-            $header[] = 'Authorization: '.$auth;
+            $header[] = 'sesskey: '.$auth;
         }
         $curlopts = array(
             CURLOPT_CUSTOMREQUEST => $method,
@@ -529,10 +529,15 @@ class coursestore_ws_manager {
     /**
      * Send a session start request.
      *
-     * @param string  $auth  Authorization string
+     * @param string    $hash      Authorization string
+     * @param username  $username  Username string
      */
-    function start_session($auth) {
-        return $this->send('sessions', array(), 'POST', $auth);
+    function start_session($hash, $username) {
+        $authdata = array(
+            'hash' => $hash,
+            'username' => $username
+        );
+        return $this->send('sessions', $authdata, 'POST');
     }
     /**
      * Get a backup resource.
