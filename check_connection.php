@@ -50,17 +50,12 @@ switch ($action) {
         $urltarget = get_config('tool_coursestore', 'url');
         $conntimeout = get_config('tool_coursestore', 'conntimeout');
         $timeout = get_config('tool_coursestore', 'timeout');
+        $sesskey = get_config('tool_coursestore', 'sessionkey');
 
         // Initialise, check connection
         $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
 
-        $result = tool_coursestore::check_connection($ws_manager) ? 1 : 0;
-        if(tool_coursestore::check_connection($ws_manager)) {
-            $msgtype = 'success';
-        }
-        else {
-            $msgtype = 'fail';
-        }
+        $msgtype = tool_coursestore::check_connection($ws_manager, $sesskey) ? 'success' : 'fail';
         $content = get_string('conncheck'.$msgtype, 'tool_coursestore');
         $ws_manager->close();
 
@@ -72,11 +67,12 @@ switch ($action) {
         $urltarget = get_config('tool_coursestore', 'url');
         $conntimeout = get_config('tool_coursestore', 'conntimeout');
         $timeout = get_config('tool_coursestore', 'timeout');
+        $sesskey = get_config('tool_coursestore', 'sessionkey');
 
         // Initialise, check connection
         $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
 
-        $result = tool_coursestore::check_connection_speed($ws_manager, 256, 1, 5);
+        $result = tool_coursestore::check_connection_speed($ws_manager, 256, 1, 5, $sesskey);
         $ws_manager->close();
 
         $add ='';

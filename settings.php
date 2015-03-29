@@ -92,6 +92,18 @@ if ($hassiteconfig) {
             4,
             PARAM_INT)
     );
+    $settings->add(new admin_setting_configtext('tool_coursestore/authtoken',
+            get_string('settings_authtoken', 'tool_coursestore'),
+            get_string('settings_authtoken_desc', 'tool_coursestore'),
+            '',
+            PARAM_TEXT)
+    );
+    $settings->add(new admin_setting_configtext('tool_coursestore/authusername',
+            get_string('settings_authusername', 'tool_coursestore'),
+            get_string('settings_authusername_desc', 'tool_coursestore'),
+            '',
+            PARAM_TEXT)
+    );
 
     $ADMIN->add('tools', $settings);
 }

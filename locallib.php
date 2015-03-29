@@ -33,18 +33,55 @@ abstract class tool_coursestore {
     const STATUS_FINISHED = 2;
     const STATUS_ERROR = 99;
     /**
+     * Get the stored session key for use with the course bank REST API if one
+     * exists.
+     *
+     * @return string or bool false  Session key
+     */
+    public static function get_session() {
+        return get_config('tool_coursestore', 'sessionkey');
+
+    }
+    /**
+     * Set the session key for use with the course bank REST API
+     *
+     * @return bool  Success/failure
+     */
+    public static function set_session($sessionkey) {
+        if(set_config('sessionkey', $sessionkey, 'tool_coursestore')) {
+            return true;
+        }
+        return false;
+    }
+    /**
      * Test that a connection to the configured web service consumer can be
      * made successfully.
      *
      * @param coursestore_ws_manager $wsman  Web service manager object
      * @return bool                          True for success, false otherwise
      */
-    public static function check_connection(coursestore_ws_manager $wsman) {
+    public static function check_connection(coursestore_ws_manager $wsman, $auth=false) {
 
-        $check = array('operation' => 'check');
-        $checkresult = $wsman->send($check);
-        if($checkresult['http_code'] == 200) {
-            return true;
+        if($auth) {
+            $checkresult = $wsman->send_test($auth);
+            if($checkresult['response']['http_code'] == 200) {
+                return true;
+            }
+        }
+
+        // No sess key provided, or sesskey rejected. Try starting a new session
+        $token = get_config('tool_coursestore', 'authtoken');
+        $username = get_config('tool_coursestore', 'authusername');
+        if($token && $username) {
+            if(!$wsman->start_session($token, $username)) {
+                return false;
+            }
+            $sesskey = tool_coursestore::get_session();
+            $checkresult = $wsman->send_test($sesskey);
+
+            if($checkresult['response']['http_code'] == 200) {
+                return true;
+            }
         }
         return false;
     }
@@ -57,28 +94,27 @@ abstract class tool_coursestore {
      * @param int                 $testsize  Approximate size of test transfer
      *                                       in kB
      * @param int                    $count  Number of HTTP requests to make
-     * @param int                  $retry    Number of retry attempts
+     * @param int                    $retry  Number of retry attempts
+     * @param string                  $auth  Session key
      *
      * @return int                  Approximate connection speed in kbps
      */
     public static function check_connection_speed(coursestore_ws_manager $wsman,
-            $testsize, $count, $retry) {
+            $testsize, $count, $retry, $auth) {
 
-        $check = array('operation' => 'speedtest');
-        $check['data'] = str_pad('', $testsize*1000, '0');
-        $check['checksum'] = md5($check['data']);
+        $check = str_pad('', $testsize*1000, '0');
         $start = microtime(true);
 
         // Make $count requests with the dummy data
         for($i=0; $i<$count; $i++) {
             for($j=0; $j<=$retry; $j++) {
-                $response = $wsman->send($check);
-                if($response['http_code'] == 200) {
+                $response = $wsman->send_test($auth, $check);
+                if($response['response']['http_code'] == 200) {
                     break;
                 }
             }
             // If $maxhttps unsuccessful attempts have been made
-            if($response['http_code'] != 200) {
+            if($response['response']['http_code'] != 200) {
                 return 0;
             }
         }
@@ -481,18 +517,21 @@ class coursestore_ws_manager {
         curl_close($this->curlhandle);
     }
     /**
-     * Send a the provided data in JSON encoding as a POST request
+     * Send the provided data in JSON encoding as an HTTP request
      *
-     * @param string  $resource URL fragment to append to the base URL
-     * @param array   $data     Associative array of request data to send
-     * @param string  $method   Request method. Defaults to POST.
-     * @param int     $retries  Max number of attempts to make before
-     *                                failing
-     * @param string  $auth     Authorization string
+     * @param string  $resource     URL fragment to append to the base URL
+     * @param array   $data         Associative array of request data to send
+     * @param string  $method       Request method. Defaults to POST.
+     * @param int     $retries      Max number of attempts to make before
+     *                              failing
+     * @param string  $auth         Authorization string
      *
-     * @return bool                   Return true if successful
+     * @return array or bool false  Associative array of the form:
+     *                                  'body' => <response body array>,
+     *                                  'response => <response info array>
+     *                              Or false if connection could not be made
      */
-    function send($resource='', $data=array(), $method='POST', $auth=null, $retries = 5) {
+    protected function send($resource='', $data=array(), $method='POST', $auth=null, $retries = 5) {
         $postdata = json_encode($data);
         $header = array(
             'Content-Type: application/json',
@@ -512,19 +551,24 @@ class coursestore_ws_manager {
             $result = curl_exec($this->curlhandle);
             $response = curl_getinfo($this->curlhandle);
             $httpcode = $response['http_code'];
-            if($httpcode == '200') {
-               return $result;
+            if($result) {
+                return array('body' => $result, 'response' => $response);
             }
         }
-        return $result;
+        return false;
     }
     /**
      * Send a test request
      *
-     * @param string  $auth  Authorization string
+     * @param string  $auth         Authorization string
+     * @param string  $data         Test data string
+     * @return array or bool false  Associate array response
      */
-    function send_test($auth) {
-        return $this->send('test', array(), 'GET', $auth);
+    function send_test($auth, $data='') {
+        $testdata = array('data' => $data);
+        $result = $this->send('test', $testdata, 'GET', $auth);
+
+        return $result;
     }
     /**
      * Send a session start request.
@@ -537,7 +581,16 @@ class coursestore_ws_manager {
             'hash' => $hash,
             'username' => $username
         );
-        return $this->send('sessions', $authdata, 'POST');
+        $response = $this->send('session', $authdata, 'POST');
+        if($response['response']['http_code'] == '201') {
+            $body = json_decode($response['body']);
+            if(isset($body->sesskey)) {
+                $sesskey = trim((string) $body->sesskey);
+                return tool_coursestore::set_session($sesskey);
+            }
+        }
+        // TODO: Log error
+        return false;
     }
     /**
      * Get a backup resource.
