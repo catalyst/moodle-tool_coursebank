@@ -62,8 +62,6 @@ $string['settings_requestretries'] = 'HTTP request retries';
 $string['settings_requestretries_desc'] = 'Number of times to reattempt the sending of an individual failed request.';
 $string['settings_authtoken'] = 'Authentication token';
 $string['settings_authtoken_desc'] = 'Authentication token for use in communication with external course bank instance.';
-$string['settings_authusername'] = 'Authentication username';
-$string['settings_authusername_desc'] = 'Authentication username for use in communication with external course bank instance.';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';

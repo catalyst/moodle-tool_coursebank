@@ -73,9 +73,8 @@ abstract class tool_coursestore {
 
         // No sess key provided, or sesskey rejected. Try starting a new session
         $token = get_config('tool_coursestore', 'authtoken');
-        $username = get_config('tool_coursestore', 'authusername');
-        if ($token && $username) {
-            if(!$wsman->start_session($token, $username)) {
+        if ($token) {
+            if(!$wsman->start_session($token)) {
                 return false;
             }
             $sesskey = tool_coursestore::get_session();
@@ -557,7 +556,6 @@ class coursestore_ws_manager {
     const WS_STATUS_ERROR_DB_CONNECTION = 500;
     const WS_STATUS_ERROR_GENERATING_TOKEN = 422;
     const WS_STATUS_ERROR_SITE_REMOVED_FOR_TOKEN = 423;
-    const WS_STATUS_ERROR_INACTIVE_SITE_USERNAME = 424;
     const WS_STATUS_ERROR_INVALID_USER_CREDENTIALS = 425;
     const WS_STATUS_ERROR_INACTIVE_SITE = 426;
     const WS_STATUS_ERROR_SAVING_DATA = 427;
@@ -643,12 +641,10 @@ class coursestore_ws_manager {
      * Send a session start request.
      *
      * @param string    $hash      Authorization string
-     * @param username  $username  Username string
      */
-    function start_session($hash, $username) {
+    function start_session($hash) {
         $authdata = array(
             'hash' => $hash,
-            'username' => $username
         );
         $response = $this->send('session', $authdata, 'POST');
         if ($response !== false && $response['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_CREATED) {
