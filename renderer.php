@@ -116,11 +116,13 @@ class tool_coursestore_renderer extends plugin_renderer_base {
 
         $html .= html_writer::start_tag('div',
                 array('class' => 'check-div hide'));
-        $html .= html_writer::img(
-                $CFG->wwwroot.'/pix/i/loading_small.gif',
-                get_string('checking', 'tool_coursestore'),
-                array('class' => 'hide')
+        $imgattr = array(
+            'class' => 'hide',
+            'src'   => $CFG->wwwroot.'/pix/i/loading_small.gif',
+            'alt'   => get_string('checking', 'tool_coursestore')
         );
+
+        $html .= html_writer::empty_tag('img', $imgattr);
         $inputattr = array(
             'type' => 'hidden',
             'name' => 'wwwroot',
@@ -192,11 +194,13 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::end_tag('div');
         $html .= html_writer::start_tag('div',
                 array('class' => 'speedtest-div hide'));
-        $html .= html_writer::img(
-                $CFG->wwwroot.'/pix/i/loading_small.gif',
-                get_string('checking', 'tool_coursestore'),
-                array('class' => 'hide')
+        $imgattr = array(
+            'class' => 'hide',
+            'src'   => $CFG->wwwroot.'/pix/i/loading_small.gif',
+            'alt'   => get_string('checking', 'tool_coursestore')
         );
+
+        $html .= html_writer::empty_tag('img', $imgattr);
         $html .= html_writer::end_tag('div');
         $wwwrootattr = array(
             'type' => 'hidden',
