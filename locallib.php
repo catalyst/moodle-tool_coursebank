@@ -65,7 +65,7 @@ abstract class tool_coursestore {
     public static function check_connection(coursestore_ws_manager $wsman, $auth=false) {
 
         if ($auth) {
-            $checkresult = $wsman->send_test($auth);
+            $checkresult = $wsman->get_test($auth);
             if ($checkresult['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
                 return true;
             }
@@ -74,11 +74,11 @@ abstract class tool_coursestore {
         // No sess key provided, or sesskey rejected. Try starting a new session.
         $token = get_config('tool_coursestore', 'authtoken');
         if ($token) {
-            if (!$wsman->start_session($token)) {
+            if (!$wsman->post_session($token)) {
                 return false;
             }
             $sesskey = self::get_session();
-            $checkresult = $wsman->send_test($sesskey);
+            $checkresult = $wsman->get_test($sesskey);
 
             if ($checkresult['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
                 return true;
@@ -109,7 +109,7 @@ abstract class tool_coursestore {
         // Make $count requests with the dummy data.
         for ($i = 0; $i < $count; $i++) {
             for ($j = 0; $j <= $retry; $j++) {
-                $response = $wsman->send_test($auth, $check);
+                $response = $wsman->get_test($auth, $check);
                 if ($response['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
                     break;
                 }
@@ -237,7 +237,7 @@ abstract class tool_coursestore {
                 'categoryid'   => $backup->categoryid,
                 'categoryname' => $backup->categoryname,
             );
-            if (!$wsmanager->create_backup($data, $sessionkey, $retries)) {
+            if (!$wsmanager->post_backup($data, $sessionkey, $retries)) {
                 $backup->status = self::STATUS_ERROR;
                 $DB->update_record('tool_coursestore', $backup);
                 $wsmanager->close();
@@ -257,7 +257,7 @@ abstract class tool_coursestore {
                 'chunksize'     => $chunksize,
                 'original_data' => $contents,
             );
-            if ($wsmanager->transfer_chunk($data, $backup->id, $backup->chunknumber, $sessionkey, $retries)) {
+            if ($wsmanager->post_chunk($data, $backup->id, $backup->chunknumber, $sessionkey, $retries)) {
                 $backup->timechunkcompleted = time();
                 $backup->chunknumber++;
                 if ($backup->status == self::STATUS_ERROR) {
@@ -640,7 +640,7 @@ class coursestore_ws_manager {
      * @param string  $data         Test data string
      * @return array or bool false  Associate array response
      */
-    public function send_test($auth, $data='') {
+    public function get_test($auth, $data='') {
         $testdata = array('data' => $data);
         $result = $this->send('test', $testdata, 'GET', $auth);
 
@@ -651,7 +651,7 @@ class coursestore_ws_manager {
      *
      * @param string    $hash      Authorization string
      */
-    public function start_session($hash) {
+    public function post_session($hash) {
         $authdata = array(
             'hash' => $hash,
         );
@@ -685,7 +685,7 @@ class coursestore_ws_manager {
      * @param string $auth      Authorization string
      *
      */
-    public function create_backup($data, $sessionkey, $retries) {
+    public function post_backup($data, $sessionkey, $retries) {
 
         $result = $this->send('backup', $data, 'POST', $sessionkey, $retries);
         if ($result === false) {
@@ -718,7 +718,7 @@ class coursestore_ws_manager {
      * @param int    $backupid  ID referencing course bank backup resource
      *
      */
-    public function update_backup($auth, $backupid) {
+    public function put_backup($auth, $backupid) {
         return $this->send('backup/' . $backupid, array(), 'PUT', $auth);
     }
     /**
@@ -740,7 +740,7 @@ class coursestore_ws_manager {
      * @param array  $data      Data for transfer
      *
      */
-    public function transfer_chunk($data, $backupid, $chunknumber, $sessionkey, $retries) {
+    public function post_chunk($data, $backupid, $chunknumber, $sessionkey, $retries) {
 
         // Grab the original data so we don't have to decode it to check the hash.
         $originaldata = $data['original_data'];
@@ -773,7 +773,7 @@ class coursestore_ws_manager {
      * @param int    $chunk     Chunk number
      *
      */
-    public function confirm_chunk($auth, $backupid, $chunk) {
+    public function put_chunk($auth, $backupid, $chunk) {
         return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'PUT', $auth);
     }
     /**
@@ -784,7 +784,7 @@ class coursestore_ws_manager {
      * @param int    $chunk     Chunk number
      *
      */
-    public function remove_chunk($auth, $backupid, $chunk) {
+    public function delete_chunk($auth, $backupid, $chunk) {
         return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'DELETE', $auth);
     }
 }
