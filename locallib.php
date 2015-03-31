@@ -211,7 +211,7 @@ abstract class tool_coursestore {
         $chunksize = $backup->chunksize * 1000;
 
         // Open input file
-        $coursestore_filepath = self::get_coursetore_filepath($backup);
+        $coursestore_filepath = self::get_coursestore_filepath($backup);
         $file = fopen($coursestore_filepath, 'rb');
 
         // Set offset based on chunk number
@@ -292,7 +292,7 @@ abstract class tool_coursestore {
         return $CFG->dataroot . "/coursestore";
     }
 
-    public static function get_coursetore_filepath($backup) {
+    public static function get_coursestore_filepath($backup) {
         return self::get_coursestore_data_dir() . "/" . $backup->contenthash;
     }
 
@@ -317,7 +317,7 @@ abstract class tool_coursestore {
             throw new invalid_dataroot_permissions();
         }
 
-        $coursestore_filepath = self::get_coursetore_filepath($backup);
+        $coursestore_filepath = self::get_coursestore_filepath($backup);
         copy($moodle_filepath, $coursestore_filepath);
 
         $backup->isbackedup = 1; // We have created a copy.
@@ -335,7 +335,7 @@ abstract class tool_coursestore {
     public static function delete_backup($backup) {
         global $DB;
 
-        $coursestore_filepath = self::get_coursetore_filepath($backup);
+        $coursestore_filepath = self::get_coursestore_filepath($backup);
 
         if (!is_readable($coursestore_filepath)) {
             return false;
