@@ -31,12 +31,11 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 // Get required config variables
 $urltarget = get_config('tool_coursestore', 'url');
-$conntimeout = get_config('tool_coursestore', 'conntimeout');
 $timeout = get_config('tool_coursestore', 'timeout');
 $maxatt = get_config('tool_coursestore', 'maxatt');
 
 // Initialise, check connection
-$ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
+$ws_manager = new coursestore_ws_manager($urltarget, $timeout);
 $check = array('operation' => 'check');
 if(!$ws_manager->send($check)) {
     //Connection check failed

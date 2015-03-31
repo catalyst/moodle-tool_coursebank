@@ -77,13 +77,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext('tool_coursestore/timeout',
             get_string('settings_timeout', 'tool_coursestore'),
             get_string('settings_timeout_desc', 'tool_coursestore'),
-            10,
-            PARAM_INT)
-    );
-    $settings->add(new admin_setting_configtext('tool_coursestore/conntimeout',
-            get_string('settings_conntimeout', 'tool_coursestore'),
-            get_string('settings_conntimeout_desc', 'tool_coursestore'),
-            5,
+            30,
             PARAM_INT)
     );
     $settings->add(new admin_setting_configtext('tool_coursestore/requestretries',

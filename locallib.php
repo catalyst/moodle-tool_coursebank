@@ -191,14 +191,13 @@ abstract class tool_coursestore {
 
         // Get required config variables
         $urltarget = get_config('tool_coursestore', 'url');
-        $conntimeout = get_config('tool_coursestore', 'conntimeout');
         $timeout = get_config('tool_coursestore', 'timeout');
         $retries = get_config('tool_coursestore', 'requestretries');
         $token = get_config('tool_coursestore', 'authtoken');
         $sessionkey = self::get_session();
 
         // Initialise, check connection
-        $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
+        $ws_manager = new coursestore_ws_manager($urltarget, $timeout);
         if (!self::check_connection($ws_manager, $sessionkey)) {
             $backup->status = self::STATUS_ERROR;
             $DB->update_record('tool_coursestore', $backup);
@@ -563,14 +562,13 @@ class coursestore_ws_manager {
 
     /**
      * @param string  $url            Target URL
-     * @param int     $conntimeout    Connection time out (seconds)
      * @param int     $timeout        Request time out (seconds)
      */
-    function __construct($url, $conntimeout, $timeout) {
+    function __construct($url, $timeout) {
         $this->baseurl = $url;
         $curlopts = array(
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => $conntimeout,
+            CURLOPT_CONNECTTIMEOUT => $timeout,
             CURLOPT_URL => $url
         );
         $this->curlhandle = curl_init();

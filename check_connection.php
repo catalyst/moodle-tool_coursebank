@@ -48,12 +48,11 @@ switch ($action) {
 
         // Get required config variables
         $urltarget = get_config('tool_coursestore', 'url');
-        $conntimeout = get_config('tool_coursestore', 'conntimeout');
         $timeout = get_config('tool_coursestore', 'timeout');
         $sesskey = get_config('tool_coursestore', 'sessionkey');
 
         // Initialise, check connection
-        $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
+        $ws_manager = new coursestore_ws_manager($urltarget, $timeout);
 
         $msgtype = tool_coursestore::check_connection($ws_manager, $sesskey) ? 'success' : 'fail';
         $content = get_string('conncheck'.$msgtype, 'tool_coursestore');
@@ -65,12 +64,11 @@ switch ($action) {
 
         // Get required config variables
         $urltarget = get_config('tool_coursestore', 'url');
-        $conntimeout = get_config('tool_coursestore', 'conntimeout');
         $timeout = get_config('tool_coursestore', 'timeout');
         $sesskey = get_config('tool_coursestore', 'sessionkey');
 
         // Initialise, check connection
-        $ws_manager = new coursestore_ws_manager($urltarget, $conntimeout, $timeout);
+        $ws_manager = new coursestore_ws_manager($urltarget, $timeout);
 
         $result = tool_coursestore::check_connection_speed($ws_manager, 256, 1, 5, $sesskey);
         $ws_manager->close();
