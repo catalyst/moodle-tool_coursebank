@@ -252,8 +252,11 @@ abstract class tool_coursestore {
         // Read the file in chunks, attempt to send them
         while ($contents = fread($file, $chunksize)) {
 
+            // TODO: change the chunksize to the actual size being sent. The last chunk may not be the full size.
             $data = array(
-                'data' => base64_encode($contents),
+                'data'          => base64_encode($contents),
+                'chunksize'     => $chunksize,
+                'original_data' => $contents,
             );
             if ($ws_manager->transfer_chunk($data, $backup->id, $backup->chunknumber, $sessionkey, $retries)) {
                 $backup->timechunkcompleted = time();
@@ -268,11 +271,11 @@ abstract class tool_coursestore {
                 $DB->update_record('tool_coursestore', $backup);
             }
             else {
-                if ($backup->status == tool_coursestore::STATUS_ERROR) {
+                if ($backup->status == self::STATUS_ERROR) {
                     $backup->chunkretries++;
                 }
                 else {
-                    $backup->status = tool_coursestore::STATUS_ERROR;
+                    $backup->status = self::STATUS_ERROR;
                 }
                 $DB->update_record('tool_coursestore', $backup);
                 return false;
@@ -442,7 +445,8 @@ abstract class tool_coursestore {
                 " . $sqlselect . "
                 RIGHT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
                 WHERE f.id IS NULL
-                AND tcs.isbackedup = 1";
+                AND tcs.isbackedup = 1
+                ORDER BY timecreated";
         $params = array('statusnotstarted' => tool_coursestore::STATUS_NOTSTARTED,
                         'statuserror' => tool_coursestore::STATUS_ERROR,
                         'statusinprogress' => tool_coursestore::STATUS_INPROGRESS,
@@ -517,7 +521,7 @@ abstract class tool_coursestore {
                         $coursebackup->filename
                 );
                 mtrace($bufail . "\n");
-                // stop sending backups until this one is resolved.
+                // Stop sending backups until this one is resolved.
                 break;
             }
         }
@@ -558,6 +562,7 @@ class coursestore_ws_manager {
     const WS_STATUS_ERROR_INVALID_USER_CREDENTIALS = 425;
     const WS_STATUS_ERROR_INACTIVE_SITE = 426;
     const WS_STATUS_ERROR_SAVING_DATA = 427;
+    const WS_STATUS_ERROR_ENCODED_CHUNK_SIZE = 428;
     const WS_STATUS_ERROR_UNEXPECTED = 999;
 
     /**
@@ -709,7 +714,7 @@ class coursestore_ws_manager {
      *
      */
      function update_backup($auth, $backupid) {
-         return $this->send('backup'.$backupid, array(), 'PUT', $auth);
+         return $this->send('backup/' . $backupid, array(), 'PUT', $auth);
      }
     /**
      * Get most recent chunk transferred for specific backup.
@@ -719,7 +724,7 @@ class coursestore_ws_manager {
      *
      */
      function get_chunk($auth, $backupid) {
-         return $this->send('chunks'.$backupid, array(), 'GET', $auth);
+         return $this->send('chunks/' . $backupid, array(), 'GET', $auth);
      }
     /**
      * Transfer chunk
@@ -731,9 +736,13 @@ class coursestore_ws_manager {
      *
      */
      function transfer_chunk($data, $backupid, $chunk_number, $sessionkey, $retries) {
-         $result = $this->send('chunks' . $backupid . '/' . $chunk_number, $data, 'PUT', $sessionkey, $retries);
+
+         // Grab the original data so we don't have to decode it to check the hash.
+         $original_data = $data['original_data'];
+         unset($data['original_data']);
+         $result = $this->send('chunks/' . $backupid . '/' . $chunk_number, $data, 'PUT', $sessionkey, $retries);
          if ($result === false) {
-             echo("transfer_chunk: returned false.\n");
+             // echo("transfer_chunk: returned false.\n");
              return false;
          }
 
@@ -742,16 +751,16 @@ class coursestore_ws_manager {
          if ($http_code == self::WS_STATUS_SUCCESS_UPDATED) {
              // Make sure the hash is good.
              $return_hash = $body->chunkhash;
-             $validate_hash = md5($data['data']);
+             $validate_hash = md5($original_data);
              if ($return_hash != $validate_hash) {
-                echo("transfer_chunk: hash doesn't match. http_code= $http_code; sessionkey=$sessionkey; body=" . print_r($body, true) . ".\n");
+                // echo("transfer_chunk: hash doesn't match. http_code= $http_code; return_hash=$return_hash; validate_hash=$validate_hash; body=" . print_r($body, true) . ".\n");
                  return false;
              }
              else {
                  return true;
              }
          }
-         echo("transfer_chunk: something else http_code= $http_code; sessionkey=$sessionkey; body=" . print_r($body, true) . ".\n");
+         // echo("transfer_chunk: something else http_code= $http_code; sessionkey=$sessionkey; body=" . print_r($body, true) . ".\n");
          return false;
      }
 
@@ -764,7 +773,7 @@ class coursestore_ws_manager {
      *
      */
      function confirm_chunk($auth, $backupid, $chunk) {
-         return $this->send('chunks'.$backupid.'/'.$chunk, array(), 'PUT', $auth);
+         return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'PUT', $auth);
      }
     /**
      * Remove chunk
@@ -775,6 +784,6 @@ class coursestore_ws_manager {
      *
      */
      function remove_chunk($auth, $backupid, $chunk) {
-         return $this->send('chunks'.$backupid.'/'.$chunk, array(), 'DELETE', $auth);
+         return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'DELETE', $auth);
      }
 }
