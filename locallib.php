@@ -545,6 +545,15 @@ class coursestore_ws_manager {
     private $curlhandle;
     private $baseurl;
 
+    // HTTP response codes
+    const WS_HTTP_BAD_REQUEST = 400;
+    const WS_HTTP_UNAUTHORIZED = 401;
+    const WS_HTTP_CONFLICT = 409;
+    const WS_HTTP_NOTFOUND = 404;
+    const WS_HTTP_OK = 200;
+    const WS_HTTP_CREATED = 201;
+    const WS_HTTP_INT_ERR = 500;
+
     const WS_STATUS_SUCCESS_UPDATED = 200;
     const WS_STATUS_SUCCESS_CREATED = 201;
     const WS_STATUS_SUCCESS_READ = 202;
@@ -647,14 +656,17 @@ class coursestore_ws_manager {
             'hash' => $hash,
         );
         $response = $this->send('session', $authdata, 'POST');
-        if ($response !== false && $response['response']['http_code'] == self::WS_STATUS_SUCCESS_CREATED) {
-            $body = $response['body'];
-            if (isset($body->sesskey)) {
-                $sesskey = trim((string) $body->sesskey);
-                return tool_coursestore::set_session($sesskey);
+        if ($response !== false) {
+            if ($response['response']['http_code'] == coursestore_ws_manager::WS_HTTP_CREATED) {
+                $body = $response['body'];
+                if (isset($body->sesskey)) {
+                    $sesskey = trim((string) $body->sesskey);
+                    return tool_coursestore::set_session($sesskey);
+                }
+            } else {
+                return $response;
             }
         }
-        // TODO: Log error.
         return false;
     }
     /**
