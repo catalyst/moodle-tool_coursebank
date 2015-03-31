@@ -308,7 +308,7 @@ abstract class tool_coursestore {
                 substr($backup->contenthash, 2, 2) . '/' . $backup->contenthash;
 
         if (!is_readable($moodlefilepath)) {
-            return false;
+            throw new file_serving_exception();
         }
         if (!is_writable(self::get_coursestore_data_dir())) {
             throw new invalid_dataroot_permissions();
