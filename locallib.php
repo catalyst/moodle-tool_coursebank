@@ -66,7 +66,7 @@ abstract class tool_coursestore {
 
         if ($auth) {
             $checkresult = $wsman->get_test($auth);
-            if ($checkresult['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
+            if ($checkresult['response']['http_code'] == coursestore_ws_manager::WS_HTTP_OK) {
                 return true;
             }
         }
@@ -80,7 +80,7 @@ abstract class tool_coursestore {
             $sesskey = self::get_session();
             $checkresult = $wsman->get_test($sesskey);
 
-            if ($checkresult['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
+            if ($checkresult['response']['http_code'] == coursestore_ws_manager::WS_HTTP_OK) {
                 return true;
             }
         }
@@ -110,12 +110,12 @@ abstract class tool_coursestore {
         for ($i = 0; $i < $count; $i++) {
             for ($j = 0; $j <= $retry; $j++) {
                 $response = $wsman->get_test($auth, $check);
-                if ($response['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
+                if ($response['response']['http_code'] == coursestore_ws_manager::WS_HTTP_OK) {
                     break;
                 }
             }
             // If $maxhttps unsuccessful attempts have been made.
-            if ($response['response']['http_code'] != coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
+            if ($response['response']['http_code'] != coursestore_ws_manager::WS_HTTP_OK) {
                 return 0;
             }
         }
@@ -710,7 +710,7 @@ class coursestore_ws_manager {
 
         $httpcode = $result['response']['http_code'];
         $body = $result['body'];
-        if ($httpcode == self::WS_STATUS_SUCCESS_CREATED) {
+        if ($httpcode == self::WS_HTTP_CREATED) {
             // Make sure the hash is good.
             $returnhash = $body->hash;
             $validatehash = md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
@@ -769,7 +769,7 @@ class coursestore_ws_manager {
 
         $httpcode = $result['response']['http_code'];
         $body = $result['body'];
-        if ($httpcode == self::WS_STATUS_SUCCESS_UPDATED) {
+        if ($httpcode == self::WS_HTTP_OK) {
             // Make sure the hash is good.
             $returnhash = $body->chunkhash;
             $validatehash = md5($originaldata);
