@@ -507,7 +507,7 @@ abstract class tool_coursestore {
                     $delfail = get_string(
                             'deletefailed',
                             'tool_coursestore',
-                            $coursebackup->filename
+                            $coursebackup->backupfilename
                     );
                     mtrace($delfail . "\n");
                 }
@@ -515,7 +515,7 @@ abstract class tool_coursestore {
                 $bufail = get_string(
                         'backupfailed',
                         'tool_coursestore',
-                        $coursebackup->filename
+                        $coursebackup->backupfilename
                 );
                 mtrace($bufail . "\n");
                 // Stop sending backups until this one is resolved.
