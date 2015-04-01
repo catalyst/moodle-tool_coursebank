@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,7 +22,7 @@
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
@@ -38,7 +37,7 @@ $PAGE->set_url($url);
 $PAGE->set_context($context);
 $action = required_param('action', PARAM_TEXT);
 
-if(!in_array($action, array('conncheck', 'speedtest'))) {
+if (!in_array($action, array('conncheck', 'speedtest'))) {
     $action = 'conncheck';
 }
 
@@ -46,41 +45,39 @@ switch ($action) {
     case 'conncheck':
         $header = get_string('connchecktitle', 'tool_coursestore');
 
-        // Get required config variables
+        // Get required config variables.
         $urltarget = get_config('tool_coursestore', 'url');
         $timeout = get_config('tool_coursestore', 'timeout');
         $sesskey = get_config('tool_coursestore', 'sessionkey');
 
-        // Initialise, check connection
-        $ws_manager = new coursestore_ws_manager($urltarget, $timeout);
+        // Initialise, check connection.
+        $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
 
-        $msgtype = tool_coursestore::check_connection($ws_manager, $sesskey) ? 'success' : 'fail';
+        $msgtype = tool_coursestore::check_connection($wsmanager, $sesskey) ? 'success' : 'fail';
         $content = get_string('conncheck'.$msgtype, 'tool_coursestore');
-        $ws_manager->close();
+        $wsmanager->close();
 
         break;
     case 'speedtest':
         $header = get_string('speedtesttitle', 'tool_coursestore');
 
-        // Get required config variables
+        // Get required config variables.
         $urltarget = get_config('tool_coursestore', 'url');
         $timeout = get_config('tool_coursestore', 'timeout');
         $sesskey = get_config('tool_coursestore', 'sessionkey');
 
-        // Initialise, check connection
-        $ws_manager = new coursestore_ws_manager($urltarget, $timeout);
+        // Initialise, check connection.
+        $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
 
-        $result = tool_coursestore::check_connection_speed($ws_manager, 256, 1, 5, $sesskey);
-        $ws_manager->close();
+        $result = tool_coursestore::check_connection_speed($wsmanager, 256, 1, 5, $sesskey);
+        $wsmanager->close();
 
-        $add ='';
-        if($result >= 256) {
+        $add = '';
+        if ($result >= 256) {
             $msgtype = 'success';
-        }
-        else if($result == 0) {
+        } else if ($result == 0) {
             $msgtype = 'fail';
-        }
-        else {
+        } else {
             $msgtype = 'slow';
             $add = (string) $result.' kbps.';
         }

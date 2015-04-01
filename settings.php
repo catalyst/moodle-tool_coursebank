@@ -22,7 +22,7 @@
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 
 defined('MOODLE_INTERNAL') || die();
@@ -34,7 +34,9 @@ $PAGE->requires->js('/admin/tool/coursestore/javascript/jquery-1.11.0.min.js');
 $PAGE->requires->js('/admin/tool/coursestore/javascript/coursestore.js');
 
 if ($hassiteconfig) {
-    $ADMIN->add('backups', new admin_externalpage('tool_coursestore', get_string('pluginname', 'tool_coursestore'), "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'moodle/site:config'));
+    $ADMIN->add('backups', new admin_externalpage('tool_coursestore',
+            get_string('pluginname', 'tool_coursestore'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'moodle/site:config'));
 
     $settings = new admin_settingpage('coursestore_settings',
             get_string('pluginname', 'tool_coursestore')

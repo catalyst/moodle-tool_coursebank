@@ -21,7 +21,7 @@
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -51,14 +51,14 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
-        foreach($columns as $column => $name) {
+        foreach ($columns as $column => $name) {
             $html .= html_writer::tag('th', $column);
         }
         $html .= html_writer::end_tag('tr');
         $html .= html_writer::end_tag('thead');
 
         $html .= html_writer::start_tag('tbody');
-        foreach($results as $result) {
+        foreach ($results as $result) {
             $html .= html_writer::start_tag('tr');
             $html .= html_writer::tag('td', $result->shortname);
             $html .= html_writer::tag('td', userdate($result->timemodified));
@@ -85,7 +85,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 get_string('connchecktitle', 'tool_coursestore'),
                 3
         );
-        // Hide the button, and then show it with js if it is enabled
+        // Hide the button, and then show it with js if it is enabled.
         $html .= html_writer::start_tag('div',
                 array('class' => 'conncheckbutton-div hide')
         );
@@ -98,7 +98,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('input', '', $buttonattr);
         $html .= html_writer::end_tag('div');
 
-        // Display ordinary link, and hide it with js if it is enabled
+        // Display ordinary link, and hide it with js if it is enabled.
         $html .= html_writer::start_tag('div',
                 array('class' => 'conncheckurl-div')
         );
@@ -132,14 +132,14 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('input', '', $inputattr);
         $html .= html_writer::end_tag('div');
 
-        // Success notification
+        // Success notification.
         $html .= $this->course_store_check_notification(
                 'conncheck',
                 'success',
                 get_string('connchecksuccess', 'tool_coursestore')
         );
 
-        // Failure notification
+        // Failure notification.
         $html .= $this->course_store_check_notification(
                 'conncheck',
                 'fail',
@@ -164,7 +164,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 3
         );
 
-        // Hide the button, and then show it with js if it is enabled
+        // Hide the button, and then show it with js if it is enabled.
         $html .= html_writer::start_tag('div',
                 array('class' => 'speedtestbutton-div hide')
         );
@@ -177,7 +177,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('input', '', $buttonattr);
         $html .= html_writer::end_tag('div');
 
-        // Display ordinary link, and hide it with js if it is enabled
+        // Display ordinary link, and hide it with js if it is enabled.
         $html .= html_writer::start_tag('div',
                 array('class' => 'speedtesturl-div')
         );
@@ -210,7 +210,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         );
         $html .= html_writer::tag('input', '', $wwwrootattr);
 
-        // Success notification
+        // Success notification.
 
         $html .= $this->course_store_check_notification(
                 'speedtest',
@@ -218,14 +218,14 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 get_string('speedtestsuccess', 'tool_coursestore')
         );
 
-        // Failure notification
+        // Failure notification.
         $html .= $this->course_store_check_notification(
                 'speedtest',
                 'fail',
                 get_string('speedtestfail', 'tool_coursestore')
         );
 
-        // Slow connection speed notification
+        // Slow connection speed notification.
         $attr = array(
             'type' => 'hidden',
             'name' => 'slow',

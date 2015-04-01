@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,7 +22,7 @@
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 define('MOODLE_INTERNAL', 1);
 define('AJAX_SCRIPT', 1);
@@ -33,7 +32,7 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 $action = required_param('action', PARAM_TEXT);
 
-// Prevent checks from returning NaN if the user has since logged out
+// Prevent checks from returning NaN if the user has since logged out.
 isloggedin() || die;
 
 $response = null;
@@ -47,32 +46,32 @@ switch ($action) {
     case 'conncheck':
         $context = context_system::instance();
 
-        // Get required config variables
+        // Get required config variables.
         $urltarget = get_config('tool_coursestore', 'url');
         $timeout = get_config('tool_coursestore', 'timeout');
         $sesskey = tool_coursestore::get_session();
 
-        // Initialise, check connection
-        $ws_manager = new coursestore_ws_manager($urltarget, $timeout);
+        // Initialise, check connection.
+        $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
 
-        $response = tool_coursestore::check_connection($ws_manager, $sesskey) ? 1 : 0;
-        $ws_manager->close();
+        $response = tool_coursestore::check_connection($wsmanager, $sesskey) ? 1 : 0;
+        $wsmanager->close();
 
         break;
     case 'speedtest':
         $context = context_system::instance();
 
-        // Get required config variables
+        // Get required config variables.
         $urltarget = get_config('tool_coursestore', 'url');
         $timeout = get_config('tool_coursestore', 'timeout');
         $sesskey = get_config('tool_coursestore', 'sessionkey');
 
-        // Initialise, check connection
-        $ws_manager = new coursestore_ws_manager($urltarget, $timeout);
+        // Initialise, check connection.
+        $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
 
-        $response = tool_coursestore::check_connection_speed($ws_manager, 256, 1, 5, $sesskey);
+        $response = tool_coursestore::check_connection_speed($wsmanager, 256, 1, 5, $sesskey);
         $response['sesskey'] = $sesskey;
-        $ws_manager->close();
+        $wsmanager->close();
     default:
         break;
 }

@@ -21,7 +21,7 @@
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 define('CLI_SCRIPT', true);
 
@@ -29,18 +29,17 @@ require(__DIR__.'../../../../../config.php');
 global $CFG;
 require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
-// Get required config variables
+// Get required config variables.
 $urltarget = get_config('tool_coursestore', 'url');
 $timeout = get_config('tool_coursestore', 'timeout');
 $maxatt = get_config('tool_coursestore', 'maxatt');
 
-// Initialise, check connection
-$ws_manager = new coursestore_ws_manager($urltarget, $timeout);
+// Initialise, check connection.
+$wsmanager = new coursestore_ws_manager($urltarget, $timeout);
 $check = array('operation' => 'check');
-if(!$ws_manager->send($check)) {
-    //Connection check failed
+if (!$wsmanager->send($check)) {
+    // Connection check failed.
     mtrace(get_string('conncheckfail', 'tool_coursestore'));
-}
-else {
+} else {
     mtrace(get_string('connchecksuccess', 'tool_coursestore'));
 }

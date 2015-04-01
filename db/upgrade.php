@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,7 +22,7 @@
  * @author     Tim Price <timprice@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 function xmldb_tool_coursestore_upgrade($oldversion) {
     global $CFG, $DB, $OUTPUT;
@@ -147,7 +146,6 @@ function xmldb_tool_coursestore_upgrade($oldversion) {
         // Coursestore savepoint reached.
         upgrade_plugin_savepoint(true, 2015032000, 'tool', 'coursestore');
     }
-
 
     return true;
 }

@@ -21,13 +21,13 @@
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 defined('MOODLE_INTERNAL') || die;
 
 abstract class tool_coursestore {
 
-    // status
+    // Status.
     const STATUS_NOTSTARTED = 0;
     const STATUS_INPROGRESS = 1;
     const STATUS_FINISHED = 2;
@@ -71,13 +71,13 @@ abstract class tool_coursestore {
             }
         }
 
-        // No sess key provided, or sesskey rejected. Try starting a new session
+        // No sess key provided, or sesskey rejected. Try starting a new session.
         $token = get_config('tool_coursestore', 'authtoken');
         if ($token) {
-            if(!$wsman->start_session($token)) {
+            if (!$wsman->start_session($token)) {
                 return false;
             }
-            $sesskey = tool_coursestore::get_session();
+            $sesskey = self::get_session();
             $checkresult = $wsman->send_test($sesskey);
 
             if ($checkresult['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
@@ -103,26 +103,26 @@ abstract class tool_coursestore {
     public static function check_connection_speed(coursestore_ws_manager $wsman,
             $testsize, $count, $retry, $auth) {
 
-        $check = str_pad('', $testsize*1000, '0');
+        $check = str_pad('', $testsize * 1000, '0');
         $start = microtime(true);
 
-        // Make $count requests with the dummy data
-        for($i=0; $i<$count; $i++) {
-            for($j=0; $j<=$retry; $j++) {
+        // Make $count requests with the dummy data.
+        for ($i = 0; $i < $count; $i++) {
+            for ($j = 0; $j <= $retry; $j++) {
                 $response = $wsman->send_test($auth, $check);
-                if($response['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
+                if ($response['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
                     break;
                 }
             }
-            // If $maxhttps unsuccessful attempts have been made
-            if($response['response']['http_code'] != coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
+            // If $maxhttps unsuccessful attempts have been made.
+            if ($response['response']['http_code'] != coursestore_ws_manager::WS_STATUS_SUCCESS_UPDATED) {
                 return 0;
             }
         }
         $elapsed = microtime(true) - $start;
 
-        // Convert 'total kB transferred'/'total time' into kb/s
-        return round(($testsize*$count*8)/$elapsed, 2);
+        // Convert 'total kB transferred'/'total time' into kb/s.
+        return round(($testsize * $count * 8 ) / $elapsed, 2);
     }
     public static function get_config_chunk_size() {
         return get_config('tool_coursestore', 'chunksize');
@@ -155,14 +155,14 @@ abstract class tool_coursestore {
         $finished     = get_string('statusfinished', 'tool_coursestore');
 
         $statusmap = array(
-            tool_coursestore::STATUS_NOTSTARTED => $notstarted,
-            tool_coursestore::STATUS_INPROGRESS => $inprogress,
-            tool_coursestore::STATUS_FINISHED => $finished,
-            tool_coursestore::STATUS_ERROR => $statuserror
+            self::STATUS_NOTSTARTED => $notstarted,
+            self::STATUS_INPROGRESS => $inprogress,
+            self::STATUS_FINISHED => $finished,
+            self::STATUS_ERROR => $statuserror
         );
 
-        foreach($results as $result) {
-            if(isset($statusmap[$result->status])) {
+        foreach ($results as $result) {
+            if (isset($statusmap[$result->status])) {
                 $result->status = $statusmap[$result->status];
             }
         }
@@ -189,36 +189,35 @@ abstract class tool_coursestore {
             return false;
         }
 
-        // Get required config variables
+        // Get required config variables.
         $urltarget = get_config('tool_coursestore', 'url');
         $timeout = get_config('tool_coursestore', 'timeout');
         $retries = get_config('tool_coursestore', 'requestretries');
         $token = get_config('tool_coursestore', 'authtoken');
         $sessionkey = self::get_session();
 
-        // Initialise, check connection
-        $ws_manager = new coursestore_ws_manager($urltarget, $timeout);
-        if (!self::check_connection($ws_manager, $sessionkey)) {
+        // Initialise, check connection.
+        $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
+        if (!self::check_connection($wsmanager, $sessionkey)) {
             $backup->status = self::STATUS_ERROR;
             $DB->update_record('tool_coursestore', $backup);
-            $ws_manager-close();
+            $wsmanager->close();
             return false;
         }
         // Update again in case a new session key was given.
         $sessionkey = self::get_session();
 
-        // Chunk size is set in kilobytes
+        // Chunk size is set in kilobytes.
         $chunksize = $backup->chunksize * 1000;
 
-        // Open input file
-        $coursestore_filepath = self::get_coursestore_filepath($backup);
-        $file = fopen($coursestore_filepath, 'rb');
+        // Open input file.
+        $coursestorefilepath = self::get_coursestore_filepath($backup);
+        $file = fopen($coursestorefilepath, 'rb');
 
-        // Set offset based on chunk number
+        // Set offset based on chunk number.
         if ($backup->chunknumber != 0) {
             fseek($file, $backup->chunknumber * $chunksize);
-        }
-        else if ($backup->chunknumber == 0) {
+        } else if ($backup->chunknumber == 0) {
             // Initial the backup record.
             $coursedate = '';
             if ($backup->coursestartdate > 0) {
@@ -238,10 +237,10 @@ abstract class tool_coursestore {
                 'categoryid'   => $backup->categoryid,
                 'categoryname' => $backup->categoryname,
             );
-            if (!$ws_manager->create_backup($data, $sessionkey, $retries)) {
+            if (!$wsmanager->create_backup($data, $sessionkey, $retries)) {
                 $backup->status = self::STATUS_ERROR;
                 $DB->update_record('tool_coursestore', $backup);
-                $ws_manager->close();
+                $wsmanager->close();
                 echo("create backup failed; chunknumber=" . $backup->chunknumber . ".\n");
                 return false;
             }
@@ -249,7 +248,7 @@ abstract class tool_coursestore {
             $DB->update_record('tool_coursestore', $backup);
         }
 
-        // Read the file in chunks, attempt to send them
+        // Read the file in chunks, attempt to send them.
         while ($contents = fread($file, $chunksize)) {
 
             // TODO: change the chunksize to the actual size being sent. The last chunk may not be the full size.
@@ -258,23 +257,21 @@ abstract class tool_coursestore {
                 'chunksize'     => $chunksize,
                 'original_data' => $contents,
             );
-            if ($ws_manager->transfer_chunk($data, $backup->id, $backup->chunknumber, $sessionkey, $retries)) {
+            if ($wsmanager->transfer_chunk($data, $backup->id, $backup->chunknumber, $sessionkey, $retries)) {
                 $backup->timechunkcompleted = time();
                 $backup->chunknumber++;
                 if ($backup->status == self::STATUS_ERROR) {
                     $backup->chunkretries = 0;
                     $backup->status = self::STATUS_INPROGRESS;
                 }
-                if($backup->chunknumber == $backup->totalchunks) {
+                if ($backup->chunknumber == $backup->totalchunks) {
                     $backup->status = self::STATUS_FINISHED;
                 }
                 $DB->update_record('tool_coursestore', $backup);
-            }
-            else {
+            } else {
                 if ($backup->status == self::STATUS_ERROR) {
                     $backup->chunkretries++;
-                }
-                else {
+                } else {
                     $backup->status = self::STATUS_ERROR;
                 }
                 $DB->update_record('tool_coursestore', $backup);
@@ -282,7 +279,7 @@ abstract class tool_coursestore {
             }
         }
 
-        $ws_manager->close();
+        $wsmanager->close();
         fclose($file);
         return true;
     }
@@ -305,20 +302,20 @@ abstract class tool_coursestore {
     public static function copy_backup($backup) {
         global $CFG, $DB;
 
-        // Construct the full path of the backup file
-        $moodle_filepath = $CFG->dataroot . '/filedir/' .
+        // Construct the full path of the backup file.
+        $moodlefilepath = $CFG->dataroot . '/filedir/' .
                 substr($backup->contenthash, 0, 2) . '/' .
-                substr($backup->contenthash, 2,2) .'/' . $backup->contenthash;
+                substr($backup->contenthash, 2, 2) . '/' . $backup->contenthash;
 
-        if (!is_readable($moodle_filepath)) {
+        if (!is_readable($moodlefilepath)) {
             return false;
         }
         if (!is_writable(self::get_coursestore_data_dir())) {
             throw new invalid_dataroot_permissions();
         }
 
-        $coursestore_filepath = self::get_coursestore_filepath($backup);
-        copy($moodle_filepath, $coursestore_filepath);
+        $coursestorefilepath = self::get_coursestore_filepath($backup);
+        copy($moodlefilepath, $coursestorefilepath);
 
         $backup->isbackedup = 1; // We have created a copy.
         $DB->update_record('tool_coursestore', $backup);
@@ -335,16 +332,16 @@ abstract class tool_coursestore {
     public static function delete_backup($backup) {
         global $DB;
 
-        $coursestore_filepath = self::get_coursestore_filepath($backup);
+        $coursestorefilepath = self::get_coursestore_filepath($backup);
 
-        if (!is_readable($coursestore_filepath)) {
+        if (!is_readable($coursestorefilepath)) {
             return false;
         }
         if (!is_writable(self::get_coursestore_data_dir())) {
             return false;
         }
 
-        unlink($coursestore_filepath);
+        unlink($coursestorefilepath);
 
         $backup->isbackedup = 0; // We have deleted the copy.
         $DB->update_record('tool_coursestore', $backup);
@@ -447,9 +444,9 @@ abstract class tool_coursestore {
                 WHERE f.id IS NULL
                 AND tcs.isbackedup = 1
                 ORDER BY timecreated";
-        $params = array('statusnotstarted' => tool_coursestore::STATUS_NOTSTARTED,
-                        'statuserror' => tool_coursestore::STATUS_ERROR,
-                        'statusinprogress' => tool_coursestore::STATUS_INPROGRESS,
+        $params = array('statusnotstarted' => self::STATUS_NOTSTARTED,
+                        'statuserror' => self::STATUS_ERROR,
+                        'statusinprogress' => self::STATUS_INPROGRESS,
                         'contextcourse1' => CONTEXT_COURSE,
                         'contextcourse2' => CONTEXT_COURSE
                         );
@@ -467,12 +464,12 @@ abstract class tool_coursestore {
                 $cs = new stdClass();
                 $cs->backupfilename = $coursebackup->filename;
                 $cs->fileid = $coursebackup->f_fileid;
-                $cs->chunksize = tool_coursestore::get_config_chunk_size();
-                $cs->totalchunks = tool_coursestore::calculate_total_chunks($cs->chunksize, $coursebackup->filesize);
+                $cs->chunksize = self::get_config_chunk_size();
+                $cs->totalchunks = self::calculate_total_chunks($cs->chunksize, $coursebackup->filesize);
                 $cs->chunknumber = 0;
-                $cs->status = tool_coursestore::STATUS_NOTSTARTED;
+                $cs->status = self::STATUS_NOTSTARTED;
                 $cs->isbackedup = 0; // No copy has been created yet.
-                foreach($insertfields as $field) {
+                foreach ($insertfields as $field) {
                     $cs->$field = $coursebackup->$field;
                 }
                 $backupid = $DB->insert_record('tool_coursestore', $cs);
@@ -503,9 +500,9 @@ abstract class tool_coursestore {
                 $coursebackup->categoryid = $cs->categoryid;
                 $coursebackup->categoryname = $cs->categoryname;
             }
-            $result = tool_coursestore::send_backup($coursebackup);
+            $result = self::send_backup($coursebackup);
             if ($result) {
-                $delete = tool_coursestore::delete_backup($coursebackup);
+                $delete = self::delete_backup($coursebackup);
                 if (!$delete) {
                     $delfail = get_string(
                             'deletefailed',
@@ -534,10 +531,10 @@ abstract class tool_coursestore {
  *
  */
 abstract class tool_coursestore_error {
-    // errors
+    // Errors.
     const ERROR_TIMEOUT              = 100;
     const ERROR_MAX_ATTEMPTS_REACHED = 101;
-    // etc. populate as needed.
+    // Etc. populate as needed.
 }
 
 /**
@@ -569,7 +566,7 @@ class coursestore_ws_manager {
      * @param string  $url            Target URL
      * @param int     $timeout        Request time out (seconds)
      */
-    function __construct($url, $timeout) {
+    public function __construct($url, $timeout) {
         $this->baseurl = $url;
         $curlopts = array(
             CURLOPT_RETURNTRANSFER => true,
@@ -582,7 +579,7 @@ class coursestore_ws_manager {
     /**
      * Close the associated curl handler object
      */
-    function close() {
+    public function close() {
         curl_close($this->curlhandle);
     }
     /**
@@ -634,7 +631,7 @@ class coursestore_ws_manager {
      * @param string  $data         Test data string
      * @return array or bool false  Associate array response
      */
-    function send_test($auth, $data='') {
+    public function send_test($auth, $data='') {
         $testdata = array('data' => $data);
         $result = $this->send('test', $testdata, 'GET', $auth);
 
@@ -645,19 +642,19 @@ class coursestore_ws_manager {
      *
      * @param string    $hash      Authorization string
      */
-    function start_session($hash) {
+    public function start_session($hash) {
         $authdata = array(
             'hash' => $hash,
         );
         $response = $this->send('session', $authdata, 'POST');
-        if ($response !== false && $response['response']['http_code'] == coursestore_ws_manager::WS_STATUS_SUCCESS_CREATED) {
+        if ($response !== false && $response['response']['http_code'] == self::WS_STATUS_SUCCESS_CREATED) {
             $body = $response['body'];
             if (isset($body->sesskey)) {
                 $sesskey = trim((string) $body->sesskey);
                 return tool_coursestore::set_session($sesskey);
             }
         }
-        // TODO: Log error
+        // TODO: Log error.
         return false;
     }
     /**
@@ -666,7 +663,7 @@ class coursestore_ws_manager {
      * @param string $auth      Authorization string
      * @param int    $backupid  ID referencing course bank backup resource
      */
-    function get_backup($auth, $backupid) {
+    public function get_backup($auth, $backupid) {
         return $this->send('backup'. $backupid, array(), 'GET', $auth);
 
     }
@@ -676,35 +673,31 @@ class coursestore_ws_manager {
      * @param string $auth      Authorization string
      *
      */
-     function create_backup($data, $sessionkey, $retries) {
+    public function create_backup($data, $sessionkey, $retries) {
 
-         $result = $this->send('backup', $data, 'POST', $sessionkey, $retries);
-         if ($result === false) {
-             //echo("just false.\n");
-             return false;
-         }
+        $result = $this->send('backup', $data, 'POST', $sessionkey, $retries);
+        if ($result === false) {
+            return false;
+        }
 
-         $http_code = $result['response']['http_code'];
-         $body = $result['body'];
-         if ($http_code == self::WS_STATUS_SUCCESS_CREATED) {
-             // Make sure the hash is good.
-             $return_hash = $body->hash;
-             $validate_hash = md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
-             if ($return_hash != $validate_hash) {
-                 //echo("hash doesn't match\n");
-                 return false;
-             }
-             else {
-                 return true;
-             }
-         }
-         if (isset($body->error) && $body->error == self::WS_STATUS_ERROR_BACKUP_ALREADY_EXISTS) {
-             // the backup already exists, continue.
-             return true;
-         }
-         //echo("something else: " . print_r($body, true) . "\n");
-         return false;
-     }
+        $httpcode = $result['response']['http_code'];
+        $body = $result['body'];
+        if ($httpcode == self::WS_STATUS_SUCCESS_CREATED) {
+            // Make sure the hash is good.
+            $returnhash = $body->hash;
+            $validatehash = md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
+            if ($returnhash != $validatehash) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        if (isset($body->error) && $body->error == self::WS_STATUS_ERROR_BACKUP_ALREADY_EXISTS) {
+            // The backup already exists, continue.
+            return true;
+        }
+            return false;
+    }
 
     /**
      * Update a backup resource.
@@ -713,9 +706,9 @@ class coursestore_ws_manager {
      * @param int    $backupid  ID referencing course bank backup resource
      *
      */
-     function update_backup($auth, $backupid) {
-         return $this->send('backup/' . $backupid, array(), 'PUT', $auth);
-     }
+    public function update_backup($auth, $backupid) {
+        return $this->send('backup/' . $backupid, array(), 'PUT', $auth);
+    }
     /**
      * Get most recent chunk transferred for specific backup.
      *
@@ -723,9 +716,9 @@ class coursestore_ws_manager {
      * @param int    $backupid  ID referencing course bank backup resource
      *
      */
-     function get_chunk($auth, $backupid) {
-         return $this->send('chunks/' . $backupid, array(), 'GET', $auth);
-     }
+    public function get_chunk($auth, $backupid) {
+        return $this->send('chunks/' . $backupid, array(), 'GET', $auth);
+    }
     /**
      * Transfer chunk
      *
@@ -735,34 +728,30 @@ class coursestore_ws_manager {
      * @param array  $data      Data for transfer
      *
      */
-     function transfer_chunk($data, $backupid, $chunk_number, $sessionkey, $retries) {
+    public function transfer_chunk($data, $backupid, $chunknumber, $sessionkey, $retries) {
 
-         // Grab the original data so we don't have to decode it to check the hash.
-         $original_data = $data['original_data'];
-         unset($data['original_data']);
-         $result = $this->send('chunks/' . $backupid . '/' . $chunk_number, $data, 'PUT', $sessionkey, $retries);
-         if ($result === false) {
-             // echo("transfer_chunk: returned false.\n");
-             return false;
-         }
+        // Grab the original data so we don't have to decode it to check the hash.
+        $originaldata = $data['original_data'];
+        unset($data['original_data']);
+        $result = $this->send('chunks/' . $backupid . '/' . $chunknumber, $data, 'PUT', $sessionkey, $retries);
+        if ($result === false) {
+            return false;
+        }
 
-         $http_code = $result['response']['http_code'];
-         $body = $result['body'];
-         if ($http_code == self::WS_STATUS_SUCCESS_UPDATED) {
-             // Make sure the hash is good.
-             $return_hash = $body->chunkhash;
-             $validate_hash = md5($original_data);
-             if ($return_hash != $validate_hash) {
-                // echo("transfer_chunk: hash doesn't match. http_code= $http_code; return_hash=$return_hash; validate_hash=$validate_hash; body=" . print_r($body, true) . ".\n");
-                 return false;
-             }
-             else {
-                 return true;
-             }
-         }
-         // echo("transfer_chunk: something else http_code= $http_code; sessionkey=$sessionkey; body=" . print_r($body, true) . ".\n");
-         return false;
-     }
+        $httpcode = $result['response']['http_code'];
+        $body = $result['body'];
+        if ($httpcode == self::WS_STATUS_SUCCESS_UPDATED) {
+            // Make sure the hash is good.
+            $returnhash = $body->chunkhash;
+            $validatehash = md5($originaldata);
+            if ($returnhash != $validatehash) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Update chunk status to confirmed
@@ -772,9 +761,9 @@ class coursestore_ws_manager {
      * @param int    $chunk     Chunk number
      *
      */
-     function confirm_chunk($auth, $backupid, $chunk) {
-         return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'PUT', $auth);
-     }
+    public function confirm_chunk($auth, $backupid, $chunk) {
+        return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'PUT', $auth);
+    }
     /**
      * Remove chunk
      *
@@ -783,7 +772,7 @@ class coursestore_ws_manager {
      * @param int    $chunk     Chunk number
      *
      */
-     function remove_chunk($auth, $backupid, $chunk) {
-         return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'DELETE', $auth);
-     }
+    public function remove_chunk($auth, $backupid, $chunk) {
+        return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'DELETE', $auth);
+    }
 }
