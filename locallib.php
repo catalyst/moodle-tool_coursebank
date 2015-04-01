@@ -257,7 +257,7 @@ abstract class tool_coursestore {
                 'chunksize'     => $chunksize,
                 'original_data' => $contents,
             );
-            if ($wsmanager->post_chunk($data, $backup->id, $backup->chunknumber, $sessionkey, $retries)) {
+            if ($wsmanager->put_chunk($data, $backup->id, $backup->chunknumber, $sessionkey, $retries)) {
                 $backup->timechunkcompleted = time();
                 $backup->chunknumber++;
                 if ($backup->status == self::STATUS_ERROR) {
@@ -740,7 +740,7 @@ class coursestore_ws_manager {
      * @param array  $data      Data for transfer
      *
      */
-    public function post_chunk($data, $backupid, $chunknumber, $sessionkey, $retries) {
+    public function put_chunk($data, $backupid, $chunknumber, $sessionkey, $retries) {
 
         // Grab the original data so we don't have to decode it to check the hash.
         $originaldata = $data['original_data'];
@@ -773,7 +773,7 @@ class coursestore_ws_manager {
      * @param int    $chunk     Chunk number
      *
      */
-    public function put_chunk($auth, $backupid, $chunk) {
+    public function put_chunk_confirm($auth, $backupid, $chunk) {
         return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'PUT', $auth);
     }
     /**
