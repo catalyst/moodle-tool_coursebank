@@ -23,6 +23,12 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
+
+require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+
+define('CRON_MOODLE', 1);
+define('CRON_EXTERNAL', 2);
+
 /**
  * Recursively delete a directory that is not empty
  *
@@ -44,4 +50,109 @@ function tool_coursestore_rrmdir($dir) {
         rmdir($dir);
     }
 }
+/**
+ * Cron function
+ */
+function tool_coursestore_cron() {
+    $name = 'tool_coursestore_cronlock';
+    $canrun = tool_coursestore_can_run_cron(CRON_MOODLE);
 
+    if (!$canrun) {
+        mtrace(get_string('cron_skippingmoodle', 'tool_coursestore'));
+        return true;
+    }
+
+    if (tool_coursestore_does_cron_lock_exist($name)) {
+        mtrace(get_string('cron_locked', 'tool_coursestore'));
+        return true;
+    }
+
+    tool_coursestore_set_cron_lock($name, time());
+    tool_coursestore::fetch_backups();
+    tool_coursestore_delete_cron_lock($name);
+}
+/**
+ * Check if we can run cron.
+ *
+ * @param integer $type Type of cron run (moodle or external)
+ * @return boolean
+ */
+function tool_coursestore_can_run_cron($type) {
+    $enabled = tool_coursestore_get_config('enable');
+    $externalcronenabled = tool_coursestore_get_config('externalcron');
+
+    if ($enabled) {
+        if ($type == CRON_MOODLE and !$externalcronenabled) {
+            return true;
+        } else if ($type == CRON_EXTERNAL and $externalcronenabled) {
+            return true;
+        }
+    }
+
+    return false;
+}
+/**
+ * Set config to tool_coursestore plugin
+ *
+ * @param string $name
+ * @param string $value
+ * @return bool true or exception
+ */
+function tool_coursestore_set_config($name, $value) {
+    $result = set_config($name, $value, 'tool_coursestore');
+    return $result;
+}
+/**
+ * Gets config for tool_coursestore plugin
+ *
+ * @param string $name
+ * @return mixed hash-like object or single value, return false no config found
+ */
+function tool_coursestore_get_config($name) {
+    $value = get_config('tool_coursestore', $name);
+    return $value;
+}
+/**
+ * Insert temporary cron lock into the config table
+ *
+ * @global type DB
+ * @param string $name cron lock's name
+ * @param string $value cron lock's value
+ * @return bool
+ */
+function tool_coursestore_set_cron_lock($name, $value) {
+    global $DB;
+    try {
+        $lock = new stdClass();
+        $lock->name = $name;
+        $lock->value = $value;
+        $DB->insert_record('config', $lock);
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+/**
+ * Check if the temporary cron lock still exists in the config table
+ *
+ * @global type DB
+ * @param string $name cron lock's name
+ * @return bool
+ */
+function tool_coursestore_does_cron_lock_exist($name) {
+    global $DB;
+
+    return $DB->record_exists('config', array('name' => $name));
+}
+ /**
+  * Delete the temporary cron lock from the config table
+  *
+  * @global type DB
+  * @param string $name cron lock's name
+  */
+function tool_coursestore_delete_cron_lock($name) {
+    global $DB;
+    if (tool_coursestore_does_cron_lock_exist($name)) {
+        $DB->delete_records('config', array('name' => $name));
+    }
+}

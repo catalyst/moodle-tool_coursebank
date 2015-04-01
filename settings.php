@@ -64,6 +64,9 @@ if ($hassiteconfig) {
             $enableoptions
     );
     $settings->add($enable);
+    $settings->add(new admin_setting_configcheckbox('tool_coursestore/externalcron',
+            get_string('settings_externalcron', 'tool_coursestore'),
+            get_string('settings_externalcron_desc', 'tool_coursestore'), 0));
     $settings->add(new admin_setting_configtext('tool_coursestore/url',
             get_string('settings_url', 'tool_coursestore'),
             get_string('settings_url_desc', 'tool_coursestore'),

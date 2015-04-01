@@ -40,6 +40,10 @@ $string['settings_enable'] = 'Active';
 $string['settings_enable_desc'] = 'Enable or disable sending of course backups.';
 $string['settings_enablestring'] = 'Enable';
 $string['settings_disablestring'] = 'Disable';
+$string['settings_externalcron'] = 'Use external cron';
+$string['settings_externalcron_desc'] = 'If checked the process will be triggered by external cron.
+    <br />Server administrators have to set up external cron.
+    <br />The simple example: <PRE>2-57/5 * * * * www-data php /path/to/your/moodle/admin/tool/coursestore/cli/backup.php >> /var/log/backup.log</PRE>';
 $string['conncheckfail'] = 'Connection error. Please confirm that your course bank settings and network configuration are correct.';
 $string['connchecksuccess'] = 'Connection check passed!';
 $string['speedtestsuccess'] = 'Connection speed test passed!';
@@ -60,6 +64,13 @@ $string['settings_requestretries'] = 'HTTP request retries';
 $string['settings_requestretries_desc'] = 'Number of times to reattempt the sending of an individual failed request.';
 $string['settings_authtoken'] = 'Authentication token';
 $string['settings_authtoken_desc'] = 'Authentication token for use in communication with external course bank instance.';
+$string['cron_skippingmoodle'] = 'Disabled or configured to use an external cron. Skipping...';
+$string['cron_locked'] = 'Cron lock record is in the database. The process may have been interrupted recently or still running.';
+$string['cron_force'] = 'The lock can be removed by running this script with --force as an argument.';
+$string['cron_duplicate'] = 'Duplicate cron lock';
+$string['cron_sending'] = 'Sending backups...';
+$string['cron_skippingexternal'] = 'The tool is not configured to be run via CLI. Exiting...';
+$string['cron_removinglock'] = 'Removing cron lock in the database...';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
