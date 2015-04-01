@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die;
  *
  * @param string $dir path
  */
-function coursestore_rrmdir($dir) {
+function tool_coursestore_rrmdir($dir) {
     if (is_dir($dir)) {
         $objects = scandir($dir);
         foreach ($objects as $object) {
