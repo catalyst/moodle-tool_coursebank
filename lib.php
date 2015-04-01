@@ -51,9 +51,17 @@ function tool_coursestore_rrmdir($dir) {
     }
 }
 /**
- * Cron function
+ * Legacy cron function
  */
 function tool_coursestore_cron() {
+    tool_coursestore_cron_run();
+}
+/**
+ * Run cron code
+ *
+ * @return boolean
+ */
+function tool_coursestore_cron_run() {
     $name = 'tool_coursestore_cronlock';
     $canrun = tool_coursestore_can_run_cron(CRON_MOODLE);
 
