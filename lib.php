@@ -15,28 +15,33 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Course store plugin uninstallation.
  *
- * @package    tool
- * @subpackage coursestore
- * @author     Tim Price <timprice@catalyst-au.net>
+ * @package    tool_coursestore
+ * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
-
-function xmldb_tool_coursestore_uninstall() {
-    global $CFG, $DB;
-
-    if (is_writable($CFG->dataroot)) {
-        $dir = $CFG->dataroot . "/coursestore";
-        coursestore_rrmdir($dir);
-    } else {
-        throw new invalid_dataroot_permissions();
+defined('MOODLE_INTERNAL') || die;
+/**
+ * Recursively delete a directory that is not empty
+ *
+ * @param string $dir path
+ */
+function coursestore_rrmdir($dir) {
+    if (is_dir($dir)) {
+        $objects = scandir($dir);
+        foreach ($objects as $object) {
+            if ($object != "." && $object != "..") {
+                if (filetype($dir."/".$object) == "dir") {
+                    coursestore_rrmdir($dir."/".$object);
+                } else {
+                    unlink($dir."/".$object);
+                }
+            }
+        }
+        reset($objects);
+        rmdir($dir);
     }
-
-    return true;
 }
+
