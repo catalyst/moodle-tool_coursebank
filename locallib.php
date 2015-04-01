@@ -237,7 +237,7 @@ abstract class tool_coursestore {
                 'categoryid'   => $backup->categoryid,
                 'categoryname' => $backup->categoryname,
             );
-            if (!$wsmanager->post_backup($data, $sessionkey, $retries)) {
+            if (!$coursebankid = $wsmanager->post_backup($data, $sessionkey, $retries)) {
                 $backup->status = self::STATUS_ERROR;
                 $DB->update_record('tool_coursestore', $backup);
                 $wsmanager->close();
@@ -251,7 +251,6 @@ abstract class tool_coursestore {
         // Read the file in chunks, attempt to send them.
         while ($contents = fread($file, $chunksize)) {
 
-            // TODO: change the chunksize to the actual size being sent. The last chunk may not be the full size.
             $data = array(
                 'data'          => base64_encode($contents),
                 'chunksize'     => $chunksize,
@@ -263,11 +262,8 @@ abstract class tool_coursestore {
                 if ($backup->status == self::STATUS_ERROR) {
                     $backup->chunkretries = 0;
                     $backup->status = self::STATUS_INPROGRESS;
+                    $DB->update_record('tool_coursestore', $backup);
                 }
-                if ($backup->chunknumber == $backup->totalchunks) {
-                    $backup->status = self::STATUS_FINISHED;
-                }
-                $DB->update_record('tool_coursestore', $backup);
             } else {
                 if ($backup->status == self::STATUS_ERROR) {
                     $backup->chunkretries++;
@@ -277,6 +273,26 @@ abstract class tool_coursestore {
                 $DB->update_record('tool_coursestore', $backup);
                 return false;
             }
+        }
+
+        if ($backup->chunknumber == $backup->totalchunks) {
+            $data = array(
+                'fileid' => $backup->id,
+                'filename' => $backup->backupfilename,
+                'filehash' => $backup->contenthash,
+                'filesize' => $backup->filesize,
+                'chunksize' => $backup->chunksize,
+                'totalchunks' => $backup->totalchunks
+            );
+            if (!isset($coursebankid)) {
+                $coursebankid = $backup->id;
+            }
+            // Confirm the backup file as complete.
+            if (!$wsmanager->put_backup($sessionkey, $data, $coursebankid)) {
+                return false;
+            }
+            $backup->status = self::STATUS_FINISHED;
+            $DB->update_record('tool_coursestore', $backup);
         }
 
         $wsmanager->close();
@@ -701,12 +717,12 @@ class coursestore_ws_manager {
             if ($returnhash != $validatehash) {
                 return false;
             } else {
-                return true;
+                return $data['fileid'];
             }
         }
         if (isset($body->error) && $body->error == self::WS_STATUS_ERROR_BACKUP_ALREADY_EXISTS) {
             // The backup already exists, continue.
-            return true;
+            return $data['fileid'];
         }
             return false;
     }
@@ -718,8 +734,9 @@ class coursestore_ws_manager {
      * @param int    $backupid  ID referencing course bank backup resource
      *
      */
-    public function put_backup($auth, $backupid) {
-        return $this->send('backup/' . $backupid, array(), 'PUT', $auth);
+    public function put_backup($sessionkey, $data, $backupid, $retries=4) {
+
+        return $this->send('backup/' . $backupid, $data, 'PUT', $sessionkey);
     }
     /**
      * Get most recent chunk transferred for specific backup.
