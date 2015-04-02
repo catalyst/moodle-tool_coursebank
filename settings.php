@@ -38,7 +38,7 @@ if ($hassiteconfig) {
             get_string('nav_summary', 'tool_coursestore'),
             "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'moodle/site:config'));
 
-    $ADMIN->add('backups', new admin_externalpage('tool_coursestore',
+    $ADMIN->add('backups', new admin_externalpage('tool_coursestore_download',
             get_string('nav_download', 'tool_coursestore'),
             "$CFG->wwwroot/$CFG->admin/tool/coursestore/download.php", 'moodle/site:config'));
 
