@@ -804,4 +804,21 @@ class coursestore_ws_manager {
     public function delete_chunk($auth, $backupid, $chunk) {
         return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'DELETE', $auth);
     }
+    /**
+     * Get list of backup files available for download from course bank instance.
+     *
+     * @param string $sesskey  Session key authorization string
+     *
+     */
+    public function get_downloads($sesskey) {
+        $result = $this->send('downloads', array(), 'GET', $sesskey);
+        return $result;
+    }
+    /**
+     * Get count of backup files available from course bank instance.
+     */
+    public function get_downloadcount($sesskey) {
+        $result = $this->send('downloadcount', array(), 'GET', $sesskey);
+        return $result;
+    }
 }

@@ -46,6 +46,26 @@ $PAGE->set_title($header);
 $renderer = $PAGE->get_renderer('tool_coursestore');
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading($header);
-
+$urltarget = get_config('tool_coursestore', 'url');
+$timeout = get_config('tool_coursestore', 'timeout');
+$wsman = new coursestore_ws_manager($urltarget, $timeout);
+if (!$sesskey = tool_coursestore::get_session()) {
+    $hash = get_config('tool_coursestore', 'authtoken');
+    if (!$wsman->post_session($hash)) {
+        $redirecturl = new moodle_url(
+                '/admin/tool/coursestore/check_connection.php',
+                array('action' => 'conncheck')
+        );
+        redirect($redirecturl, '', 0);
+    }
+    $sesskey = tool_coursestore::get_session();
+}
+if (!$response = $wsman->get_downloads($sesskey)) {
+    $redirecturl = new moodle_url(
+            '/admin/tool/coursestore/check_connection.php',
+            array('action' => 'conncheck')
+    );
+    redirect($redirecturl, '', 0);
+}
+echo $renderer->course_store_downloads($response['body']);
 echo $OUTPUT->footer();

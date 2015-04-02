@@ -73,6 +73,47 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         return $html;
     }
     /**
+     * Output main body of downloads interface.
+     *
+     * @return string $html          Body HTML output
+     */
+    public function course_store_downloads($downloads) {
+        global $CFG;
+
+        $columns = array(
+                'Course name'    => 'coursename',
+                'File name'      => 'backupfilename',
+                'File size'      => 'filesize'
+        );
+
+        $html = $this->box_start();
+        $html .= $this->heading(
+                get_string('downloadsummary', 'tool_coursestore'),
+                3
+        );
+        $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
+        $html .= html_writer::start_tag('thead');
+        $html .= html_writer::start_tag('tr');
+        foreach ($columns as $column => $name) {
+            $html .= html_writer::tag('th', $column);
+        }
+        $html .= html_writer::end_tag('tr');
+        $html .= html_writer::end_tag('thead');
+
+        $html .= html_writer::start_tag('tbody');
+        foreach ($downloads as $download) {
+            $html .= html_writer::start_tag('tr');
+            $html .= html_writer::tag('td', $download->coursename);
+            $html .= html_writer::tag('td', $download->backupfilename);
+            $html .= html_writer::tag('td', display_size($download->filesize));
+            $html .= html_writer::start_tag('tr');
+        }
+        $html .= html_writer::end_tag('tbody');
+        $html .= html_writer::end_tag('table');
+        $html .= $this->box_end();
+        return $html;
+    }
+    /**
      * Output result of connection check
      *
      * @return string $html          Result HTML output
