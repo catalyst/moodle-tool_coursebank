@@ -71,6 +71,8 @@ $string['cron_duplicate'] = 'Duplicate cron lock';
 $string['cron_sending'] = 'Sending backups...';
 $string['cron_skippingexternal'] = 'The tool is not configured to be run via CLI. Exiting...';
 $string['cron_removinglock'] = 'Removing cron lock in the database...';
+$string['nav_summary'] = 'Course Store backups summary';
+$string['nav_download'] = 'Course Store download backups';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
