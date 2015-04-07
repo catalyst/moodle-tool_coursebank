@@ -72,5 +72,5 @@ if (!$response = $wsman->get_downloads($sesskey)) {
     );
     redirect($redirecturl, '', 0);
 }
-echo $renderer->course_store_downloads($response['body'], $sort, $dir);
+echo $renderer->course_store_downloads($response['body'], $sort, $dir, $page, $perpage);
 echo $OUTPUT->footer();

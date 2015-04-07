@@ -32,7 +32,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      *
      * @return string $html          Body HTML output
      */
-    public function course_store_main($results, $sort='', $dir='') {
+    public function course_store_main($results, $sort='', $dir='', $page='', $perpage='') {
         global $CFG;
 
         $columns = array('coursename', 'backupdate', 'filename', 'filesize', 'status');
@@ -46,7 +46,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
         foreach ($columns as $column) {
-            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir));
+            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir, $dir, $page, $perpage));
         }
         $html .= html_writer::end_tag('tr');
         $html .= html_writer::end_tag('thead');
@@ -71,7 +71,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      *
      * @return string $html          Body HTML output
      */
-    public function course_store_downloads($downloads, $sort='', $dir='') {
+    public function course_store_downloads($downloads, $sort='', $dir='', $page='', $perpage='') {
         global $CFG;
 
         $columns = array('coursename', 'filename', 'filesize',  'backupdate');
@@ -85,7 +85,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
         foreach ($columns as $column) {
-            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir));
+            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir, $page, $perpage));
         }
         $html .= html_writer::tag('th', get_string('action'));
         $html .= html_writer::end_tag('tr');
@@ -113,8 +113,15 @@ class tool_coursestore_renderer extends plugin_renderer_base {
     private function course_store_get_field_name($field) {
         return get_string($field, 'tool_coursestore');
     }
-
-    private function course_store_get_column_link($column, $sort, $dir) {
+    /**
+     * Generates a link for table's header
+     *
+     * @param string $column Coulumn name, e.g. 'coursename'
+     * @param string $sort Coulumn name to sort by, e.g. 'coursename'
+     * @param string $dir Sort direction (ASC or DESC)
+     * @return string HTML code of link
+     */
+    private function course_store_get_column_link($column, $sort, $dir, $page, $perpage) {
 
         $name = $this->course_store_get_field_name($column);
         if ($sort != $column) {
@@ -125,7 +132,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             $columnicon = ($dir == "ASC") ? "sort_asc" : "sort_desc";
             $columnicon = "<img class='iconsort' src=\"" . $this->output->pix_url('t/' . $columnicon) . "\" alt=\"\" />";
         }
-        $$column = "<a href=\"?sort=$column&amp;dir=$columndir\">" . $name . "</a>$columnicon";
+        $$column = "<a href=\"?sort=$column&amp;dir=$columndir&amp;page=$page&amp;perpage=$perpage\">" . $name . "</a>$columnicon";
 
         return $$column;
     }

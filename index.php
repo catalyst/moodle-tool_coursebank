@@ -52,5 +52,5 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading($header);
 $results = tool_coursestore::get_summary_data();
-echo $renderer->course_store_main($results, $sort, $dir);
+echo $renderer->course_store_main($results, $sort, $dir, $page, $perpage);
 echo $OUTPUT->footer();
