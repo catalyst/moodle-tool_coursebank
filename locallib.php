@@ -692,7 +692,7 @@ class coursestore_ws_manager {
                 return new coursestore_http_response($body, $info, $curlopts);
             }
         }
-        return false;
+        return new coursestore_http_response(false, false, $curlopts);
     }
     /**
      * Send a test request
@@ -721,19 +721,16 @@ class coursestore_ws_manager {
             'hash' => $hash,
         );
         $response = $this->send('session', $authdata, 'POST');
-        if ($response !== false) {
-            if ($response->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
-                if (isset($response->body->sesskey)) {
-                    $tag_sesskey = self::WS_AUTH_SESSION_KEY;
-                    $sesskey = trim((string) $response->body->$tag_sesskey);
-                    return tool_coursestore::set_session($sesskey);
-                }
-            } else {
-                // Unexpected http response code.
-                return $response;
+        if ($response->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
+            if (isset($response->body->sesskey)) {
+                $tag_sesskey = self::WS_AUTH_SESSION_KEY;
+                $sesskey = trim((string) $response->body->$tag_sesskey);
+                return tool_coursestore::set_session($sesskey);
             }
+        } else {
+            // Unexpected response or no response received.
+            return $response;
         }
-        return false;
     }
     /**
      * Get a backup resource.
@@ -754,16 +751,13 @@ class coursestore_ws_manager {
     public function post_backup($data, $sessionkey, $retries) {
 
         $response = $this->send('backup', $data, 'POST', $sessionkey, $retries);
-        if ($response === false) {
-            return false;
-        }
 
         if ($response->httpcode == self::WS_HTTP_CREATED) {
             // Make sure the hash is good.
             $returnhash = $response->body->hash;
             $validatehash = md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
             if ($returnhash != $validatehash) {
-                return false;
+                return $response;
             } else {
                 return $data['fileid'];
             }
@@ -771,7 +765,8 @@ class coursestore_ws_manager {
             // The backup already exists, continue.
             return $data['fileid'];
         }
-        return false;
+        // Unexpected response or no response received.
+        return $response;
     }
 
     /**
@@ -810,21 +805,17 @@ class coursestore_ws_manager {
         $originaldata = $data['original_data'];
         unset($data['original_data']);
         $response = $this->send('chunks/' . $backupid . '/' . $chunknumber, $data, 'PUT', $sessionkey, $retries);
-        if ($response === false) {
-            return false;
-        }
 
         if ($response->httpcode == self::WS_HTTP_OK) {
             // Make sure the hash is good.
             $returnhash = $response->body->chunkhash;
             $validatehash = md5($originaldata);
-            if ($returnhash != $validatehash) {
-                return false;
-            } else {
+            if ($returnhash == $validatehash) {
                 return true;
             }
         }
-        return false;
+        // Unexpected response or no response received.
+        return $response;
     }
 
     /**
@@ -879,14 +870,13 @@ class coursestore_http_response {
      public $request;
     /**
      */
-    public function __construct($body, $info, $request=null) {
-        if (isset($info['http_code'])) {
-            $this->httpcode = $info['http_code'];
-        } else {
-            return false;
-        }
+    public function __construct($body=false, $info=false, $request=null) {
+
+        $responsereceived = isset($info['http_code']);
+        $this->httpcode = $responsereceived ? $info['http_code'] : false;
         $this->body = $body;
         $this->info = $info;
         $this->request = $request;
+
     }
 }
