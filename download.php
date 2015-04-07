@@ -30,12 +30,17 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
+$download     = optional_param('download', 0, PARAM_INT);
+$sort         = optional_param('sort', 'coursename', PARAM_ALPHANUM);
+$dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
+$page         = optional_param('page', 0, PARAM_INT);
+$perpage      = optional_param('perpage', 50, PARAM_INT);        // how many per page
+
 $context = context_system::instance();
 require_login();
 
 admin_externalpage_setup('tool_coursestore_download');
 
-$conncheck = optional_param('conn', null, PARAM_BOOL);
 $url = new moodle_url('/admin/tool/coursestore/download.php');
 $PAGE->set_url($url);
 $PAGE->set_context($context);
@@ -67,5 +72,5 @@ if (!$response = $wsman->get_downloads($sesskey)) {
     );
     redirect($redirecturl, '', 0);
 }
-echo $renderer->course_store_downloads($response['body']);
+echo $renderer->course_store_downloads($response['body'], $sort, $dir);
 echo $OUTPUT->footer();

@@ -75,6 +75,12 @@ $string['nav_summary'] = 'Course Store backups summary';
 $string['nav_download'] = 'Course Store download backups';
 $string['downloadsummary'] = 'Course Bank backups';
 $string['eventconnectionchecked'] = 'Connection checked';
+$string['coursename'] = 'Course name';
+$string['backupdate'] = 'Backup date';
+$string['filename'] = 'File name';
+$string['filesize'] = 'File size';
+$string['status'] = 'Status';
+
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';

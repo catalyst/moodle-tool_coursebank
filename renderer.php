@@ -32,16 +32,10 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      *
      * @return string $html          Body HTML output
      */
-    public function course_store_main($results) {
+    public function course_store_main($results, $sort='', $dir='') {
         global $CFG;
 
-        $columns = array(
-                'Course name'    => 'shortname',
-                'Backup date'    => 'timemodified',
-                'File name'      => 'filename',
-                'File size'      => 'filesize',
-                'Status'         => 'status'
-        );
+        $columns = array('coursename', 'backupdate', 'filename', 'filesize', 'status');
 
         $html = $this->box_start();
         $html .= $this->heading(
@@ -51,8 +45,8 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
-        foreach ($columns as $column => $name) {
-            $html .= html_writer::tag('th', $column);
+        foreach ($columns as $column) {
+            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir));
         }
         $html .= html_writer::end_tag('tr');
         $html .= html_writer::end_tag('thead');
@@ -77,14 +71,10 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      *
      * @return string $html          Body HTML output
      */
-    public function course_store_downloads($downloads) {
+    public function course_store_downloads($downloads, $sort='', $dir='') {
         global $CFG;
 
-        $columns = array(
-                'Course name'    => 'coursename',
-                'File name'      => 'backupfilename',
-                'File size'      => 'filesize'
-        );
+        $columns = array('coursename', 'filename', 'filesize',  'backupdate');
 
         $html = $this->box_start();
         $html .= $this->heading(
@@ -94,9 +84,10 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
-        foreach ($columns as $column => $name) {
-            $html .= html_writer::tag('th', $column);
+        foreach ($columns as $column) {
+            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir));
         }
+        $html .= html_writer::tag('th', get_string('action'));
         $html .= html_writer::end_tag('tr');
         $html .= html_writer::end_tag('thead');
 
@@ -113,6 +104,32 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= $this->box_end();
         return $html;
     }
+    /**
+     * Returns the display name of a field
+     *
+     * @param string $field Field name, e.g. 'coursename'
+     * @return string Text description taken from language file, e.g. 'Course name'
+     */
+    private function course_store_get_field_name($field) {
+        return get_string($field, 'tool_coursestore');
+    }
+
+    private function course_store_get_column_link($column, $sort, $dir) {
+
+        $name = $this->course_store_get_field_name($column);
+        if ($sort != $column) {
+            $columndir = "ASC";
+            $columnicon = "";
+        } else {
+            $columndir = $dir == "ASC" ? "DESC" : "ASC";
+            $columnicon = ($dir == "ASC") ? "sort_asc" : "sort_desc";
+            $columnicon = "<img class='iconsort' src=\"" . $this->output->pix_url('t/' . $columnicon) . "\" alt=\"\" />";
+        }
+        $$column = "<a href=\"?sort=$column&amp;dir=$columndir\">" . $name . "</a>$columnicon";
+
+        return $$column;
+    }
+
     /**
      * Output result of connection check
      *

@@ -29,6 +29,11 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
+$sort         = optional_param('sort', 'coursename', PARAM_ALPHANUM);
+$dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
+$page         = optional_param('page', 0, PARAM_INT);
+$perpage      = optional_param('perpage', 50, PARAM_INT);        // how many per page
+
 $context = context_system::instance();
 require_login();
 
@@ -47,5 +52,5 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading($header);
 $results = tool_coursestore::get_summary_data();
-echo $renderer->course_store_main($results);
+echo $renderer->course_store_main($results, $sort, $dir);
 echo $OUTPUT->footer();
