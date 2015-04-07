@@ -77,6 +77,6 @@ if (!$response = $wsman->get_downloads($sesskey)) {
 $filtering = new coursestore_filtering('download', array('coursename' => 0, 'filename' => 1, 'filesize' => 1, 'backupdate' => 1));
 $filtering->display_add();
 $filtering->display_active();
-echo $renderer->course_store_downloads($response['body'], $sort, $dir, $page, $perpage);
+echo $renderer->course_store_downloads($response->body, $sort, $dir, $page, $perpage);
 
 echo $OUTPUT->footer();
