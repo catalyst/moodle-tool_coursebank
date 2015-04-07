@@ -52,7 +52,7 @@ class connection_checked extends \core\event\base {
         if ($this->data['other']['conncheckaction'] == 'speedtest') {
             if (isset($this->data['other']['speed'])) {
                 return "Speed test resulted in speed of ".
-                        $this->data['other']['speed'] . "kbps";
+                        $this->data['other']['speed'] . " kbps";
             }
         } else {
             if ($this->data['other']['status']) {

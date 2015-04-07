@@ -123,13 +123,29 @@ abstract class tool_coursestore {
             }
             // If $maxhttps unsuccessful attempts have been made.
             if ($response->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
-                return 0;
+                $speed = 0;
+                break;
             }
         }
-        $elapsed = microtime(true) - $start;
+        if (!isset($speed)) {
+            $elapsed = microtime(true) - $start;
 
-        // Convert 'total kB transferred'/'total time' into kb/s.
-        return round(($testsize * $count * 8 ) / $elapsed, 2);
+            // Convert 'total kB transferred'/'total time' into kb/s.
+            $speed = round(($testsize * $count * 8 ) / $elapsed, 2);
+        }
+        $otherdata = array(
+            'conncheckaction' => 'speedtest',
+            'speed' => $speed
+        );
+        $eventdata = array(
+            'other' => $otherdata,
+            'context' => context_system::instance()
+        );
+        $event = \tool_coursestore\event\connection_checked::create($eventdata);
+        $event->trigger();
+
+        return $speed;
+
     }
     public static function get_config_chunk_size() {
         return get_config('tool_coursestore', 'chunksize');
@@ -682,7 +698,6 @@ class coursestore_ws_manager {
         }
         $headers = array(self::WS_AUTH_SESSION_KEY => $auth, 'data' => $data);
         $result = $this->send('test', array(), 'GET', $headers);
-
         return $result;
     }
     /**
