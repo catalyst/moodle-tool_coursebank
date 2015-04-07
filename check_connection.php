@@ -68,21 +68,21 @@ switch ($action) {
 
         // Initialise, check connection.
         $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
+        $testsize = 256;
 
-        $result = tool_coursestore::check_connection_speed($wsmanager, 256, 1, 5, $sesskey);
+        $result = tool_coursestore::check_connection_speed($wsmanager, $testsize, 1, 5, $sesskey);
         $wsmanager->close();
 
         $add = '';
-        if ($result >= 256) {
-            $msgtype = 'success';
-        } else if ($result == 0) {
+        if ($result == 0) {
             $msgtype = 'fail';
-        } else {
-            $msgtype = 'slow';
-            $add = (string) $result.' kbps.';
+        }
+        else {
+            $msgtype = $result >= 256 ? 'success' : 'slow';
+            $add = (string) $result .' kbps.';
         }
 
-        $content = get_string('speedtest'.$msgtype, 'tool_coursestore').$add;
+        $content = get_string('speedtest'.$msgtype, 'tool_coursestore') . $add;
 
     default:
         break;

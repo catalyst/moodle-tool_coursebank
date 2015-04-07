@@ -46,7 +46,7 @@ $string['settings_externalcron_desc'] = 'If checked the process will be triggere
     <br />The simple example: <PRE>2-57/5 * * * * www-data php /path/to/your/moodle/admin/tool/coursestore/cli/backup.php >> /var/log/backup.log</PRE>';
 $string['conncheckfail'] = 'Connection error. Please confirm that your course bank settings and network configuration are correct.';
 $string['connchecksuccess'] = 'Connection check passed!';
-$string['speedtestsuccess'] = 'Connection speed test passed!';
+$string['speedtestsuccess'] = 'Connection speed test passed! The test transfer speed was approximately ';
 $string['speedtestfail'] = 'Connection error. Please confirm that your course bank settings and network configuration are correct.';
 $string['speedtestslow'] = 'Outbound transfers are very slow. The test transfer speed was approximately ';
 $string['checking'] = 'Checking...';

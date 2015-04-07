@@ -46,18 +46,12 @@ function speed_test( event ) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4 && xhr.status == 200) {
             var response = +(xhr.responseText);
-            if (response > 256) {
-                jQuery(".speedtest-div").addClass("hide");
-                jQuery(".speedtest-success").removeClass("hide");
-                if (!jQuery(".speedtest-fail").hasClass("hide")) {
-                    jQuery(".speedtest-fail").addClass("hide");
-                }
-                if (!jQuery(".speedtest-slow").hasClass("hide")) {
-                    jQuery(".speedtest-slow").addClass("hide");
-                }
-            } else if (response == 0){
+            if (response == 0){
+                // Connection has failed.
                 jQuery(".speedtest-div").addClass("hide");
                 jQuery(".speedtest-fail").removeClass("hide");
+
+                // hide the other divs.
                 if (!jQuery(".speedtest-success").hasClass("hide")) {
                     jQuery(".speedtest-success").addClass("hide");
                 }
@@ -65,11 +59,29 @@ function speed_test( event ) {
                     jQuery(".speedtest-slow").addClass("hide");
                 }
             }
+            else if (response >= 256) {
+                // Good connection.
+                var speedtestcontent = jQuery('.speedtestsuccess').val();
+                jQuery(".speedtest-alert-success").text(speedtestcontent + ' ' + response + ' kbps');
+                jQuery(".speedtest-div").addClass("hide");
+                jQuery(".speedtest-success").removeClass("hide");
+
+                // hide the other divs.
+                if (!jQuery(".speedtest-fail").hasClass("hide")) {
+                    jQuery(".speedtest-fail").addClass("hide");
+                }
+                if (!jQuery(".speedtest-slow").hasClass("hide")) {
+                    jQuery(".speedtest-slow").addClass("hide");
+                }
+            }
             else {
+                // This is a slow connection.
                 var speedtestcontent = jQuery('.speedtestslow').val();
                 jQuery(".speedtest-alert-slow").text(speedtestcontent + ' ' + response + ' kbps');
                 jQuery(".speedtest-div").addClass("hide");
                 jQuery(".speedtest-slow").removeClass("hide");
+
+                // hide the other divs.
                 if (!jQuery(".speedtest-fail").hasClass("hide")) {
                     jQuery(".speedtest-fail").addClass("hide");
                 }

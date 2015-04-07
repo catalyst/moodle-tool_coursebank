@@ -587,6 +587,8 @@ class coursestore_ws_manager {
     const WS_STATUS_ERROR_ENCODED_CHUNK_SIZE = 428;
     const WS_STATUS_ERROR_UNEXPECTED = 999;
 
+    const WS_AUTH_SESSION_KEY = 'sesskey';
+
     /**
      * @param string  $url            Target URL
      * @param int     $timeout        Request time out (seconds)
@@ -615,7 +617,9 @@ class coursestore_ws_manager {
      * @param string  $method       Request method. Defaults to POST.
      * @param int     $retries      Max number of attempts to make before
      *                              failing
-     * @param string  $auth         Authorization string
+     * @param mixed   $auth         string: Authorization string
+     *                              array: 'sesskey' => Authorisation string
+     *                                     'data'    => test data string
      *
      * @return array or bool false  Associative array of the form:
      *                                  'body' => <response body array>,
@@ -630,7 +634,14 @@ class coursestore_ws_manager {
             'Content-Length: ' . strlen($postdata)
         );
         if (isset($auth)) {
-            $header[] = 'sesskey: ' . $auth;
+            if (is_array($auth)) {
+                foreach ($auth as $k => $v) {
+                    $header[] = $k . ': ' . $v;
+                }
+            }
+            else {
+                $header[] = self::WS_AUTH_SESSION_KEY . ': ' . $auth;
+            }
         }
         $curlopts = array(
             CURLOPT_CUSTOMREQUEST => $method,
@@ -657,8 +668,13 @@ class coursestore_ws_manager {
      * @return array or bool false  Associate array response
      */
     public function get_test($auth, $data='') {
-        $testdata = array('data' => $data);
-        $result = $this->send('test', $testdata, 'GET', $auth);
+        if ($data == '') {
+            // The connection test is looking for data in the header.
+            // Put something there...
+            $data = str_pad('', 1000, '0');
+        }
+        $headers = array(self::WS_AUTH_SESSION_KEY => $auth, 'data' => $data);
+        $result = $this->send('test', array(), 'GET', $headers);
 
         return $result;
     }
@@ -675,8 +691,9 @@ class coursestore_ws_manager {
         if ($response !== false) {
             if ($response['response']['http_code'] == coursestore_ws_manager::WS_HTTP_CREATED) {
                 $body = $response['body'];
-                if (isset($body->sesskey)) {
-                    $sesskey = trim((string) $body->sesskey);
+                $tag_sesskey = self::WS_AUTH_SESSION_KEY;
+                if (isset($body->$tag_sesskey)) {
+                    $sesskey = trim((string) $body->$tag_sesskey);
                     return tool_coursestore::set_session($sesskey);
                 }
             } else {

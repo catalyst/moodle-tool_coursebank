@@ -252,7 +252,13 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('input', '', $wwwrootattr);
 
         // Success notification.
-
+        $attr = array(
+            'type' => 'hidden',
+            'name' => 'success',
+            'value' => get_string('speedtestsuccess', 'tool_coursestore'),
+            'class' => 'speedtestsuccess'
+        );
+        $html .= html_writer::tag('input', '', $attr);
         $html .= $this->course_store_check_notification(
                 'speedtest',
                 'success',
