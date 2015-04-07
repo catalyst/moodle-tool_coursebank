@@ -64,27 +64,34 @@ abstract class tool_coursestore {
      */
     public static function check_connection(coursestore_ws_manager $wsman, $auth=false) {
 
+        $success = false;
         if ($auth) {
             $checkresult = $wsman->get_test($auth);
-            if ($checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
-                return true;
-            }
+            $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
         }
 
         // No sess key provided, or sesskey rejected. Try starting a new session.
         $token = get_config('tool_coursestore', 'authtoken');
-        if ($token) {
+        if ($token && !$success) {
             if (!$wsman->post_session($token)) {
-                return false;
+                $success = false;
             }
             $sesskey = self::get_session();
             $checkresult = $wsman->get_test($sesskey);
-
-            if ($checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
-                return true;
-            }
+            $checkresult = $wsman->get_test($auth);
+            $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
         }
-        return false;
+        $otherdata = array(
+            'conncheckaction' => 'conncheck',
+            'status' => $success
+            );
+        $eventdata = array(
+            'other' => $otherdata,
+            'context' => context_system::instance()
+        );
+        $event = \tool_coursestore\event\connection_checked::create($eventdata);
+        $event->trigger();
+        return $success;
     }
     /**
      * Test the speed of a transfer of $testsize kilobytes. A total

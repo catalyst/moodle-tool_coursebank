@@ -75,5 +75,4 @@ switch ($action) {
     default:
         break;
 }
-
 echo print_r($response, true);
