@@ -295,7 +295,7 @@ abstract class tool_coursestore {
                 $coursebankid = $backup->id;
             }
             // Confirm the backup file as complete.
-            if (!$wsmanager->put_backup($sessionkey, $data, $coursebankid)) {
+            if (!$wsmanager->put_backup_complete($sessionkey, $data, $coursebankid)) {
                 return false;
             }
             $backup->status = self::STATUS_FINISHED;
@@ -755,9 +755,9 @@ class coursestore_ws_manager {
      * @param int    $backupid  ID referencing course bank backup resource
      *
      */
-    public function put_backup($sessionkey, $data, $backupid, $retries=4) {
+    public function put_backup_complete($sessionkey, $data, $backupid, $retries=4) {
 
-        return $this->send('backup/' . $backupid, $data, 'PUT', $sessionkey);
+        return $this->send('backupcomplete/' . $backupid, $data, 'PUT', $sessionkey);
     }
     /**
      * Get most recent chunk transferred for specific backup.

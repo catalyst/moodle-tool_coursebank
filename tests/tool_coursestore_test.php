@@ -163,7 +163,7 @@ class tool_coursestore_testcase extends advanced_testcase {
     /**
      * @group tool_coursestore
      */
-    public function test_tool_coursestore_put_backup() {
+    public function test_tool_coursestore_put_backup_complete() {
     }
     /**
      * @group tool_coursestore
