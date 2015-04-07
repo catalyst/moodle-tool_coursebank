@@ -33,6 +33,26 @@ abstract class tool_coursestore {
     const STATUS_FINISHED = 2;
     const STATUS_ERROR = 99;
     /**
+     * Returns an array of available statuses
+     * @return array of availble statuses
+     */
+    public static function get_statuses() {
+        $notstarted   = get_string('statusnotstarted', 'tool_coursestore');
+        $inprogress   = get_string('statusinprogress', 'tool_coursestore');
+        $statuserror  = get_string('statuserror', 'tool_coursestore');
+        $finished     = get_string('statusfinished', 'tool_coursestore');
+
+        $statuses = array(
+            self::STATUS_NOTSTARTED => $notstarted,
+            self::STATUS_INPROGRESS => $inprogress,
+            self::STATUS_FINISHED   => $finished,
+            self::STATUS_ERROR      => $statuserror
+        );
+
+        return $statuses;
+    }
+
+    /**
      * Get the stored session key for use with the course bank REST API if one
      * exists.
      *
@@ -172,17 +192,8 @@ abstract class tool_coursestore {
             INNER JOIN {course} c ON (cx.instanceid = c.id)";
         $params = array('contextcourse' => CONTEXT_COURSE);
         $results = $DB->get_records_sql($sql, $params);
-        $notstarted   = get_string('statusnotstarted', 'tool_coursestore');
-        $inprogress   = get_string('statusinprogress', 'tool_coursestore');
-        $statuserror  = get_string('statuserror', 'tool_coursestore');
-        $finished     = get_string('statusfinished', 'tool_coursestore');
 
-        $statusmap = array(
-            self::STATUS_NOTSTARTED => $notstarted,
-            self::STATUS_INPROGRESS => $inprogress,
-            self::STATUS_FINISHED => $finished,
-            self::STATUS_ERROR => $statuserror
-        );
+        $statusmap = self::get_statuses();
 
         foreach ($results as $result) {
             if (isset($statusmap[$result->status])) {

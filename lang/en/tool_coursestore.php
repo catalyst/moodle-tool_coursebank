@@ -80,6 +80,9 @@ $string['backupdate'] = 'Backup date';
 $string['filename'] = 'File name';
 $string['filesize'] = 'File size';
 $string['status'] = 'Status';
+$string['filtermorethan'] = 'more than';
+$string['filterlessthan'] = 'less than';
+$string['filterisequalto'] = 'is equal to';
 
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';

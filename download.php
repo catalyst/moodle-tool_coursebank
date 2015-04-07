@@ -27,6 +27,7 @@
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -72,5 +73,10 @@ if (!$response = $wsman->get_downloads($sesskey)) {
     );
     redirect($redirecturl, '', 0);
 }
+
+$filtering = new coursestore_filtering('download', array('coursename' => 0, 'filename' => 1, 'filesize' => 1, 'backupdate' => 1));
+$filtering->display_add();
+$filtering->display_active();
 echo $renderer->course_store_downloads($response['body'], $sort, $dir, $page, $perpage);
+
 echo $OUTPUT->footer();

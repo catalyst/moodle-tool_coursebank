@@ -26,6 +26,7 @@
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -52,5 +53,9 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading($header);
 $results = tool_coursestore::get_summary_data();
+$filtering = new coursestore_filtering('summary');
+// add filters
+$filtering->display_add();
+$filtering->display_active();
 echo $renderer->course_store_main($results, $sort, $dir, $page, $perpage);
 echo $OUTPUT->footer();
