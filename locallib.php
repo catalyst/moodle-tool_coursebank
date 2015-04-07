@@ -66,7 +66,7 @@ abstract class tool_coursestore {
 
         if ($auth) {
             $checkresult = $wsman->get_test($auth);
-            if ($checkresult['response']['http_code'] == coursestore_ws_manager::WS_HTTP_OK) {
+            if ($checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
                 return true;
             }
         }
@@ -80,7 +80,7 @@ abstract class tool_coursestore {
             $sesskey = self::get_session();
             $checkresult = $wsman->get_test($sesskey);
 
-            if ($checkresult['response']['http_code'] == coursestore_ws_manager::WS_HTTP_OK) {
+            if ($checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
                 return true;
             }
         }
@@ -110,12 +110,12 @@ abstract class tool_coursestore {
         for ($i = 0; $i < $count; $i++) {
             for ($j = 0; $j <= $retry; $j++) {
                 $response = $wsman->get_test($auth, $check);
-                if ($response['response']['http_code'] == coursestore_ws_manager::WS_HTTP_OK) {
+                if ($response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
                     break;
                 }
             }
             // If $maxhttps unsuccessful attempts have been made.
-            if ($response['response']['http_code'] != coursestore_ws_manager::WS_HTTP_OK) {
+            if ($response->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
                 return 0;
             }
         }
@@ -652,10 +652,10 @@ class coursestore_ws_manager {
         curl_setopt_array($this->curlhandle, $curlopts);
         for ($attempt = 0; $attempt <= $retries; $attempt++) {
             $result = curl_exec($this->curlhandle);
-            $response = curl_getinfo($this->curlhandle);
+            $info = curl_getinfo($this->curlhandle);
             if ($result) {
                 $body = json_decode($result);
-                return array('body' => $body, 'response' => $response);
+                return new coursestore_http_response($body, $info, $curlopts);
             }
         }
         return false;
@@ -689,14 +689,14 @@ class coursestore_ws_manager {
         );
         $response = $this->send('session', $authdata, 'POST');
         if ($response !== false) {
-            if ($response['response']['http_code'] == coursestore_ws_manager::WS_HTTP_CREATED) {
-                $body = $response['body'];
-                $tag_sesskey = self::WS_AUTH_SESSION_KEY;
-                if (isset($body->$tag_sesskey)) {
-                    $sesskey = trim((string) $body->$tag_sesskey);
+            if ($response->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
+                if (isset($response->body->sesskey)) {
+                    $tag_sesskey = self::WS_AUTH_SESSION_KEY;
+                    $sesskey = trim((string) $response->body->$tag_sesskey);
                     return tool_coursestore::set_session($sesskey);
                 }
             } else {
+                // Unexpected http response code.
                 return $response;
             }
         }
@@ -720,28 +720,25 @@ class coursestore_ws_manager {
      */
     public function post_backup($data, $sessionkey, $retries) {
 
-        $result = $this->send('backup', $data, 'POST', $sessionkey, $retries);
-        if ($result === false) {
+        $response = $this->send('backup', $data, 'POST', $sessionkey, $retries);
+        if ($response === false) {
             return false;
         }
 
-        $httpcode = $result['response']['http_code'];
-        $body = $result['body'];
-        if ($httpcode == self::WS_HTTP_CREATED) {
+        if ($response->httpcode == self::WS_HTTP_CREATED) {
             // Make sure the hash is good.
-            $returnhash = $body->hash;
+            $returnhash = $response->body->hash;
             $validatehash = md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
             if ($returnhash != $validatehash) {
                 return false;
             } else {
                 return $data['fileid'];
             }
-        }
-        if (isset($body->error) && $body->error == self::WS_STATUS_ERROR_BACKUP_ALREADY_EXISTS) {
+        } else if ($response->httpcode == self::WS_HTTP_CONFLICT) {
             // The backup already exists, continue.
             return $data['fileid'];
         }
-            return false;
+        return false;
     }
 
     /**
@@ -779,16 +776,14 @@ class coursestore_ws_manager {
         // Grab the original data so we don't have to decode it to check the hash.
         $originaldata = $data['original_data'];
         unset($data['original_data']);
-        $result = $this->send('chunks/' . $backupid . '/' . $chunknumber, $data, 'PUT', $sessionkey, $retries);
-        if ($result === false) {
+        $response = $this->send('chunks/' . $backupid . '/' . $chunknumber, $data, 'PUT', $sessionkey, $retries);
+        if ($response === false) {
             return false;
         }
 
-        $httpcode = $result['response']['http_code'];
-        $body = $result['body'];
-        if ($httpcode == self::WS_HTTP_OK) {
+        if ($response->httpcode == self::WS_HTTP_OK) {
             // Make sure the hash is good.
-            $returnhash = $body->chunkhash;
+            $returnhash = $response->body->chunkhash;
             $validatehash = md5($originaldata);
             if ($returnhash != $validatehash) {
                 return false;
@@ -801,6 +796,9 @@ class coursestore_ws_manager {
 
     /**
      * Update chunk status to confirmed
+     *
+     * NOTE: This function is not currently in use due to architectural changes
+     *       and will likely be deprecated.
      *
      * @param string $auth      Authorization string
      * @param int    $backupid  ID referencing course bank backup resource
@@ -828,14 +826,34 @@ class coursestore_ws_manager {
      *
      */
     public function get_downloads($sesskey) {
-        $result = $this->send('downloads', array(), 'GET', $sesskey);
-        return $result;
+        return $this->send('downloads', array(), 'GET', $sesskey);
     }
     /**
      * Get count of backup files available from course bank instance.
      */
     public function get_downloadcount($sesskey) {
-        $result = $this->send('downloadcount', array(), 'GET', $sesskey);
-        return $result;
+        return $this->send('downloadcount', array(), 'GET', $sesskey);
+    }
+}
+/**
+ * HTTP response class, used to pass around request responses
+ *
+ */
+class coursestore_http_response {
+     public $body;
+     public $info;
+     public $httpcode;
+     public $request;
+    /**
+     */
+    public function __construct($body, $info, $request=null) {
+        if (isset($info['http_code'])) {
+            $this->httpcode = $info['http_code'];
+        } else {
+            return false;
+        }
+        $this->body = $body;
+        $this->info = $info;
+        $this->request = $request;
     }
 }
