@@ -252,7 +252,7 @@ abstract class tool_coursestore {
         if ($backup->chunknumber != 0) {
             fseek($file, $backup->chunknumber * $chunksize);
         } else if ($backup->chunknumber == 0) {
-            // Initial the backup record.
+            // Initialise the backup record.
             $coursedate = '';
             if ($backup->coursestartdate > 0) {
                 $dt = new DateTime("@" . $backup->coursestartdate);

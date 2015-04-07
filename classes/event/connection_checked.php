@@ -58,11 +58,12 @@ class connection_checked extends \core\event\base {
                         $this->data['other']['speed'] . " kbps.";
             }
         } else {
-            if ($this->data['other']['status']) {
-                return "Connection check passed.";
-            } else {
-                return "Connection check failed.";
+            if (isset($this->data['other']['status'])) {
+                if($this->data['other']['status']) {
+                    return "Connection check passed.";
+                }
             }
+                return "Connection check failed.";
         }
     }
 
