@@ -39,7 +39,7 @@ $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
 $check = array('operation' => 'check');
 if (!$wsmanager->send($check)) {
     // Connection check failed.
-    mtrace(get_string('conncheckfail', 'tool_coursestore'));
+    mtrace(get_string('conncheckfail', 'tool_coursestore', $urltarget));
 } else {
-    mtrace(get_string('connchecksuccess', 'tool_coursestore'));
+    mtrace(get_string('connchecksuccess', 'tool_coursestore', $urltarget));
 }

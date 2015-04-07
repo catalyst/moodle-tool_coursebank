@@ -44,11 +44,11 @@ $string['settings_externalcron'] = 'Use external cron';
 $string['settings_externalcron_desc'] = 'If checked the process will be triggered by external cron.
     <br />Server administrators have to set up external cron.
     <br />The simple example: <PRE>2-57/5 * * * * www-data php /path/to/your/moodle/admin/tool/coursestore/cli/backup.php >> /var/log/backup.log</PRE>';
-$string['conncheckfail'] = 'Connection error. Please confirm that your course bank settings and network configuration are correct.';
-$string['connchecksuccess'] = 'Connection check passed!';
-$string['speedtestsuccess'] = 'Connection speed test passed! The test transfer speed was approximately ';
-$string['speedtestfail'] = 'Connection error. Please confirm that your course bank settings and network configuration are correct.';
-$string['speedtestslow'] = 'Outbound transfers are very slow. The test transfer speed was approximately ';
+$string['conncheckfail'] = 'Connection to {$a} failed. Please confirm that your course bank settings and network configuration are correct.';
+$string['connchecksuccess'] = 'Connection check to {$a} passed!';
+$string['speedtestsuccess'] = 'Connection speed test to {$a} passed! The test transfer speed was approximately ';
+$string['speedtestfail'] = 'Connection to {$a} failed. Please confirm that your course bank settings and network configuration are correct.';
+$string['speedtestslow'] = 'Outbound transfers to {$a} are very slow. The test transfer speed was approximately ';
 $string['checking'] = 'Checking...';
 $string['return'] = 'Return';
 $string['connchecktitle'] = 'Connection check';

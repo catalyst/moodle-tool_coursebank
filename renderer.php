@@ -174,17 +174,18 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::end_tag('div');
 
         // Success notification.
+        $urltarget = get_config('tool_coursestore', 'url');
         $html .= $this->course_store_check_notification(
                 'conncheck',
                 'success',
-                get_string('connchecksuccess', 'tool_coursestore')
+                get_string('connchecksuccess', 'tool_coursestore', $urltarget)
         );
 
         // Failure notification.
         $html .= $this->course_store_check_notification(
                 'conncheck',
                 'fail',
-                get_string('conncheckfail', 'tool_coursestore')
+                get_string('conncheckfail', 'tool_coursestore', $urltarget)
         );
 
         $html .= $this->box_end();
@@ -252,38 +253,39 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('input', '', $wwwrootattr);
 
         // Success notification.
+        $urltarget = get_config('tool_coursestore', 'url');
         $attr = array(
             'type' => 'hidden',
             'name' => 'success',
-            'value' => get_string('speedtestsuccess', 'tool_coursestore'),
+            'value' => get_string('speedtestsuccess', 'tool_coursestore', $urltarget),
             'class' => 'speedtestsuccess'
         );
         $html .= html_writer::tag('input', '', $attr);
         $html .= $this->course_store_check_notification(
                 'speedtest',
                 'success',
-                get_string('speedtestsuccess', 'tool_coursestore')
+                get_string('speedtestsuccess', 'tool_coursestore', $urltarget)
         );
 
         // Failure notification.
         $html .= $this->course_store_check_notification(
                 'speedtest',
                 'fail',
-                get_string('speedtestfail', 'tool_coursestore')
+                get_string('speedtestfail', 'tool_coursestore', $urltarget)
         );
 
         // Slow connection speed notification.
         $attr = array(
             'type' => 'hidden',
             'name' => 'slow',
-            'value' => get_string('speedtestslow', 'tool_coursestore'),
+            'value' => get_string('speedtestslow', 'tool_coursestore', $urltarget),
             'class' => 'speedtestslow'
         );
         $html .= html_writer::tag('input', '', $attr);
         $html .= $this->course_store_check_notification(
                 'speedtest',
                 'slow',
-                get_string('speedtestslow', 'tool_coursestore')
+                get_string('speedtestslow', 'tool_coursestore', $urltarget)
         );
 
         $html .= $this->box_end();

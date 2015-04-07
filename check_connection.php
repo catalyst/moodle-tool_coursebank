@@ -54,7 +54,7 @@ switch ($action) {
         $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
 
         $msgtype = tool_coursestore::check_connection($wsmanager, $sesskey) ? 'success' : 'fail';
-        $content = get_string('conncheck'.$msgtype, 'tool_coursestore');
+        $content = get_string('conncheck' . $msgtype, 'tool_coursestore', $urltarget);
         $wsmanager->close();
 
         break;
@@ -82,7 +82,7 @@ switch ($action) {
             $add = (string) $result .' kbps.';
         }
 
-        $content = get_string('speedtest'.$msgtype, 'tool_coursestore') . $add;
+        $content = get_string('speedtest' . $msgtype, 'tool_coursestore', $urltarget) . $add;
 
     default:
         break;
