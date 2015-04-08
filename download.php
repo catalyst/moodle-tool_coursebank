@@ -46,11 +46,10 @@ $url = new moodle_url('/admin/tool/coursestore/download.php');
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 
-$header = get_string('pluginname', 'tool_coursestore');
+$header = get_string('downloadsummary', 'tool_coursestore');
 $PAGE->set_title($header);
-
-$renderer = $PAGE->get_renderer('tool_coursestore');
 echo $OUTPUT->header();
+echo $OUTPUT->heading($header);
 
 $urltarget = get_config('tool_coursestore', 'url');
 $timeout = get_config('tool_coursestore', 'timeout');
@@ -88,6 +87,7 @@ if (!$count = $wsman->get_downloadcount($sesskey, $extraparams)) {
 
 $filtering->display_add();
 $filtering->display_active();
+$renderer = $PAGE->get_renderer('tool_coursestore');
 echo $renderer->course_store_downloads($response->body, $sort, $dir, $page, $perpage);
 echo $OUTPUT->paging_bar($count->body->backupcount, $page, $perpage, $url);
 

@@ -39,7 +39,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
 
         $html = $this->box_start();
         $html .= $this->heading(
-                get_string('backupfiles', 'tool_coursestore', $results['count']),
+                get_string('backupfiles', 'tool_coursestore', count($results)),
                 3
         );
         $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
@@ -52,7 +52,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::end_tag('thead');
 
         $html .= html_writer::start_tag('tbody');
-        foreach ($results['results'] as $result) {
+        foreach ($results as $result) {
             $html .= html_writer::start_tag('tr');
             $html .= html_writer::tag('td', $result->coursefullname);
             $html .= html_writer::tag('td', userdate($result->filetimemodified));
@@ -78,7 +78,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
 
         $html = $this->box_start();
         $html .= $this->heading(
-                get_string('downloadsummary', 'tool_coursestore'),
+                get_string('backupfiles', 'tool_coursestore', count((array)$downloads)),
                 3
         );
         $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
