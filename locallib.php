@@ -93,7 +93,8 @@ abstract class tool_coursestore {
         // No sess key provided, or sesskey rejected. Try starting a new session.
         $token = get_config('tool_coursestore', 'authtoken');
         if ($token && !$success) {
-            if (!$wsman->post_session($token)) {
+            $sessresponse = $wsman->post_session($token);
+            if($sessresponse->httpcode != coursestore_ws_manager::WS_HTTP_CREATED) {
                 $success = false;
             }
             $sesskey = self::get_session();
@@ -270,7 +271,9 @@ abstract class tool_coursestore {
                 'categoryid'   => $backup->categoryid,
                 'categoryname' => $backup->categoryname,
             );
-            if (!$coursebankid = $wsmanager->post_backup($data, $sessionkey, $retries)) {
+            $coursebankid = $wsmanager->post_backup($data, $sessionkey, $retries);
+            // Unexpected http response or none received.
+            if (!is_int($coursebankid)) {
                 $backup->status = self::STATUS_ERROR;
                 $DB->update_record('tool_coursestore', $backup);
                 $wsmanager->close();
@@ -289,7 +292,15 @@ abstract class tool_coursestore {
                 'chunksize'     => $chunksize,
                 'original_data' => $contents,
             );
-            if ($wsmanager->put_chunk($data, $backup->id, $backup->chunknumber, $sessionkey, $retries)) {
+
+            $response = $wsmanager->put_chunk(
+                    $data,
+                    $backup->id,
+                    $backup->chunknumber,
+                    $sessionkey,
+                    $retries
+            );
+            if ($response === true) {
                 $backup->timechunkcompleted = time();
                 $backup->chunknumber++;
                 if ($backup->status == self::STATUS_ERROR) {
@@ -321,7 +332,8 @@ abstract class tool_coursestore {
                 $coursebankid = $backup->id;
             }
             // Confirm the backup file as complete.
-            if (!$wsmanager->put_backup_complete($sessionkey, $data, $coursebankid)) {
+            $completion = $wsmanager->put_backup_complete($sessionkey, $data, $coursebankid);
+            if ($completion->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
                 return false;
             }
             $backup->status = self::STATUS_FINISHED;
