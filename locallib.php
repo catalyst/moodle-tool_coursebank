@@ -240,17 +240,6 @@ abstract class tool_coursestore {
             return false;
         }
 
-        $otherdata = array(
-            'courseid' => $backup->courseid,
-            'coursestoreid' => $backup->id
-            );
-        $eventdata = array(
-            'other' => $otherdata,
-            'context' => context_system::instance()
-        );
-        $event = \tool_coursestore\event\transfer_started::create($eventdata);
-        $event->trigger();
-
         // Update again in case a new session key was given.
         $sessionkey = self::get_session();
 
@@ -260,6 +249,20 @@ abstract class tool_coursestore {
         // Open input file.
         $coursestorefilepath = self::get_coursestore_filepath($backup);
         $file = fopen($coursestorefilepath, 'rb');
+
+        // Log transfer_started/resumed event.
+        $transferaction = $backup->chunknumber == 0 ? 'started' : 'resumed';
+        $otherdata = array(
+            'courseid' => $backup->courseid,
+            'coursestoreid' => $backup->id
+            );
+        $eventdata = array(
+            'other' => $otherdata,
+            'context' => context_system::instance()
+        );
+        $eventclass = '\tool_coursestore\event\transfer_' . $transferaction;
+        $event = $eventclass::create($eventdata);
+        $event->trigger();
 
         // Set offset based on chunk number.
         if ($backup->chunknumber != 0) {
@@ -351,6 +354,8 @@ abstract class tool_coursestore {
             }
             $backup->status = self::STATUS_FINISHED;
             $DB->update_record('tool_coursestore', $backup);
+
+            // Log transfer_completed event.
             $otherdata = array(
                 'courseid' => $backup->courseid,
                 'coursestoreid' => $backup->id
