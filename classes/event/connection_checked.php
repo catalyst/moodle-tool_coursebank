@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The EVENTNAME event.
+ * connection_checked
  *
  * @package    tool_coursestore
  * @author     Adam Riddell <adamr@catalyst-au.net>
@@ -25,12 +25,13 @@
 namespace tool_coursestore\event;
 defined('MOODLE_INTERNAL') || die();
 /**
- * The EVENTNAME event class.
+ * connection_checked
+ *
+ * This event is to be triggered whenever a connection check call is made.
  *
  * @property-read array $other {
- *      Extra information about event.
- *
- *      This event is to be triggered whenever a connection check call is made.
+ *      status => Connection check result
+ *      speed  => Resulting connection speed
  * }
  *
  * @package    tool_coursestore
