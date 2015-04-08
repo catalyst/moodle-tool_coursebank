@@ -923,7 +923,7 @@ class coursestore_ws_manager {
     /**
      * Get count of backup files available from course bank instance.
      */
-    public function get_downloadcount($sesskey) {
+    public function get_downloadcount($sesskey, array $params = null) {
         return $this->send('downloadcount', array(), 'GET', $sesskey);
     }
 }
