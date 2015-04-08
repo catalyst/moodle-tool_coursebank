@@ -87,15 +87,9 @@ class coursestore_filter_filesize extends user_filter_text {
      * @return array sql string and $params
      */
     public function get_sql_filter($data) {
-        global $DB;
-        static $counter = 0;
-        $name = 'ex_text'.$counter++;
-
         $operator = $data['operator'];
-        $value    = $data['value'];
+        $value    = intval($data['value']);
         $field    = $this->_field;
-
-        $params = array();
 
         if ($operator != 3 and $value === '') {
             return '';
@@ -103,25 +97,21 @@ class coursestore_filter_filesize extends user_filter_text {
 
         switch($operator) {
             case 0: // More than.
-                $res = $DB->sql_like($field, ":$name", false, false);
-                $params[$name] = "%$value%";
+                $res .= "$field > $value";
                 break;
             case 1: // Less than.
-                $res = $DB->sql_like($field, ":$name", false, false, true);
-                $params[$name] = "%$value%";
+                $res .= "$field < $value";
                 break;
             case 2: // Equal to.
-                $res = $DB->sql_like($field, ":$name", false, false);
-                $params[$name] = "$value";
+                $res .= "$field = $value";
                 break;
             case 3: // Empty.
-                $res = "$field = :$name";
-                $params[$name] = '';
+                $res .= "$field = ''";
                 break;
             default:
                 return '';
         }
-        return array($res, $params);
+        return array($res, array());
     }
 
     /**
