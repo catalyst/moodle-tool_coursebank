@@ -101,6 +101,9 @@ if ($hassiteconfig) {
             '',
             PARAM_TEXT)
     );
+    $settings->add(new admin_setting_configcheckbox('tool_coursestore/loghttpdata',
+            get_string('settings_loghttpdata', 'tool_coursestore'),
+            get_string('settings_loghttpdata_desc', 'tool_coursestore'), 0));
 
     $ADMIN->add('tools', $settings);
 }

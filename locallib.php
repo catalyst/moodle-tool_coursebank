@@ -294,6 +294,8 @@ abstract class tool_coursestore {
                 $DB->update_record('tool_coursestore', $backup);
                 $wsmanager->close();
                 echo("create backup failed; chunknumber=" . $backup->chunknumber . ".\n");
+                // Log a transfer interruption event.
+                $coursebankid->log_http_error($backup->courseid, $backup->id);
                 return false;
             }
             $backup->status = self::STATUS_INPROGRESS;
@@ -332,6 +334,8 @@ abstract class tool_coursestore {
                     $backup->status = self::STATUS_ERROR;
                 }
                 $DB->update_record('tool_coursestore', $backup);
+                // Log a transfer interruption event.
+                $response->log_http_error($backup->courseid, $backup->id);
                 return false;
             }
         }
@@ -351,6 +355,8 @@ abstract class tool_coursestore {
             // Confirm the backup file as complete.
             $completion = $wsmanager->put_backup_complete($sessionkey, $data, $coursebankid);
             if ($completion->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
+                // Log a transfer interruption event.
+                $completion->log_http_error($backup->courseid, $backup->id);
                 return false;
             }
             $backup->status = self::STATUS_FINISHED;
@@ -956,6 +962,11 @@ class coursestore_http_response {
      public $httpcode;
      public $request;
     /**
+     * Constructor method for http_response object.
+     *
+     * @param obj   $body
+     * @param array $info
+     * @param array $request
      */
     public function __construct($body=false, $info=false, $request=null) {
 
@@ -965,5 +976,40 @@ class coursestore_http_response {
         $this->info = $info;
         $this->request = $request;
 
+    }
+    /**
+     * Method to log the http response as a Moodle event. This is intended
+     * for scenarios where an unexpected http response is encountered, and
+     * data about this response and the initial request may be helpful for
+     * debugging.
+     *
+     * @param int $courseid
+     * @param int $coursestoreid
+     */
+    public function log_http_error($courseid, $coursestoreid) {
+        $body = $this->body;
+        $request = $this->request;
+        $request[CURLOPT_POSTFIELDS] = (array) json_decode($request[CURLOPT_POSTFIELDS]);
+
+        // Don't include data in event unless loghttpdata is set.
+        if (!get_config('tool_coursestore', 'loghttpdata')) {
+            unset($request[CURLOPT_POSTFIELDS]['data']);
+            unset($body->data);
+        }
+
+        $otherdata = array(
+            'courseid' => $courseid,
+            'coursestoreid' => $coursestoreid,
+            'body' => $body,
+            'info' => $this->info,
+            'httpcode' => $this->httpcode,
+            'request' => $request
+            );
+        $eventdata = array(
+            'other' => $otherdata,
+            'context' => context_system::instance()
+        );
+        $event = \tool_coursestore\event\transfer_interrupted::create($eventdata);
+        $event->trigger();
     }
 }
