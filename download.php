@@ -78,11 +78,17 @@ if (!$response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $pag
     redirect($redirecturl, '', 0);
 }
 
+if (!$count = $wsman->get_downloadcount($sesskey, $extraparams)) {
+    $redirecturl = new moodle_url(
+            '/admin/tool/coursestore/check_connection.php',
+            array('action' => 'conncheck')
+    );
+    redirect($redirecturl, '', 0);
+}
+
 $filtering->display_add();
 $filtering->display_active();
 echo $renderer->course_store_downloads($response->body, $sort, $dir, $page, $perpage);
-
-// I hope we will get something like $response->body['count'] for pagination.
-//echo $OUTPUT->paging_bar($count, $page, $perpage, $url);
+echo $OUTPUT->paging_bar($count->body->backupcount, $page, $perpage, $url);
 
 echo $OUTPUT->footer();
