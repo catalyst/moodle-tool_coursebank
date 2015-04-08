@@ -35,7 +35,7 @@ $download     = optional_param('download', 0, PARAM_INT);
 $sort         = optional_param('sort', 'coursename', PARAM_ALPHANUM);
 $dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
 $page         = optional_param('page', 0, PARAM_INT);
-$perpage      = optional_param('perpage', 50, PARAM_INT);        // how many per page
+$perpage      = optional_param('perpage', 50, PARAM_INT);
 
 $context = context_system::instance();
 require_login();
@@ -74,7 +74,7 @@ if (!$response = $wsman->get_downloads($sesskey)) {
     redirect($redirecturl, '', 0);
 }
 
-$filtering = new coursestore_filtering('download', array('coursename' => 0, 'filename' => 1, 'filesize' => 1, 'backupdate' => 1));
+$filtering = new coursestore_filtering('download', array('coursefullname' => 0, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
 $filtering->display_add();
 $filtering->display_active();
 echo $renderer->course_store_downloads($response->body, $sort, $dir, $page, $perpage);

@@ -179,19 +179,28 @@ abstract class tool_coursestore {
      * page.
      *
      */
-    public static function get_summary_data() {
-        global $CFG, $DB;
+    public static function get_summary_data($sort='status', $dir='ASC', $extraselect='',
+                                            array $extraparams=null, $page=0, $recordsperpage=0) {
+        global $DB;
 
-        $sql = "SELECT tcs.id, c.shortname, f.timemodified, f.filename,
-                       f.filesize, tcs.status
-                  FROM {tool_coursestore} tcs
-            INNER JOIN {files} f ON (tcs.fileid = f.id)
-            INNER JOIN {context} cx
-                       ON (f.contextid = cx.id)
-                       AND (cx.contextlevel = :contextcourse)
-            INNER JOIN {course} c ON (cx.instanceid = c.id)";
-        $params = array('contextcourse' => CONTEXT_COURSE);
-        $results = $DB->get_records_sql($sql, $params);
+        $fieldstosort = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'status');
+
+        if (in_array($sort, $fieldstosort)) {
+            $sort = "$sort $dir";
+        } else {
+            $sort = '';
+        }
+
+        if (!empty($extraselect)) {
+            $select = $extraselect;
+        }
+
+        if (!empty($extraparams)) {
+            $params = $params + (array)$extraparams;
+        }
+
+        $results = $DB->get_records_select('tool_coursestore', $select, $params, $sort, '*', $page, $recordsperpage);
+        $count = $DB->count_records_select('tool_coursestore', $select, $params);
 
         $statusmap = self::get_statuses();
 
@@ -201,7 +210,7 @@ abstract class tool_coursestore {
             }
         }
 
-        return $results;
+        return array('results' => $results, 'count' => $count);
     }
     /**
      * Convenience function to handle sending a file along with the relevant

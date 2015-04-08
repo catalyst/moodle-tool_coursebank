@@ -35,28 +35,28 @@ class tool_coursestore_renderer extends plugin_renderer_base {
     public function course_store_main($results, $sort='', $dir='', $page='', $perpage='') {
         global $CFG;
 
-        $columns = array('coursename', 'backupdate', 'filename', 'filesize', 'status');
+        $columns = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'status');
 
         $html = $this->box_start();
         $html .= $this->heading(
-                get_string('backupsummary', 'tool_coursestore'),
+                get_string('backupfiles', 'tool_coursestore', $results['count']),
                 3
         );
         $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
         foreach ($columns as $column) {
-            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir, $dir, $page, $perpage));
+            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir, $page, $perpage));
         }
         $html .= html_writer::end_tag('tr');
         $html .= html_writer::end_tag('thead');
 
         $html .= html_writer::start_tag('tbody');
-        foreach ($results as $result) {
+        foreach ($results['results'] as $result) {
             $html .= html_writer::start_tag('tr');
-            $html .= html_writer::tag('td', $result->shortname);
+            $html .= html_writer::tag('td', $result->coursefullname);
             $html .= html_writer::tag('td', userdate($result->timemodified));
-            $html .= html_writer::tag('td', $result->filename);
+            $html .= html_writer::tag('td', $result->backupfilename);
             $html .= html_writer::tag('td', display_size($result->filesize));
             $html .= html_writer::tag('td', $result->status);
             $html .= html_writer::start_tag('tr');
@@ -74,7 +74,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
     public function course_store_downloads($downloads, $sort='', $dir='', $page='', $perpage='') {
         global $CFG;
 
-        $columns = array('coursename', 'filename', 'filesize',  'backupdate');
+        $columns = array('coursefullname', 'backupfilename', 'filesize',  'filetimemodified');
 
         $html = $this->box_start();
         $html .= $this->heading(
@@ -94,7 +94,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('tbody');
         foreach ($downloads as $download) {
             $html .= html_writer::start_tag('tr');
-            $html .= html_writer::tag('td', $download->coursename);
+            $html .= html_writer::tag('td', $download->coursefullname);
             $html .= html_writer::tag('td', $download->backupfilename);
             $html .= html_writer::tag('td', display_size($download->filesize));
             $html .= html_writer::start_tag('tr');

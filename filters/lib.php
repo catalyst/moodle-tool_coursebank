@@ -60,7 +60,7 @@ class coursestore_filtering {
         }
 
         if (empty($fieldnames)) {
-            $fieldnames = array('coursename' => 0, 'filename' => 1, 'filesize' => 1, 'backupdate' => 1, 'status' => 1);
+            $fieldnames = array('coursefullname' => 0, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1, 'status' => 1);
         }
 
         $this->_fields  = array();
@@ -124,10 +124,10 @@ class coursestore_filtering {
     public function get_field($fieldname, $advanced) {
 
         switch ($fieldname) {
-            case 'coursename':  return new coursestore_filter_text('coursename', get_string('coursename', 'tool_coursestore'), $advanced, 'coursename');
-            case 'filename':    return new coursestore_filter_text('filename',get_string('filename', 'tool_coursestore'), $advanced, 'filename');
+            case 'coursefullname':  return new coursestore_filter_text('coursefullname', get_string('coursefullname', 'tool_coursestore'), $advanced, 'coursefullname');
+            case 'backupfilename':    return new coursestore_filter_text('backupfilename',get_string('backupfilename', 'tool_coursestore'), $advanced, 'backupfilename');
             case 'filesize':    return new coursestore_filter_filesize('filesize', get_string('filesize', 'tool_coursestore'), $advanced, 'filesize');
-            case 'backupdate':  return new coursestore_filter_date('firstaccess', get_string('backupdate', 'tool_coursestore'), $advanced, 'backupdate');
+            case 'filetimemodified':  return new coursestore_filter_date('filetimemodified', get_string('filetimemodified', 'tool_coursestore'), $advanced, 'filetimemodified');
             case 'status':      return new coursestore_filter_select('status', get_string('status', 'tool_coursestore'), $advanced, 'status', tool_coursestore::get_statuses());
             default:
                 return null;

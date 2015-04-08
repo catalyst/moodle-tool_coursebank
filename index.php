@@ -30,32 +30,35 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
-$sort         = optional_param('sort', 'coursename', PARAM_ALPHANUM);
+$sort         = optional_param('sort', 'status', PARAM_ALPHANUM);
 $dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
 $page         = optional_param('page', 0, PARAM_INT);
-$perpage      = optional_param('perpage', 50, PARAM_INT);        // how many per page
+$perpage      = optional_param('perpage', 50, PARAM_INT);
 
 $context = context_system::instance();
 require_login();
 
 admin_externalpage_setup('tool_coursestore');
 
-$conncheck = optional_param('conn', null, PARAM_BOOL);
 $url = new moodle_url('/admin/tool/coursestore/index.php');
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 
-$header = get_string('pluginname', 'tool_coursestore');
+$header = get_string('backupsummary', 'tool_coursestore');
 $PAGE->set_title($header);
-
-$renderer = $PAGE->get_renderer('tool_coursestore');
 echo $OUTPUT->header();
-
 echo $OUTPUT->heading($header);
-$results = tool_coursestore::get_summary_data();
-$filtering = new coursestore_filtering('summary');
-// add filters
+
+// Filters.
+$filtering = new coursestore_filtering('summary', array('status' => 0, 'coursefullname' => 1, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
+list($extraselect, $extraparams) = $filtering->get_sql_filter();
+$results = tool_coursestore::get_summary_data($sort, $dir, $extraselect, $extraparams, $page, $perpage);
+// Display filters.
 $filtering->display_add();
 $filtering->display_active();
+
+// Display table.
+$renderer = $PAGE->get_renderer('tool_coursestore');
 echo $renderer->course_store_main($results, $sort, $dir, $page, $perpage);
+// Footer.
 echo $OUTPUT->footer();
