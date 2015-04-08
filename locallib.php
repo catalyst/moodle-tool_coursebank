@@ -770,11 +770,11 @@ class coursestore_ws_manager {
             if ($returnhash != $validatehash) {
                 return $response;
             } else {
-                return $data['fileid'];
+                return (int) $data['fileid'];
             }
         } else if ($response->httpcode == self::WS_HTTP_CONFLICT) {
             // The backup already exists, continue.
-            return $data['fileid'];
+            return (int) $data['fileid'];
         }
         // Unexpected response or no response received.
         return $response;
