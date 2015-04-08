@@ -316,14 +316,15 @@ abstract class tool_coursestore {
                     $sessionkey,
                     $retries
             );
+
             if ($response === true) {
                 $backup->timechunkcompleted = time();
                 $backup->chunknumber++;
                 if ($backup->status == self::STATUS_ERROR) {
                     $backup->chunkretries = 0;
                     $backup->status = self::STATUS_INPROGRESS;
-                    $DB->update_record('tool_coursestore', $backup);
                 }
+                $DB->update_record('tool_coursestore', $backup);
             } else {
                 if ($backup->status == self::STATUS_ERROR) {
                     $backup->chunkretries++;
@@ -443,7 +444,6 @@ abstract class tool_coursestore {
      * via web service to the configured course bank instance.
      *
      * - The query consists of three parts which are combined with a UNION
-     * - The first
      *
      */
     public static function fetch_backups() {
