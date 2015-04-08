@@ -191,16 +191,8 @@ abstract class tool_coursestore {
             $sort = '';
         }
 
-        if (!empty($extraselect)) {
-            $select = $extraselect;
-        }
-
-        if (!empty($extraparams)) {
-            $params = $extraparams;
-        }
-
-        $results = $DB->get_records_select('tool_coursestore', $select, $params, $sort, '*', $page, $recordsperpage);
-        $count = $DB->count_records_select('tool_coursestore', $select, $params);
+        $results = $DB->get_records_select('tool_coursestore', $extraselect, $extraparams, $sort, '*', $page, $recordsperpage);
+        $count = $DB->count_records_select('tool_coursestore', $extraselect, $extraparams);
 
         $statusmap = self::get_statuses();
 
