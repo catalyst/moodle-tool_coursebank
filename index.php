@@ -60,5 +60,6 @@ $filtering->display_active();
 // Display table.
 $renderer = $PAGE->get_renderer('tool_coursestore');
 echo $renderer->course_store_main($results, $sort, $dir, $page, $perpage);
+echo $OUTPUT->paging_bar($results['count'], $page, $perpage, $url);
 // Footer.
 echo $OUTPUT->footer();

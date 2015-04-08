@@ -27,4 +27,30 @@ require_once($CFG->dirroot.'/user/filters/lib.php');
 
 class coursestore_filter_date extends user_filter_date {
 
+    /**
+     * Returns params
+     *
+     * @param array $data filter settings
+     * @return array sql string and $params
+     */
+    public function get_param_filter($data) {
+        $params = array();
+
+        $after  = (int)$data['after'];
+        $before = (int)$data['before'];
+
+        if (empty($after) and empty($before)) {
+            return '';
+        }
+
+        if ($after) {
+            $params = array('operator' => '>=', 'value' => $after);
+        }
+
+        if ($before) {
+            $params = array('operator' => '<=', 'value' => $before);
+        }
+
+        return $params;
+    }
 }

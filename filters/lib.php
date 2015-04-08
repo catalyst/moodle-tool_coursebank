@@ -172,6 +172,33 @@ class coursestore_filtering {
     }
 
     /**
+     * Returns parameters based on active filters
+     * @param string $extra sql
+     * @param array $params named params (recommended prefix ex)
+     * @return array sql string and $params
+     */
+    public function get_param_filter(array $params=null) {
+        global $SESSION;
+
+        $params = (array)$params;
+
+        if (!empty($SESSION->coursestore_filtering[$this->prefix])) {
+            foreach ($SESSION->coursestore_filtering[$this->prefix] as $fname => $datas) {
+                if (!array_key_exists($fname, $this->_fields)) {
+                    continue; // Filter not used.
+                }
+                $field = $this->_fields[$fname];
+                foreach ($datas as $i => $data) {
+                    $p = $field->get_param_filter($data);
+                    $params[$fname][] = $p;
+                }
+            }
+        }
+
+        return $params;
+    }
+
+    /**
      * Print the add filter form.
      */
     public function display_add() {

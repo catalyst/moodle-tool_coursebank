@@ -866,10 +866,58 @@ class coursestore_ws_manager {
     /**
      * Get list of backup files available for download from course bank instance.
      *
-     * @param string $sesskey  Session key authorization string
+     * One of the parameters is an Associative array $params
+     * A simple example:
      *
+            Array
+            (
+                [coursefullname] => Array
+                    (
+                        [0] => Array
+                            (
+                                [operator] => LIKE
+                                [value] => test
+                            )
+
+                    )
+
+                [filetimemodified] => Array
+                    (
+                        [0] => Array
+                            (
+                                [operator] => >=
+                                [value] => 1428415200
+                            )
+
+                    )
+
+            )
+     *
+     * The firs level keys contain field names (e.g coursefullname, backupfilename, filesize, filetimemodified, status)
+     * The second level is an array of filters
+     * Each filter is an associative array with following keys: operator, value
+     * Operator may contain following values:
+     * <>       - not equal
+     * >=       - more or equal
+     * <=       - less or equal
+     * =        - equal
+     * >        - more then
+     * <        - less then
+     * LIKE     - contains
+     * NOT LIKE - does not contain
+     * %LIKE    - starts with
+     * LIKE%    - ends with
+     * EMPTY    - empty
+     *
+     * @param string $sesskey  Session key authorization string
+     * @param array $params Associative array of parameters
+     * @param string $sort A field to sort by
+     * @param string $dir The sort direction ASC|DESC
+     * @param int $page The page or records to return
+     * @param int $recordsperpage The number of records to return per page
+     * @return std Class
      */
-    public function get_downloads($sesskey) {
+    public function get_downloads($sesskey, array $params = null, $sort ='', $dir='ASC', $page=0, $recordsperpage=0) {
         return $this->send('downloads', array(), 'GET', $sesskey);
     }
     /**

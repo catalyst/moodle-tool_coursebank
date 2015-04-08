@@ -113,6 +113,40 @@ class coursestore_filter_filesize extends user_filter_text {
         }
         return array($res, array());
     }
+    /**
+     * Returns params
+     *
+     * @param array $data filter settings
+     * @return array sql string and $params
+     */
+    public function get_param_filter($data) {
+        $params = array();
+
+        $operator = $data['operator'];
+        $value    = intval($data['value']);
+
+        if ($operator != 3 and $value === '') {
+            return '';
+        }
+
+        switch($operator) {
+            case 0: // More than.
+                $params = array('operator' => '>', 'value' => $value);
+                break;
+            case 1: // Less than.
+                $params = array('operator' => '<', 'value' => $value);
+                break;
+            case 2: // Equal to.
+                $params = array('operator' => '=', 'value' => $value);
+                break;
+            case 3: // Empty.
+                $params = array('operator' => 'EMPTY', 'value' => $value);
+                break;
+            default:
+                return '';
+        }
+        return $params;
+    }
 
     /**
      * Returns a human friendly description of the filter used as label.
