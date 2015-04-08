@@ -351,6 +351,16 @@ abstract class tool_coursestore {
             }
             $backup->status = self::STATUS_FINISHED;
             $DB->update_record('tool_coursestore', $backup);
+            $otherdata = array(
+                'courseid' => $backup->courseid,
+                'coursestoreid' => $backup->id
+                );
+            $eventdata = array(
+                'other' => $otherdata,
+                'context' => context_system::instance()
+            );
+            $event = \tool_coursestore\event\transfer_completed::create($eventdata);
+            $event->trigger();
         }
 
         $wsmanager->close();

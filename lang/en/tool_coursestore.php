@@ -80,6 +80,7 @@ $string['coursefullname'] = 'Course name';
 $string['filetimemodified'] = 'Backup date';
 $string['backupfilename'] = 'File name';
 $string['eventtransferstarted'] = 'Backup transfer started';
+$string['eventtransfercompleted'] = 'Backup transfer completed';
 $string['coursename'] = 'Course name';
 $string['backupdate'] = 'Backup date';
 $string['filename'] = 'File name';
