@@ -98,7 +98,6 @@ abstract class tool_coursestore {
             }
             $sesskey = self::get_session();
             $checkresult = $wsman->get_test($sesskey);
-            $checkresult = $wsman->get_test($auth);
             $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
         }
         $otherdata = array(
