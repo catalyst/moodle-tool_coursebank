@@ -104,7 +104,8 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                                                     'alt' => $text, 'class' => 'iconsmall'));
             $url = new moodle_url('_URL_', array());
             $attributes = array('href' => $url);
-            $html .= html_writer::tag('a', $icon, $attributes);
+            $link = html_writer::tag('a', $icon, $attributes);
+            $html .= html_writer::tag('td', $link);
             $html .= html_writer::start_tag('tr');
         }
         $html .= html_writer::end_tag('tbody');
