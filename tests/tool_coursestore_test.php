@@ -80,10 +80,11 @@ class tool_coursestore_testcase extends advanced_testcase {
     public function test_tool_coursestore_post_session() {
         $this->resetAfterTest(true);
         $wsman = new coursestore_ws_manager_tester();
+        $response = new coursestore_http_response();
 
         // Test false response.
-        $wsman->set_response(false);
-        $this->assertEquals(false, $wsman->post_session('hash'));
+        $wsman->set_response($response);
+        $this->assertEquals($response, $wsman->post_session('hash'));
 
         // Test successful response.
         $info = array(
@@ -139,12 +140,13 @@ class tool_coursestore_testcase extends advanced_testcase {
         // Test hash mismatch response.
         $testdata['filename'] = 'test-different-hash.mbz';
         $result = $wsman->post_backup($testdata, 'sesskey', 0);
-        $this->assertEquals(false, $result);
+        $this->assertEquals($response, $result);
 
         // Test failed request.
-        $wsman->set_response(false);
+        $response = new coursestore_http_response();
+        $wsman->set_response($response);
         $result = $wsman->post_backup($testdata, 'sesskey', 0);
-        $this->assertEquals(false, $result);
+        $this->assertEquals($response, $result);
 
         // Test response if backup already exists.
         $info['http_code'] = coursestore_ws_manager_tester::WS_HTTP_CONFLICT;
@@ -158,7 +160,7 @@ class tool_coursestore_testcase extends advanced_testcase {
         $response = new coursestore_http_response($body, $info);
         $wsman->set_response($response);
         $result = $wsman->post_backup($testdata, 'sesskey', 0);
-        $this->assertEquals(false, $result);
+        $this->assertEquals($response, $result);
     }
     /**
      * @group tool_coursestore
@@ -178,10 +180,11 @@ class tool_coursestore_testcase extends advanced_testcase {
         $wsman = new coursestore_ws_manager_tester();
 
         // Test failed request.
-        $wsman->set_response(false);
+        $response = new coursestore_http_response();
+        $wsman->set_response($response);
         $data = array('original_data' => 'data');
         $result = $wsman->put_chunk($data, 1, 2, 'sesskey', 0);
-        $this->assertEquals(false, $result);
+        $this->assertEquals($response, $result);
 
         // Test successful request.
         $body = new stdClass();
@@ -199,7 +202,7 @@ class tool_coursestore_testcase extends advanced_testcase {
         $response = new coursestore_http_response($body, $info);
         $wsman->set_response($response);
         $result = $wsman->put_chunk($data, 1, 2, 'sesskey', 0);
-        $this->assertEquals(false, $result);
+        $this->assertEquals($response, $result);
 
         // Test unexpected HTTP response code.
         $info = array('http_code' => coursestore_ws_manager_tester::WS_HTTP_UNAUTHORIZED);
@@ -207,6 +210,6 @@ class tool_coursestore_testcase extends advanced_testcase {
         $wsman->set_response($response);
         $body->chunkhash = md5($data['original_data']);
         $result = $wsman->put_chunk($data, 1, 2, 'sesskey', 0);
-        $this->assertEquals(false, $result);
+        $this->assertEquals($response, $result);
     }
 }
