@@ -239,6 +239,18 @@ abstract class tool_coursestore {
             $wsmanager->close();
             return false;
         }
+
+        $otherdata = array(
+            'courseid' => $backup->courseid,
+            'coursestoreid' => $backup->id
+            );
+        $eventdata = array(
+            'other' => $otherdata,
+            'context' => context_system::instance()
+        );
+        $event = \tool_coursestore\event\transfer_started::create($eventdata);
+        $event->trigger();
+
         // Update again in case a new session key was given.
         $sessionkey = self::get_session();
 
