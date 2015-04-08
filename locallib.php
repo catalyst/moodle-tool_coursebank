@@ -196,7 +196,7 @@ abstract class tool_coursestore {
         }
 
         if (!empty($extraparams)) {
-            $params = $params + (array)$extraparams;
+            $params = $extraparams;
         }
 
         $results = $DB->get_records_select('tool_coursestore', $select, $params, $sort, '*', $page, $recordsperpage);
