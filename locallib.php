@@ -102,7 +102,7 @@ abstract class tool_coursestore {
             $checkresult = $wsman->get_test($sesskey);
             $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
         }
-        if(self::legacy_logging()) {
+        if (self::legacy_logging()) {
             $result = $success ? 'passed' : 'failed';
             $info = "Connection check $result.";
             add_to_log(SITEID, 'Course store', 'Connection check', '', $info, 0, $USER->id);
@@ -138,7 +138,7 @@ abstract class tool_coursestore {
             $testsize, $count, $retry, $auth) {
         global $USER;
 
-        $check = str_pad('', $testsize * 6, '0');
+        $check = str_pad('', $testsize * 1000, '0');
         $start = microtime(true);
 
         // Make $count requests with the dummy data.
@@ -161,7 +161,7 @@ abstract class tool_coursestore {
             // Convert 'total kB transferred'/'total time' into kb/s.
             $speed = round(($testsize * $count * 8 ) / $elapsed, 2);
         }
-        if(self::legacy_logging()) {
+        if (self::legacy_logging()) {
             $result = $speed === 0 ? 'failed' : "$speed kbps";
             $info = "Connection speed test: $result.";
             add_to_log(SITEID, 'Course store', 'Connection check', '', $info, 0, $USER->id);
@@ -265,7 +265,7 @@ abstract class tool_coursestore {
 
         // Log transfer_started/resumed event.
         $transferaction = $backup->chunknumber == 0 ? 'started' : 'resumed';
-        if(self::legacy_logging()) {
+        if (self::legacy_logging()) {
             $info = "Transfer of backup with course store id $backup->id " .
                     "started. (Course ID: $backup->courseid)";
 
@@ -390,7 +390,7 @@ abstract class tool_coursestore {
             $DB->update_record('tool_coursestore', $backup);
 
             // Log transfer_completed event.
-            if(self::legacy_logging()) {
+            if (self::legacy_logging()) {
                 $info = "Transfer of backup with course store id $backup->id " .
                         "completed. (Course ID: $backup->courseid)";
 
@@ -808,8 +808,8 @@ class coursestore_ws_manager {
         );
         $response = $this->send('session', $authdata, 'POST');
         if ($response->httpcode == self::WS_HTTP_CREATED) {
-            if (isset($response->body->sesskey)) {
-                $tagsesskey = self::WS_AUTH_SESSION_KEY;
+            $tagsesskey = self::WS_AUTH_SESSION_KEY;
+            if (isset($response->body->$tagsesskey)) {
                 $sesskey = trim((string) $response->body->$tagsesskey);
                 return tool_coursestore::set_session($sesskey);
             }
@@ -826,7 +826,7 @@ class coursestore_ws_manager {
      * @param bool   $download  Whether or not to generate a download link.
      */
     public function get_backup($sesskey, $backupid, $download=false) {
-        $headers = array('sesskey' => $sesskey);
+        $headers = array(self::WS_AUTH_SESSION_KEY => $sesskey);
         if ($download) {
             $headers['download'] = 'true';
         }
@@ -1034,7 +1034,7 @@ class coursestore_http_response {
      * @param int $coursestoreid
      */
     public function log_http_error($courseid, $coursestoreid) {
-        if(tool_coursestore::legacy_logging()) {
+        if (tool_coursestore::legacy_logging()) {
             return $this->log_http_error_legacy($courseid, $coursestoreid);
         }
         $info = $this->info;
@@ -1077,7 +1077,7 @@ class coursestore_http_response {
             $info .= "HTTP RESPONSE: " . $this->httpcode . " ";
         }
 
-        if(isset($this->body->error_desc)) {
+        if (isset($this->body->error_desc)) {
             $info .= "ERROR: " . $this->body->error_desc;
         }
 
