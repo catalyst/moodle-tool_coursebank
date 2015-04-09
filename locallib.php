@@ -988,7 +988,7 @@ class coursestore_http_response {
      */
     public function log_http_error($courseid, $coursestoreid) {
         $info = $this->info;
-        $body = $this->body;
+        $body = (array)$this->body;
         $request = $this->request;
         $request[CURLOPT_POSTFIELDS] = (array) json_decode($request[CURLOPT_POSTFIELDS]);
 
