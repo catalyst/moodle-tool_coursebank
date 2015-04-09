@@ -782,10 +782,12 @@ class coursestore_ws_manager {
      */
     public function get_test($auth, $data=' ') {
         $headers = array(
-            self::WS_AUTH_SESSION_KEY => $auth,
+            self::WS_AUTH_SESSION_KEY => $auth
+        );
+        $json = array(
             'data' => base64_encode($data)
         );
-        $result = $this->send('test', array(), 'GET', $headers);
+        $result = $this->send('test', $json, 'GET', $headers);
         return $result;
     }
     /**
