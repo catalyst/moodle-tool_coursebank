@@ -94,7 +94,7 @@ abstract class tool_coursestore {
         $token = get_config('tool_coursestore', 'authtoken');
         if ($token && !$success) {
             $sessresponse = $wsman->post_session($token);
-            if($sessresponse->httpcode != coursestore_ws_manager::WS_HTTP_CREATED) {
+            if ($sessresponse->httpcode != coursestore_ws_manager::WS_HTTP_CREATED) {
                 $success = false;
             }
             $sesskey = self::get_session();
@@ -640,7 +640,7 @@ class coursestore_ws_manager {
     private $curlhandle;
     private $baseurl;
 
-    // HTTP response codes
+    // HTTP response codes.
     const WS_HTTP_BAD_REQUEST = 400;
     const WS_HTTP_UNAUTHORIZED = 401;
     const WS_HTTP_CONFLICT = 409;
@@ -717,8 +717,7 @@ class coursestore_ws_manager {
                 foreach ($auth as $k => $v) {
                     $header[] = $k . ': ' . $v;
                 }
-            }
-            else {
+            } else {
                 $header[] = self::WS_AUTH_SESSION_KEY . ': ' . $auth;
             }
         }
@@ -764,10 +763,10 @@ class coursestore_ws_manager {
             'hash' => $hash,
         );
         $response = $this->send('session', $authdata, 'POST');
-        if ($response->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
+        if ($response->httpcode == self::WS_HTTP_CREATED) {
             if (isset($response->body->sesskey)) {
-                $tag_sesskey = self::WS_AUTH_SESSION_KEY;
-                $sesskey = trim((string) $response->body->$tag_sesskey);
+                $tagsesskey = self::WS_AUTH_SESSION_KEY;
+                $sesskey = trim((string) $response->body->$tagsesskey);
                 return tool_coursestore::set_session($sesskey);
             }
         } else {
