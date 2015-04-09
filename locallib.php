@@ -984,6 +984,9 @@ class coursestore_http_response {
      * @param int $coursestoreid
      */
     public function log_http_error($courseid, $coursestoreid) {
+        if((float) $CFG->version < 2014051200) {
+            return $this->log_http_error_legacy($courseid, $coursestoreid);
+        }
         $info = $this->info;
         $body = (array)$this->body;
         $request = $this->request;
@@ -1009,5 +1012,25 @@ class coursestore_http_response {
         );
         $event = \tool_coursestore\event\transfer_interrupted::create($eventdata);
         $event->trigger();
+        return true;
+    }
+    private function log_http_error_legacy($courseid, $coursestoreid) {
+
+        $info = "Transfer of backup with course store id $coursestoreid " .
+                "interrupted: URL: " . $this->request[CURLOPT_URL] .
+                "METHOD: " . $this->request[CURLOPT_CUSTOMREQUEST] . " ";
+
+        if (!isset($this->httpcode)) {
+            $info .= "No http response received";
+        } else {
+            $info .= "HTTP RESPONSE: " . $this->httpcode . " ";
+        }
+
+        if(isset($this->body->error_desc)) {
+            $info .= "ERROR: " . $this->body->error_desc;
+        }
+
+        add_to_log(SITEID, 'admin/tool/coursestore', 'Transfer error', '', $info, 0, $USER->id);
+        return true;
     }
 }
