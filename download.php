@@ -69,7 +69,8 @@ if (!$sesskey = tool_coursestore::get_session()) {
 $filtering = new coursestore_filtering('download', array('coursefullname' => 0, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
 $extraparams = $filtering->get_param_filter();
 
-if (!$response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage)) {
+$response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
+if (isset($response->body->error)) {
     $redirecturl = new moodle_url(
             '/admin/tool/coursestore/check_connection.php',
             array('action' => 'conncheck')
@@ -77,7 +78,8 @@ if (!$response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $pag
     redirect($redirecturl, '', 0);
 }
 
-if (!$count = $wsman->get_downloadcount($sesskey, $extraparams)) {
+$count = $wsman->get_downloadcount($sesskey, $extraparams);
+if ($count->body->error) {
     $redirecturl = new moodle_url(
             '/admin/tool/coursestore/check_connection.php',
             array('action' => 'conncheck')
