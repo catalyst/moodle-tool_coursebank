@@ -814,11 +814,17 @@ class coursestore_ws_manager {
     /**
      * Get a backup resource.
      *
-     * @param string $auth      Authorization string
-     * @param int    $backupid  ID referencing course bank backup resource
+     * @param string $auth      Authorization string.
+     * @param int    $backupid  ID referencing course bank backup resource.
+     * @param bool   $download  Whether or not to generate a download link.
      */
-    public function get_backup($auth, $backupid) {
-        return $this->send('backup'. $backupid, array(), 'GET', $auth);
+    public function get_backup($sesskey, $backupid, $download=false) {
+        $headers = array('sesskey' => $sesskey);
+        if ($download) {
+            $headers['download'] = 'true';
+        }
+
+        return $this->send('backup/'. $backupid, array(), 'GET', $headers);
 
     }
     /**
