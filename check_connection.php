@@ -30,7 +30,7 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 $context = context_system::instance();
 require_login();
-admin_externalpage_setup('tool_coursestore');
+admin_externalpage_setup('tool_coursestore_download');
 
 $url = new moodle_url('/admin/tool/coursestore/check_connection.php');
 $PAGE->set_url($url);
