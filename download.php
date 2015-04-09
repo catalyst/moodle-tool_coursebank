@@ -60,18 +60,20 @@ if (!$sesskey = tool_coursestore::get_session()) {
 }
 
 // TODO: fix broken url.
-if ($download == 1 and $file > 0) {
-    $response = $wsman->get_backup($sesskey, $file, true);
-    if (isset($response->body->error)) {
+if ($download == 1 and intval($file) > 0) {
+    $downloadurl = $wsman->get_backup($sesskey, $file, true);
+    if (isset($downloadurl->body->error)) {
         $redirecturl = new moodle_url(
                 '/admin/tool/coursestore/check_connection.php',
                 array('action' => 'conncheck')
         );
         redirect($redirecturl, '', 0);
     }
-    if (isset($response->body->url)) {
-        // TODO: validate URL.
-        redirect($response->body->url, '', 0);
+
+    if (isset($downloadurl->body->url)) {
+        if (!filter_var($downloadurl->body->url, FILTER_VALIDATE_URL) === false) {
+            redirect($downloadurl->body->url, '', 0);
+        }
     }
 }
 
@@ -96,7 +98,7 @@ if (isset($response->body->error)) {
 }
 
 $count = $wsman->get_downloadcount($sesskey, $extraparams);
-if ($count->body->error) {
+if (isset($count->body->error)) {
     $redirecturl = new moodle_url(
             '/admin/tool/coursestore/check_connection.php',
             array('action' => 'conncheck')
