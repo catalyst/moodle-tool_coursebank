@@ -83,6 +83,7 @@ abstract class tool_coursestore {
      * @return bool                          True for success, false otherwise
      */
     public static function check_connection(coursestore_ws_manager $wsman, $auth=false) {
+        global $USER;
 
         $success = false;
         if ($auth) {
@@ -101,16 +102,22 @@ abstract class tool_coursestore {
             $checkresult = $wsman->get_test($sesskey);
             $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
         }
-        $otherdata = array(
-            'conncheckaction' => 'conncheck',
-            'status' => $success
+        if(self::legacy_logging()) {
+            $result = $success ? 'passed' : 'failed';
+            $info = "Connection check $result.";
+            add_to_log(SITEID, 'Course store', 'Connection check', '', $info, 0, $USER->id);
+        } else {
+            $otherdata = array(
+                'conncheckaction' => 'conncheck',
+                'status' => $success
+                );
+            $eventdata = array(
+                'other' => $otherdata,
+                'context' => context_system::instance()
             );
-        $eventdata = array(
-            'other' => $otherdata,
-            'context' => context_system::instance()
-        );
-        $event = \tool_coursestore\event\connection_checked::create($eventdata);
-        $event->trigger();
+            $event = \tool_coursestore\event\connection_checked::create($eventdata);
+            $event->trigger();
+        }
         return $success;
     }
     /**
@@ -129,6 +136,7 @@ abstract class tool_coursestore {
      */
     public static function check_connection_speed(coursestore_ws_manager $wsman,
             $testsize, $count, $retry, $auth) {
+        global $USER;
 
         $check = str_pad('', $testsize * 6, '0');
         $start = microtime(true);
@@ -153,17 +161,22 @@ abstract class tool_coursestore {
             // Convert 'total kB transferred'/'total time' into kb/s.
             $speed = round(($testsize * $count * 8 ) / $elapsed, 2);
         }
-        $otherdata = array(
-            'conncheckaction' => 'speedtest',
-            'speed' => $speed
-        );
-        $eventdata = array(
-            'other' => $otherdata,
-            'context' => context_system::instance()
-        );
-        $event = \tool_coursestore\event\connection_checked::create($eventdata);
-        $event->trigger();
-
+        if(self::legacy_logging()) {
+            $result = $speed === 0 ? 'failed' : "$speed kbps";
+            $info = "Connection speed test: $result.";
+            add_to_log(SITEID, 'Course store', 'Connection check', '', $info, 0, $USER->id);
+        } else {
+            $otherdata = array(
+                'conncheckaction' => 'speedtest',
+                'speed' => $speed
+            );
+            $eventdata = array(
+                'other' => $otherdata,
+                'context' => context_system::instance()
+            );
+            $event = \tool_coursestore\event\connection_checked::create($eventdata);
+            $event->trigger();
+        }
         return $speed;
 
     }
@@ -212,7 +225,7 @@ abstract class tool_coursestore {
      *
      */
     public static function send_backup($backup) {
-        global $CFG, $DB;
+        global $CFG, $DB, $USER;
 
         // Copy the backup file into our storage area so there are no changes to the file
         // during transfer, unless file already exists.
@@ -252,17 +265,24 @@ abstract class tool_coursestore {
 
         // Log transfer_started/resumed event.
         $transferaction = $backup->chunknumber == 0 ? 'started' : 'resumed';
-        $otherdata = array(
-            'courseid' => $backup->courseid,
-            'coursestoreid' => $backup->id
+        if(self::legacy_logging()) {
+            $info = "Transfer of backup with course store id $backup->id " .
+                    "started. (Course ID: $backup->courseid)";
+
+            add_to_log(SITEID, 'Course store', 'Transfer '.$transferaction, '', $info, 0, $USER->id);
+        } else {
+            $otherdata = array(
+                'courseid' => $backup->courseid,
+                'coursestoreid' => $backup->id
+                );
+            $eventdata = array(
+                'other' => $otherdata,
+                'context' => context_system::instance()
             );
-        $eventdata = array(
-            'other' => $otherdata,
-            'context' => context_system::instance()
-        );
-        $eventclass = '\tool_coursestore\event\transfer_' . $transferaction;
-        $event = $eventclass::create($eventdata);
-        $event->trigger();
+            $eventclass = '\tool_coursestore\event\transfer_' . $transferaction;
+            $event = $eventclass::create($eventdata);
+            $event->trigger();
+        }
 
         // Set offset based on chunk number.
         if ($backup->chunknumber != 0) {
@@ -363,16 +383,23 @@ abstract class tool_coursestore {
             $DB->update_record('tool_coursestore', $backup);
 
             // Log transfer_completed event.
-            $otherdata = array(
-                'courseid' => $backup->courseid,
-                'coursestoreid' => $backup->id
+            if(self::legacy_logging()) {
+                $info = "Transfer of backup with course store id $backup->id " .
+                        "completed. (Course ID: $backup->courseid)";
+
+                add_to_log(SITEID, 'Course store', 'Transfer completed', '', $info, 0, $USER->id);
+           } else {
+                $otherdata = array(
+                    'courseid' => $backup->courseid,
+                    'coursestoreid' => $backup->id
+                    );
+                $eventdata = array(
+                    'other' => $otherdata,
+                    'context' => context_system::instance()
                 );
-            $eventdata = array(
-                'other' => $otherdata,
-                'context' => context_system::instance()
-            );
-            $event = \tool_coursestore\event\transfer_completed::create($eventdata);
-            $event->trigger();
+                $event = \tool_coursestore\event\transfer_completed::create($eventdata);
+                $event->trigger();
+           }
         }
 
         $wsmanager->close();
@@ -618,6 +645,14 @@ abstract class tool_coursestore {
             }
         }
         $rs->close();
+    }
+    public static function legacy_logging() {
+        global $CFG;
+        if ((float) $CFG->version < 2014051200) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
@@ -984,7 +1019,7 @@ class coursestore_http_response {
      * @param int $coursestoreid
      */
     public function log_http_error($courseid, $coursestoreid) {
-        if((float) $CFG->version < 2014051200) {
+        if(tool_coursestore::legacy_logging()) {
             return $this->log_http_error_legacy($courseid, $coursestoreid);
         }
         $info = $this->info;
@@ -1015,6 +1050,7 @@ class coursestore_http_response {
         return true;
     }
     private function log_http_error_legacy($courseid, $coursestoreid) {
+        global $USER;
 
         $info = "Transfer of backup with course store id $coursestoreid " .
                 "interrupted: URL: " . $this->request[CURLOPT_URL] .
@@ -1030,7 +1066,7 @@ class coursestore_http_response {
             $info .= "ERROR: " . $this->body->error_desc;
         }
 
-        add_to_log(SITEID, 'admin/tool/coursestore', 'Transfer error', '', $info, 0, $USER->id);
+        add_to_log(SITEID, 'Course store', 'Transfer error', '', $info, 0, $USER->id);
         return true;
     }
 }
