@@ -375,11 +375,18 @@ abstract class tool_coursestore {
             // Confirm the backup file as complete.
             $completion = $wsmanager->put_backup_complete($sessionkey, $data, $coursebankid);
             if ($completion->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
+                $backup->status = self::STATUS_ERROR;
+                // Start from the beginning next time.
+                $backup->chunknumber = 0;
+                $backup->timechunkcompleted = 0;
+                $DB->update_record('tool_coursestore', $backup);
+
                 // Log a transfer interruption event.
                 $completion->log_http_error($backup->courseid, $backup->id);
                 return false;
             }
             $backup->status = self::STATUS_FINISHED;
+            $backup->timecompleted = time();
             $DB->update_record('tool_coursestore', $backup);
 
             // Log transfer_completed event.
