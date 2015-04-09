@@ -130,7 +130,7 @@ abstract class tool_coursestore {
     public static function check_connection_speed(coursestore_ws_manager $wsman,
             $testsize, $count, $retry, $auth) {
 
-        $check = str_pad('', $testsize * 1000, '0');
+        $check = str_pad('', $testsize * 6, '0');
         $start = microtime(true);
 
         // Make $count requests with the dummy data.
@@ -746,13 +746,11 @@ class coursestore_ws_manager {
      * @param string  $data         Test data string
      * @return array or bool false  Associate array response
      */
-    public function get_test($auth, $data='') {
-        if ($data == '') {
-            // The connection test is looking for data in the header.
-            // Put something there...
-            $data = str_pad('', 1000, '0');
-        }
-        $headers = array(self::WS_AUTH_SESSION_KEY => $auth, 'data' => $data);
+    public function get_test($auth, $data=' ') {
+        $headers = array(
+            self::WS_AUTH_SESSION_KEY => $auth,
+            'data' => base64_encode($data)
+        );
         $result = $this->send('test', array(), 'GET', $headers);
         return $result;
     }
