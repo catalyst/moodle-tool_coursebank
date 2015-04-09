@@ -32,6 +32,7 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
 defined('MOODLE_INTERNAL') || die;
 
 $download     = optional_param('download', 0, PARAM_INT);
+$file         = optional_param('file', 0, PARAM_INT);
 $sort         = optional_param('sort', 'coursename', PARAM_ALPHANUM);
 $dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
 $page         = optional_param('page', 0, PARAM_INT);
@@ -43,14 +44,6 @@ require_login();
 admin_externalpage_setup('tool_coursestore_download');
 
 $url = new moodle_url('/admin/tool/coursestore/download.php');
-$PAGE->set_url($url);
-$PAGE->set_context($context);
-
-$header = get_string('downloadsummary', 'tool_coursestore');
-$PAGE->set_title($header);
-echo $OUTPUT->header();
-echo $OUTPUT->heading($header);
-
 $urltarget = get_config('tool_coursestore', 'url');
 $timeout = get_config('tool_coursestore', 'timeout');
 $wsman = new coursestore_ws_manager($urltarget, $timeout);
@@ -65,6 +58,30 @@ if (!$sesskey = tool_coursestore::get_session()) {
     }
     $sesskey = tool_coursestore::get_session();
 }
+
+// TODO: fix broken url.
+if ($download == 1 and $file > 0) {
+    $response = $wsman->get_backup($sesskey, $file, true);
+    if (isset($response->body->error)) {
+        $redirecturl = new moodle_url(
+                '/admin/tool/coursestore/check_connection.php',
+                array('action' => 'conncheck')
+        );
+        redirect($redirecturl, '', 0);
+    }
+    if (isset($response->body->url)) {
+        // TODO: validate URL.
+        redirect($response->body->url, '', 0);
+    }
+}
+
+$PAGE->set_url($url);
+$PAGE->set_context($context);
+
+$header = get_string('downloadsummary', 'tool_coursestore');
+$PAGE->set_title($header);
+echo $OUTPUT->header();
+echo $OUTPUT->heading($header);
 
 $filtering = new coursestore_filtering('download', array('coursefullname' => 0, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
 $extraparams = $filtering->get_param_filter();

@@ -102,7 +102,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             $text = get_string('download');
             $icon = html_writer::empty_tag('img', array('src' => $this->output->pix_url('/t/download'),
                                                     'alt' => $text, 'class' => 'iconsmall'));
-            $url = new moodle_url('_URL_', array());
+            $url = new moodle_url("?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage&amp;download=1&amp;file=$download->coursestoreid", array());
             $attributes = array('href' => $url);
             $link = html_writer::tag('a', $icon, $attributes);
             $html .= html_writer::tag('td', $link);
