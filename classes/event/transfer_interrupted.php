@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * transfer_interrupted 
+ * transfer_interrupted
  *
  * @package    tool_coursestore
  * @author     Adam Riddell <adamr@catalyst-au.net>
@@ -25,7 +25,7 @@
 namespace tool_coursestore\event;
 defined('MOODLE_INTERNAL') || die();
 /**
- * transfer_interrupted 
+ * transfer_interrupted
  *
  * @property-read array $other {
  *      courseid => Backup Moodle course ID
@@ -51,8 +51,13 @@ class transfer_interrupted extends \core\event\base {
         $desc = "Transfer of backup with course store id ".
                 $this->data['other']['coursestoreid'] .
                 " interruped due to error. (Original course id: " .
-                $this->data['other']['courseid'] .
-                ")";
+                $this->data['other']['courseid'] . ")";
+
+        if (isset($this->data['other']['body']['error']) and isset($this->data['other']['body']['error_desc'])) {
+            $desc .= " Error code: " .  $this->data['other']['body']['error'] .
+                     " Error text: " .  $this->data['other']['body']['error_desc'];
+        }
+
         return $desc;
     }
 
