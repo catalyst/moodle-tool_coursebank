@@ -34,11 +34,15 @@ $PAGE->requires->js('/admin/tool/coursestore/javascript/jquery-1.11.0.min.js');
 $PAGE->requires->js('/admin/tool/coursestore/javascript/coursestore.js');
 
 if ($hassiteconfig) {
-    $ADMIN->add('backups', new admin_externalpage('tool_coursestore',
+
+    $ADMIN->add('backups', new admin_category('coursestore_pages',
+            get_string('pluginname', 'tool_coursestore')));
+
+    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore',
             get_string('nav_summary', 'tool_coursestore'),
             "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'moodle/site:config'));
 
-    $ADMIN->add('backups', new admin_externalpage('tool_coursestore_download',
+    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_download',
             get_string('nav_download', 'tool_coursestore'),
             "$CFG->wwwroot/$CFG->admin/tool/coursestore/download.php", 'moodle/site:config'));
 
