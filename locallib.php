@@ -95,7 +95,7 @@ abstract class tool_coursestore {
         $token = get_config('tool_coursestore', 'authtoken');
         if ($token && !$success) {
             $sessresponse = $wsman->post_session($token);
-            if ($sessresponse->httpcode != coursestore_ws_manager::WS_HTTP_CREATED) {
+            if (!$sessresponse) {
                 $success = false;
             }
             $sesskey = self::get_session();
