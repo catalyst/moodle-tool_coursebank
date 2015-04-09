@@ -32,13 +32,9 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/filters/select.php');
 
 
 class coursestore_filtering {
-    /** @var string */
     private $prefix;
-    /** @var array */
     public $_fields;
-    /** @var \coursestore_add_filter_form */
     public $_addform;
-    /** @var \coursestore_active_filter_form */
     public $_activeform;
 
     /**
@@ -50,7 +46,6 @@ class coursestore_filtering {
     public function __construct($prefix, $fieldnames = null, $baseurl = null, $extraparams = null) {
         global $SESSION;
 
-        //$this->prefix = '';
         if (!empty($prefix)) {
              $this->prefix = $prefix;
         }
@@ -124,11 +119,16 @@ class coursestore_filtering {
     public function get_field($fieldname, $advanced) {
 
         switch ($fieldname) {
-            case 'coursefullname':  return new coursestore_filter_text('coursefullname', get_string('coursefullname', 'tool_coursestore'), $advanced, 'coursefullname');
-            case 'backupfilename':    return new coursestore_filter_text('backupfilename',get_string('backupfilename', 'tool_coursestore'), $advanced, 'backupfilename');
-            case 'filesize':    return new coursestore_filter_filesize('filesize', get_string('filesize', 'tool_coursestore'), $advanced, 'filesize');
-            case 'filetimemodified':  return new coursestore_filter_date('filetimemodified', get_string('filetimemodified', 'tool_coursestore'), $advanced, 'filetimemodified');
-            case 'status':      return new coursestore_filter_select('status', get_string('status', 'tool_coursestore'), $advanced, 'status', tool_coursestore::get_statuses());
+            case 'coursefullname':
+                return new coursestore_filter_text('coursefullname', get_string('coursefullname', 'tool_coursestore'), $advanced, 'coursefullname');
+            case 'backupfilename':
+                return new coursestore_filter_text('backupfilename', get_string('backupfilename', 'tool_coursestore'), $advanced, 'backupfilename');
+            case 'filesize':
+                return new coursestore_filter_filesize('filesize', get_string('filesize', 'tool_coursestore'), $advanced, 'filesize');
+            case 'filetimemodified':
+                return new coursestore_filter_date('filetimemodified', get_string('filetimemodified', 'tool_coursestore'), $advanced, 'filetimemodified');
+            case 'status':
+                return new coursestore_filter_select('status', get_string('status', 'tool_coursestore'), $advanced, 'status', tool_coursestore::get_statuses());
             default:
                 return null;
         }

@@ -41,7 +41,7 @@ defined('MOODLE_INTERNAL') || die();
  **/
 class connection_checked extends \core\event\base {
     protected function init() {
-        $this->data['crud'] = 'r'; // c(reate), r(ead), u(pdate), d(elete)
+        $this->data['crud'] = 'r'; // Note: c(reate), r(ead), u(pdate), d(elete).
         $this->data['edulevel'] = self::LEVEL_OTHER;
     }
 
@@ -52,7 +52,7 @@ class connection_checked extends \core\event\base {
     public function get_description() {
         if ($this->data['other']['conncheckaction'] == 'speedtest') {
             if (isset($this->data['other']['speed'])) {
-                if((int) $this->data['other']['speed'] === 0) {
+                if ((int) $this->data['other']['speed'] === 0) {
                     return "Connection check failed.";
                 }
                 return "Connection speed tested - approximate speed: ".
@@ -60,7 +60,7 @@ class connection_checked extends \core\event\base {
             }
         } else {
             if (isset($this->data['other']['status'])) {
-                if($this->data['other']['status']) {
+                if ($this->data['other']['status']) {
                     return "Connection check passed.";
                 }
             }

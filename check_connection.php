@@ -76,8 +76,7 @@ switch ($action) {
         $add = '';
         if ($result == 0) {
             $msgtype = 'fail';
-        }
-        else {
+        } else {
             $msgtype = $result >= 256 ? 'success' : 'slow';
             $add = (string) $result .' kbps.';
         }

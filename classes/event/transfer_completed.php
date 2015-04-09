@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * transfer_completed 
+ * transfer_completed
  *
  * @package    tool_coursestore
  * @author     Adam Riddell <adamr@catalyst-au.net>
@@ -25,7 +25,7 @@
 namespace tool_coursestore\event;
 defined('MOODLE_INTERNAL') || die();
 /**
- * transfer_completed 
+ * transfer_completed
  *
  * @property-read array $other {
  *      courseid => Backup Moodle course ID
