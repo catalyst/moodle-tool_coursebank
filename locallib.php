@@ -1103,9 +1103,10 @@ class coursestore_logging {
      * @param int $courseid Moodle course ID
      * @param string $url URL
      * @param int $userid Moodle user ID
+     * @param array $other Other data we may wnat to use
      * @return boolean
      */
-    public static function add_to_logs($eventname='', $info ='', $action='', $module='', $courseid=SITEID, $url='', $userid=0) {
+    public static function add_to_logs($eventname='', $info ='', $action='', $module='', $courseid=SITEID, $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
 
         if ($userid == 0) {
@@ -1120,7 +1121,8 @@ class coursestore_logging {
             'action'   => $action,
             'url'      => $url,
             'info'     => $info,
-            'userid'   => $userid
+            'userid'   => $userid,
+            'other'    => $other
         );
 
         $eventdata = array(
