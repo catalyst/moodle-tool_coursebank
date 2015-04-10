@@ -1085,3 +1085,58 @@ class coursestore_http_response {
         return true;
     }
 }
+
+/**
+ * Basic logging class
+ *
+ */
+class coursestore_logging {
+    /**
+     * Method to log as a Moodle event or lagacy logging.
+     *
+     * @global type $USER
+     * @global type $CFG
+     * @param string $eventname The name of event class
+     * @param string $info Text to log
+     * @param string $action Action
+     * @param string $module Moodle module name
+     * @param int $courseid Moodle course ID
+     * @param string $url URL
+     * @param int $userid Moodle user ID
+     * @return boolean
+     */
+    public static function add_to_logs($eventname='', $info ='', $action='', $module='', $courseid=SITEID, $url='', $userid=0) {
+        global $USER, $CFG;
+
+        if ($userid == 0) {
+            $userid = $USER->id;
+        }
+
+        $url = str_replace($CFG->wwwroot, "/", $url);
+
+        $otherdata = array(
+            'courseid' => $courseid,
+            'module'   => $module,
+            'action'   => $action,
+            'url'      => $url,
+            'info'     => $info,
+            'userid'   => $userid
+        );
+
+        $eventdata = array(
+            'other'    => $otherdata,
+            'context' => context_system::instance()
+        );
+
+        $classname = '\tool_coursestore\event\\' .  $eventname;
+        
+        if (class_exists($classname) and !tool_coursestore::legacy_logging()) {
+            $event = $classname::create($eventdata);
+            $event->trigger();
+        } else {
+            add_to_log($courseid, $module, $action, $url, $info, 0, $userid);
+        }
+
+        return true;
+    }
+}

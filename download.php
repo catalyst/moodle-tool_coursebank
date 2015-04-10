@@ -60,27 +60,42 @@ if (!$sesskey = tool_coursestore::get_session()) {
     $sesskey = tool_coursestore::get_session();
 }
 
+// Downloading.
 if ($download == 1 and intval($file) > 0) {
     $downloadurl = $wsman->get_backup($sesskey, $file, true);
     $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";
-    if (isset($downloadurl->body->error)) {
+    $errorcode = '';
+    $info = "Downloading backup file coursestoreid $file userid $USER->id: ";
+
+    if (isset($downloadurl->body->error) and isset($downloadurl->body->error_desc)) {
         // Log it.
-        print_error('errordownloading', 'tool_coursestore', $errorurl);
+        $infoadd = "ERROR: error code {$downloadurl->body->error}, error desc: {$downloadurl->body->error_desc}";
+        $errorcode = 'errordownloading';
     }
     if (!isset($downloadurl->body->url)) {
         // Log it.
-        print_error('errordownloading', 'tool_coursestore', $errorurl);
+        $infoadd = "ERROR: url is empty";
+        $errorcode = 'errordownloading';
     }
     if (!tool_coursestore_check_url($downloadurl->body->url)) {
-        // Log it.
-        print_error('errordownloading', 'tool_coursestore', $errorurl);
+        $infoadd = "ERROR: url {$downloadurl->body->url} invalid";
+        $errorcode = 'errordownloading';
     }
-    if (!tool_coursestore_is_url_avaible($downloadurl->body->url)) {
-        // Log it.
-        print_error('errordownloading', 'tool_coursestore', $errorurl);
+    if (!tool_coursestore_is_url_available($downloadurl->body->url)) {
+        $infoadd = "ERROR: url {$downloadurl->body->url} in not available";
+        $errorcode = 'errordownloading';
     }
-    // Finally download the file.
-    redirect($downloadurl->body->url, '', 0);
+
+    if (!empty($errorcode)) {
+        $info .= $infoadd;
+        coursestore_logging::add_to_logs('coursestore_logging', $info);
+        print_error('errordownloading', 'tool_coursestore', $errorurl);
+    } else {
+        $infoadd = "SUCCESS";
+        $info .= $infoadd;
+        coursestore_logging::add_to_logs('coursestore_logging', $info);
+        redirect($downloadurl->body->url, '', 0);
+    }
 }
 
 $PAGE->set_url($url);

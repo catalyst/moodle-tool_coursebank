@@ -184,7 +184,7 @@ function tool_coursestore_check_url($url) {
  * @param array $invaldheaders A list of invalid responses e.g 404, 500.
  * @return boolean
  */
-function tool_coursestore_is_url_avaible($url, $invaldheaders=array('404', '403', '500')) {
+function tool_coursestore_is_url_available($url, $invaldheaders=array('404', '403', '500')) {
     $avaible = true;
     $headers = get_headers($url);
     foreach ($invaldheaders as $invalidheader) {
