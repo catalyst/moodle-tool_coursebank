@@ -38,13 +38,17 @@ if ($hassiteconfig) {
     $ADMIN->add('backups', new admin_category('coursestore_pages',
             get_string('pluginname', 'tool_coursestore')));
 
-    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore',
-            get_string('nav_summary', 'tool_coursestore'),
-            "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'moodle/site:config'));
-
+    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_queue',
+            get_string('nav_queue', 'tool_coursestore'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursestore/queue.php", 'moodle/site:config'));
+    
     $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_download',
             get_string('nav_download', 'tool_coursestore'),
             "$CFG->wwwroot/$CFG->admin/tool/coursestore/download.php", 'moodle/site:config'));
+    
+    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore',
+            get_string('nav_summary', 'tool_coursestore'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'moodle/site:config'));
 
     $settings = new admin_settingpage('coursestore_settings',
             get_string('pluginname', 'tool_coursestore')

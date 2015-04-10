@@ -114,6 +114,44 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         return $html;
     }
     /**
+     * Output main body of course store transfer queue
+     *
+     * @return string $html Body HTML output
+     */
+    public function course_store_queue($results, $sort='', $dir='', $page='', $perpage='') {
+
+        $columns = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'status');
+
+        $html = $this->box_start();
+        $html .= $this->heading(
+                get_string('backupfiles', 'tool_coursestore', count($results)),
+                3
+        );
+        $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
+        $html .= html_writer::start_tag('thead');
+        $html .= html_writer::start_tag('tr');
+        foreach ($columns as $column) {
+            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir, $page, $perpage));
+        }
+        $html .= html_writer::end_tag('tr');
+        $html .= html_writer::end_tag('thead');
+
+        $html .= html_writer::start_tag('tbody');
+        foreach ($results as $result) {
+            $html .= html_writer::start_tag('tr');
+            $html .= html_writer::tag('td', $result->coursefullname);
+            $html .= html_writer::tag('td', userdate($result->filetimemodified));
+            $html .= html_writer::tag('td', $result->backupfilename);
+            $html .= html_writer::tag('td', display_size($result->filesize));
+            $html .= html_writer::tag('td', $result->status);
+            $html .= html_writer::start_tag('tr');
+        }
+        $html .= html_writer::end_tag('tbody');
+        $html .= html_writer::end_tag('table');
+        $html .= $this->box_end();
+        return $html;
+    }
+    /**
      * Returns the display name of a field
      *
      * @param string $field Field name, e.g. 'coursename'

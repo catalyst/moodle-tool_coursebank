@@ -117,6 +117,12 @@ class coursestore_filtering {
      * @return object filter
      */
     public function get_field($fieldname, $advanced) {
+        $statuses = tool_coursestore::get_statuses();
+
+        // Remove STATUS_FINISHED form a filter on the queue page.
+        if ($this->prefix == 'queue' and isset($statuses[tool_coursestore::STATUS_FINISHED])) {
+            unset($statuses[tool_coursestore::STATUS_FINISHED]);
+        }
 
         switch ($fieldname) {
             case 'coursefullname':
@@ -128,7 +134,7 @@ class coursestore_filtering {
             case 'filetimemodified':
                 return new coursestore_filter_date('filetimemodified', get_string('filetimemodified', 'tool_coursestore'), $advanced, 'filetimemodified');
             case 'status':
-                return new coursestore_filter_select('status', get_string('status', 'tool_coursestore'), $advanced, 'status', tool_coursestore::get_statuses());
+                return new coursestore_filter_select('status', get_string('status', 'tool_coursestore'), $advanced, 'status', $statuses);
             default:
                 return null;
         }
