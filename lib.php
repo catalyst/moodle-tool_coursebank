@@ -164,3 +164,36 @@ function tool_coursestore_delete_cron_lock($name) {
         $DB->delete_records('config', array('name' => $name));
     }
 }
+/**
+ * Check if URL is valid
+ *
+ * @param string $url
+ */
+function tool_coursestore_check_url($url) {
+    // Validate URL first.
+    if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+        return false;
+    }
+
+    return true;
+}
+/**
+ * Check if URL returns valid header.
+ *
+ * @param string $url
+ * @param array $invaldheaders A list of invalid responses e.g 404, 500.
+ * @return boolean
+ */
+function tool_coursestore_is_url_avaible($url, $invaldheaders=array('404', '403', '500')) {
+    $avaible = true;
+    $headers = get_headers($url);
+    foreach ($invaldheaders as $invalidheader) {
+        if (strstr($headers[0], $invalidheader)) {
+            $avaible = false;
+            break;
+        }
+    }
+
+    return $avaible;
+}
+

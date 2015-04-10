@@ -93,6 +93,7 @@ $string['filterlessthan'] = 'less than';
 $string['filterisequalto'] = 'is equal to';
 $string['settings_loghttpdata'] = 'Log http data';
 $string['settings_loghttpdata_desc'] = 'Include transfer data in http request error logging.';
+$string['errordownloading'] = 'Error downloading the backup file.';
 
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';

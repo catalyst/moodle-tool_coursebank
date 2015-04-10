@@ -28,6 +28,7 @@ require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -59,22 +60,27 @@ if (!$sesskey = tool_coursestore::get_session()) {
     $sesskey = tool_coursestore::get_session();
 }
 
-// TODO: fix broken url.
 if ($download == 1 and intval($file) > 0) {
     $downloadurl = $wsman->get_backup($sesskey, $file, true);
+    $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";
     if (isset($downloadurl->body->error)) {
-        $redirecturl = new moodle_url(
-                '/admin/tool/coursestore/check_connection.php',
-                array('action' => 'conncheck')
-        );
-        redirect($redirecturl, '', 0);
+        // Log it.
+        print_error('errordownloading', 'tool_coursestore', $errorurl);
     }
-
-    if (isset($downloadurl->body->url)) {
-        if (!filter_var($downloadurl->body->url, FILTER_VALIDATE_URL) === false) {
-            redirect($downloadurl->body->url, '', 0);
-        }
+    if (!isset($downloadurl->body->url)) {
+        // Log it.
+        print_error('errordownloading', 'tool_coursestore', $errorurl);
     }
+    if (!tool_coursestore_check_url($downloadurl->body->url)) {
+        // Log it.
+        print_error('errordownloading', 'tool_coursestore', $errorurl);
+    }
+    if (!tool_coursestore_is_url_avaible($downloadurl->body->url)) {
+        // Log it.
+        print_error('errordownloading', 'tool_coursestore', $errorurl);
+    }
+    // Finally download the file.
+    redirect($downloadurl->body->url, '', 0);
 }
 
 $PAGE->set_url($url);
