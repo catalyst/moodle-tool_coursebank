@@ -102,22 +102,23 @@ abstract class tool_coursestore {
             $checkresult = $wsman->get_test($sesskey);
             $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
         }
-        if (self::legacy_logging()) {
-            $result = $success ? 'passed' : 'failed';
-            $info = "Connection check $result.";
-            add_to_log(SITEID, 'Course store', 'Connection check', '', $info, 0, $USER->id);
-        } else {
-            $otherdata = array(
-                'conncheckaction' => 'conncheck',
-                'status' => $success
-                );
-            $eventdata = array(
-                'other' => $otherdata,
-                'context' => context_system::instance()
+        // Log the connection check.
+        $result = $success ? 'passed' : 'failed';
+        $info = "Connection check $result.";
+        $otherdata = array(
+            'conncheckaction' => 'conncheck',
+            'status' => $success
             );
-            $event = \tool_coursestore\event\connection_checked::create($eventdata);
-            $event->trigger();
-        }
+        coursestore_logging::log_event(
+                'connection_checked',
+                $info,
+                'Connection check',
+                'Course store',
+                SITEID,
+                '',
+                $USER->id,
+                $otherdata
+        );
         return $success;
     }
     /**
@@ -161,22 +162,23 @@ abstract class tool_coursestore {
             // Convert 'total kB transferred'/'total time' into kb/s.
             $speed = round(($testsize * $count * 8 ) / $elapsed, 2);
         }
-        if (self::legacy_logging()) {
-            $result = $speed === 0 ? 'failed' : "$speed kbps";
-            $info = "Connection speed test: $result.";
-            add_to_log(SITEID, 'Course store', 'Connection check', '', $info, 0, $USER->id);
-        } else {
-            $otherdata = array(
-                'conncheckaction' => 'speedtest',
-                'speed' => $speed
+        // Log connection speed test.
+        $result = $speed === 0 ? 'failed' : "$speed kbps";
+        $info = "Connection speed test: $result.";
+        $otherdata = array(
+            'conncheckaction' => 'speedtest',
+            'speed' => $speed
             );
-            $eventdata = array(
-                'other' => $otherdata,
-                'context' => context_system::instance()
-            );
-            $event = \tool_coursestore\event\connection_checked::create($eventdata);
-            $event->trigger();
-        }
+        coursestore_logging::log_event(
+                'connection_checked',
+                $info,
+                'Connection check',
+                'Course store',
+                SITEID,
+                '',
+                $USER->id,
+                $otherdata
+        );
         return $speed;
 
     }
@@ -265,24 +267,21 @@ abstract class tool_coursestore {
 
         // Log transfer_started/resumed event.
         $transferaction = $backup->chunknumber == 0 ? 'started' : 'resumed';
-        if (self::legacy_logging()) {
-            $info = "Transfer of backup with course store id $backup->id " .
-                    "started. (Course ID: $backup->courseid)";
-
-            add_to_log(SITEID, 'Course store', 'Transfer '.$transferaction, '', $info, 0, $USER->id);
-        } else {
-            $otherdata = array(
-                'courseid' => $backup->courseid,
-                'coursestoreid' => $backup->id
-                );
-            $eventdata = array(
-                'other' => $otherdata,
-                'context' => context_system::instance()
+        $info = "Transfer of backup with course store id $backup->id " .
+                "started. (Course ID: $backup->courseid)";
+        $otherdata = array(
+            'coursestoreid' => $backup->id
             );
-            $eventclass = '\tool_coursestore\event\transfer_' . $transferaction;
-            $event = $eventclass::create($eventdata);
-            $event->trigger();
-        }
+        coursestore_logging::log_event(
+                'transfer_' . $transferaction,
+                $info,
+                'Transfer ' . $transferaction,
+                'Course store',
+                $backup->courseid,
+                '',
+                $USER->id,
+                $otherdata
+        );
 
         // Set offset based on chunk number.
         if ($backup->chunknumber != 0) {
@@ -390,23 +389,21 @@ abstract class tool_coursestore {
             $DB->update_record('tool_coursestore', $backup);
 
             // Log transfer_completed event.
-            if (self::legacy_logging()) {
-                $info = "Transfer of backup with course store id $backup->id " .
-                        "completed. (Course ID: $backup->courseid)";
-
-                add_to_log(SITEID, 'Course store', 'Transfer completed', '', $info, 0, $USER->id);
-           } else {
-                $otherdata = array(
-                    'courseid' => $backup->courseid,
-                    'coursestoreid' => $backup->id
-                    );
-                $eventdata = array(
-                    'other' => $otherdata,
-                    'context' => context_system::instance()
+            $info = "Transfer of backup with course store id $backup->id " .
+                    "completed. (Course ID: $backup->courseid)";
+            $otherdata = array(
+                'coursestoreid' => $backup->id
                 );
-                $event = \tool_coursestore\event\transfer_completed::create($eventdata);
-                $event->trigger();
-           }
+            coursestore_logging::log_event(
+                    'transfer_completed',
+                    $info,
+                    'Transfer completed',
+                    'Course store',
+                    $backup->courseid,
+                    '',
+                    $USER->id,
+                    $otherdata
+            );
         }
 
         $wsmanager->close();
@@ -1092,7 +1089,9 @@ class coursestore_http_response {
  */
 class coursestore_logging {
     /**
-     * Method to log as a Moodle event or lagacy logging.
+     * Method to log course store events, using either the modern events 2
+     * functionality for Moodle 2.7+, or legacy ("add_to_log") logging for
+     * earlier Moodle versions.
      *
      * @global type $USER
      * @global type $CFG
@@ -1103,10 +1102,10 @@ class coursestore_logging {
      * @param int $courseid Moodle course ID
      * @param string $url URL
      * @param int $userid Moodle user ID
-     * @param array $other Other data we may wnat to use
+     * @param array $other Other data we may want to use
      * @return boolean
      */
-    public static function add_to_logs($eventname='', $info ='', $action='', $module='', $courseid=SITEID, $url='', $userid=0, $other = array()) {
+    public static function log_event($eventname='', $info ='', $action='', $module='', $courseid=SITEID, $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
 
         if ($userid == 0) {
@@ -1115,14 +1114,16 @@ class coursestore_logging {
 
         $url = str_replace($CFG->wwwroot, "/", $url);
 
-        $otherdata = array(
-            'courseid' => $courseid,
-            'module'   => $module,
-            'action'   => $action,
-            'url'      => $url,
-            'info'     => $info,
-            'userid'   => $userid,
-            'other'    => $other
+        $otherdata = array_merge(
+            array(
+                'courseid' => $courseid,
+                'module'   => $module,
+                'action'   => $action,
+                'url'      => $url,
+                'info'     => $info,
+                'userid'   => $userid
+            ),
+            $other
         );
 
         $eventdata = array(
@@ -1131,7 +1132,7 @@ class coursestore_logging {
         );
 
         $classname = '\tool_coursestore\event\\' .  $eventname;
-        
+
         if (class_exists($classname) and !tool_coursestore::legacy_logging()) {
             $event = $classname::create($eventdata);
             $event->trigger();
