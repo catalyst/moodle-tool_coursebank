@@ -1105,7 +1105,7 @@ class coursestore_logging {
      * @param array $other Other data we may want to use
      * @return boolean
      */
-    public static function log_event($eventname='', $info ='', $action='', $module='', $courseid=SITEID, $url='', $userid=0, $other = array()) {
+    public static function log_event($info='', $eventname='coursestore_logging', $action='', $module='', $courseid=SITEID, $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
 
         // First log information for debugging purposes.
@@ -1120,32 +1120,35 @@ class coursestore_logging {
 
         $url = str_replace($CFG->wwwroot, "/", $url);
 
-        $otherdata = array_merge(
-            array(
-                'courseid' => $courseid,
-                'module'   => $module,
-                'action'   => $action,
-                'url'      => $url,
-                'info'     => $info,
-                'userid'   => $userid
-            ),
-            $other
-        );
+        if (!tool_coursestore::legacy_logging()) {
+            $otherdata = array_merge(
+                array(
+                    'courseid' => $courseid,
+                    'module'   => $module,
+                    'action'   => $action,
+                    'url'      => $url,
+                    'info'     => $info,
+                    'userid'   => $userid
+                ),
+                $other
+            );
 
-        $eventdata = array(
-            'other'    => $otherdata,
-            'context' => context_system::instance()
-        );
+            $eventdata = array(
+                'other'    => $otherdata,
+                'context' => context_system::instance()
+            );
 
-        $classname = '\tool_coursestore\event\\' .  $eventname;
+            $classname = '\tool_coursestore\event\\' .  $eventname;
 
-        if (class_exists($classname) and !tool_coursestore::legacy_logging()) {
-            $event = $classname::create($eventdata);
-            $event->trigger();
-        } else {
-            add_to_log($courseid, $module, $action, $url, $info, 0, $userid);
+            if (class_exists($classname)) {
+                $event = $classname::create($eventdata);
+                $event->trigger();
+
+                return true;
+            }
         }
-
+        // Legacy logging.
+        add_to_log($courseid, $module, $action, $url, $info, 0, $userid);
         return true;
     }
 }
