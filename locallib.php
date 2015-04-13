@@ -936,7 +936,8 @@ class coursestore_ws_manager {
         return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'DELETE', $auth);
     }
     /**
-     * Get list of backup files available for download from course bank instance.
+     * Get list of backup files available for download from course bank
+     * instance.
      *
      * One of the parameters is an Associative array $params
      * A simple example:
@@ -965,7 +966,8 @@ class coursestore_ws_manager {
 
             )
      *
-     * The firs level keys contain field names (e.g coursefullname, backupfilename, filesize, filetimemodified, status)
+     * The first level keys contain field names (e.g coursefullname,
+     * backupfilename, filesize, filetimemodified, status)
      * The second level is an array of filters
      * Each filter is an associative array with following keys: operator, value
      * Operator may contain following values:
