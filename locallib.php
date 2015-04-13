@@ -195,12 +195,11 @@ abstract class tool_coursestore {
      *
      */
     public static function get_summary_data($sort='status', $dir='ASC', $extraselect='',
-                                            array $extraparams=null, $page=0, $recordsperpage=0) {
+                                            array $extraparams=null, $page=0, $recordsperpage=0,
+                                            $fieldstosort=array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'status')) {
         global $DB;
 
-        $fieldstosort = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'status');
-
-        if (in_array($sort, $fieldstosort)) {
+        if (is_array($fieldstosort) and in_array($sort, $fieldstosort)) {
             $sort = "$sort $dir";
         } else {
             $sort = '';
