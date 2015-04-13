@@ -88,12 +88,12 @@ if ($download == 1 and intval($file) > 0) {
 
     if (!empty($errorcode)) {
         $info .= $infoadd;
-        coursestore_logging::add_to_logs($info);
+        coursestore_logging::log_event($info);
         print_error('errordownloading', 'tool_coursestore', $errorurl);
     } else {
         $infoadd = "SUCCESS";
         $info .= $infoadd;
-        coursestore_logging::add_to_logs($info);
+        coursestore_logging::log_event($info);
         redirect($downloadurl->body->url, '', 0);
     }
 }
