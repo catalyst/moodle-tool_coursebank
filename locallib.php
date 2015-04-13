@@ -110,8 +110,8 @@ abstract class tool_coursestore {
             'status' => $success
             );
         coursestore_logging::log_event(
-                'connection_checked',
                 $info,
+                'connection_checked',
                 'Connection check',
                 'Course store',
                 SITEID,
@@ -170,8 +170,8 @@ abstract class tool_coursestore {
             'speed' => $speed
             );
         coursestore_logging::log_event(
-                'connection_checked',
                 $info,
+                'connection_checked',
                 'Connection check',
                 'Course store',
                 SITEID,
@@ -272,8 +272,8 @@ abstract class tool_coursestore {
             'coursestoreid' => $backup->id
             );
         coursestore_logging::log_event(
-                'transfer_' . $transferaction,
                 $info,
+                'transfer_' . $transferaction,
                 'Transfer ' . $transferaction,
                 'Course store',
                 $backup->courseid,
@@ -394,8 +394,8 @@ abstract class tool_coursestore {
                 'coursestoreid' => $backup->id
                 );
             coursestore_logging::log_event(
-                    'transfer_completed',
                     $info,
+                    'transfer_completed',
                     'Transfer completed',
                     'Course store',
                     $backup->courseid,
@@ -605,7 +605,7 @@ abstract class tool_coursestore {
                 $coursebackup->chunksize = $cs->chunksize;
                 $coursebackup->totalchunks = $cs->totalchunks;
                 $coursebackup->chunknumber = $cs->chunknumber;
-                $coursebackup->timecreated = 0;
+                $coursebackup->timecreated = time();
                 $coursebackup->timecompleted = 0;
                 $coursebackup->timechunksent = 0;
                 $coursebackup->timechunkcompleted = 0;
