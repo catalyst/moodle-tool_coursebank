@@ -120,7 +120,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      */
     public function course_store_queue($results, $sort='', $dir='', $page='', $perpage='') {
 
-        $columns = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'status');
+        $columns = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'timecreated', 'status');
 
         $html = $this->box_start();
         $html .= $this->heading(
@@ -143,6 +143,11 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             $html .= html_writer::tag('td', userdate($result->filetimemodified));
             $html .= html_writer::tag('td', $result->backupfilename);
             $html .= html_writer::tag('td', display_size($result->filesize));
+            if ($result->timecreated > 0) {
+                $html .= html_writer::tag('td', userdate($result->timecreated));
+            } else {
+                $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursestore'));
+            }
             $html .= html_writer::tag('td', $result->status);
             $html .= html_writer::start_tag('tr');
         }
