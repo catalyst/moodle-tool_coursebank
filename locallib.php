@@ -1108,6 +1108,12 @@ class coursestore_logging {
     public static function log_event($eventname='', $info ='', $action='', $module='', $courseid=SITEID, $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
 
+        // First log information for debugging purposes.
+        if ($CFG->debug >= DEBUG_ALL) {
+            error_log("DEBUG: ".$CFG->debug);
+            error_log($info);
+        }
+
         if ($userid == 0) {
             $userid = $USER->id;
         }
