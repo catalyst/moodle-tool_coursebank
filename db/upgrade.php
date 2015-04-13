@@ -147,5 +147,18 @@ function xmldb_tool_coursestore_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2015032000, 'tool', 'coursestore');
     }
 
+    if ($oldversion < 2015041300) {
+        $table = new xmldb_table('tool_coursestore');
+        // Define field timetransferstarted to be added to tool_coursestore.
+        $field = new xmldb_field('timetransferstarted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0, 'timecreated');
+
+        // Conditionally launch add field filetimecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Coursestore savepoint reached.
+        upgrade_plugin_savepoint(true, 2015041300, 'tool', 'coursestore');
+    }
+
     return true;
 }

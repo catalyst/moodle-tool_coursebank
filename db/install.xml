@@ -12,7 +12,8 @@
         <FIELD NAME="chunksize" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How big the pieces of the file will be broken into."/>
         <FIELD NAME="totalchunks" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How many chunks will get sent."/>
         <FIELD NAME="chunknumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Which chunk is currently getting sent."/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup started to get sent."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this record was created."/>
+        <FIELD NAME="timetransferstarted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup started to get sent."/>
         <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup completed getting sent."/>
         <FIELD NAME="timechunksent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunk was started to get sent."/>
         <FIELD NAME="timechunkcompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunk was completed getting sent."/>

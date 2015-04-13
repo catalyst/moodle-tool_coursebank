@@ -305,6 +305,9 @@ abstract class tool_coursestore {
                 'categoryid'   => $backup->categoryid,
                 'categoryname' => $backup->categoryname,
             );
+            if(!isset($backup->timetransferstarted) or $backup->timetransferstarted == 0) {
+                $backup->timetransferstarted = time();
+            }
             $coursebankid = $wsmanager->post_backup($data, $sessionkey, $retries);
             // Unexpected http response or none received.
             if (!is_int($coursebankid)) {
@@ -609,6 +612,7 @@ abstract class tool_coursestore {
                 $coursebackup->timecompleted = 0;
                 $coursebackup->timechunksent = 0;
                 $coursebackup->timechunkcompleted = 0;
+                $coursebackup->timetransferstarted = 0;
                 $coursebackup->chunkretries = 0;
                 $coursebackup->status = $cs->status;
                 $coursebackup->isbackedup = 0;

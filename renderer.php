@@ -35,7 +35,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
     public function course_store_main($results, $sort='', $dir='', $page='', $perpage='') {
         global $CFG;
 
-        $columns = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'status');
+        $columns = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'timecreated', 'timecompleted', 'status');
 
         $html = $this->box_start();
         $html .= $this->heading(
@@ -58,6 +58,16 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             $html .= html_writer::tag('td', userdate($result->filetimemodified));
             $html .= html_writer::tag('td', $result->backupfilename);
             $html .= html_writer::tag('td', display_size($result->filesize));
+            if ($result->timetransferstarted > 0) {
+                $html .= html_writer::tag('td', userdate($result->timetransferstarted));
+            } else {
+                $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursestore'));
+            }
+            if ($result->timecompleted > 0) {
+                $html .= html_writer::tag('td', userdate($result->timecompleted));
+            } else {
+                $html .= html_writer::tag('td', get_string('notcompleted', 'tool_coursestore'));
+            }
             $html .= html_writer::tag('td', $result->status);
             $html .= html_writer::start_tag('tr');
         }
@@ -143,8 +153,8 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             $html .= html_writer::tag('td', userdate($result->filetimemodified));
             $html .= html_writer::tag('td', $result->backupfilename);
             $html .= html_writer::tag('td', display_size($result->filesize));
-            if ($result->timecreated > 0) {
-                $html .= html_writer::tag('td', userdate($result->timecreated));
+            if ($result->timetransferstarted > 0) {
+                $html .= html_writer::tag('td', userdate($result->timetransferstarted));
             } else {
                 $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursestore'));
             }
