@@ -102,12 +102,13 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::end_tag('thead');
 
         $html .= html_writer::start_tag('tbody');
-        foreach ($downloads as $download) {
+
+        foreach ((array) $downloads as $download) {
             $html .= html_writer::start_tag('tr');
             $html .= html_writer::tag('td', $download->coursefullname);
             $html .= html_writer::tag('td', $download->backupfilename);
             $html .= html_writer::tag('td', display_size($download->filesize));
-            $html .= html_writer::tag('td', userdate(strtotime($download->filetimemodified)));
+            $html .= html_writer::tag('td', $download->filetimemodified);
             // TO DO: actual link to download.
             $text = get_string('download');
             $icon = html_writer::empty_tag('img', array('src' => $this->output->pix_url('/t/download'),

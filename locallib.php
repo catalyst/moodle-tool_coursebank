@@ -990,7 +990,10 @@ class coursestore_ws_manager {
      * @return std Class
      */
     public function get_downloads($sesskey, array $params = null, $sort ='', $dir='ASC', $page=0, $recordsperpage=0) {
-        return $this->send('downloads', array(), 'GET', $sesskey);
+        $url = 'downloads';
+        $url .= '?page=' . (int) $page . '&perpage=' . (int) $recordsperpage;
+
+        return $this->send($url, array(), 'GET', $sesskey);
     }
     /**
      * Get count of backup files available from course bank instance.

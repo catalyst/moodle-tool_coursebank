@@ -44,7 +44,15 @@ require_login();
 
 admin_externalpage_setup('tool_coursestore_download');
 
-$url = new moodle_url('/admin/tool/coursestore/download.php');
+$params = array(
+    'download' => $download,
+    'file' => $file,
+    'sort' => $sort,
+    'dir' => $dir,
+    'page' => $page,
+    'perpage' => $perpage
+);
+$url = new moodle_url('/admin/tool/coursestore/download.php', $params);
 $urltarget = get_config('tool_coursestore', 'url');
 $timeout = get_config('tool_coursestore', 'timeout');
 $wsman = new coursestore_ws_manager($urltarget, $timeout);
