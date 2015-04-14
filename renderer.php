@@ -35,7 +35,15 @@ class tool_coursestore_renderer extends plugin_renderer_base {
     public function course_store_main($results, $sort='', $dir='', $page='', $perpage='') {
         global $CFG;
 
-        $columns = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'timecreated', 'timecompleted', 'status');
+        $columns = array(
+                'coursefullname',
+                'filetimemodified',
+                'backupfilename',
+                'filesize',
+                'timecreated',
+                'timecompleted',
+                'status'
+        );
 
         $html = $this->box_start();
         $html .= $this->heading(
@@ -54,21 +62,21 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('tbody');
         foreach ($results as $result) {
             $html .= html_writer::start_tag('tr');
-            $html .= html_writer::tag('td', $result->coursefullname);
-            $html .= html_writer::tag('td', userdate($result->filetimemodified));
-            $html .= html_writer::tag('td', $result->backupfilename);
-            $html .= html_writer::tag('td', display_size($result->filesize));
+            $html .= html_writer::tag('td', s($result->coursefullname));
+            $html .= html_writer::tag('td', s(userdate($result->filetimemodified)));
+            $html .= html_writer::tag('td', s($result->backupfilename));
+            $html .= html_writer::tag('td', s(display_size($result->filesize)));
             if ($result->timetransferstarted > 0) {
-                $html .= html_writer::tag('td', userdate($result->timetransferstarted));
+                $html .= html_writer::tag('td', s(userdate($result->timetransferstarted)));
             } else {
                 $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursestore'));
             }
             if ($result->timecompleted > 0) {
-                $html .= html_writer::tag('td', userdate($result->timecompleted));
+                $html .= html_writer::tag('td', s(userdate($result->timecompleted)));
             } else {
                 $html .= html_writer::tag('td', get_string('notcompleted', 'tool_coursestore'));
             }
-            $html .= html_writer::tag('td', $result->status);
+            $html .= html_writer::tag('td', s($result->status));
             $html .= html_writer::start_tag('tr');
         }
         $html .= html_writer::end_tag('tbody');
@@ -105,15 +113,23 @@ class tool_coursestore_renderer extends plugin_renderer_base {
 
         foreach ((array) $downloads as $download) {
             $html .= html_writer::start_tag('tr');
-            $html .= html_writer::tag('td', $download->coursefullname);
-            $html .= html_writer::tag('td', $download->backupfilename);
-            $html .= html_writer::tag('td', display_size($download->filesize));
-            $html .= html_writer::tag('td', $download->filetimemodified);
+            $html .= html_writer::tag('td', s($download->coursefullname));
+            $html .= html_writer::tag('td', s($download->backupfilename));
+            $html .= html_writer::tag('td', s(display_size($download->filesize)));
+            $html .= html_writer::tag('td', s($download->filetimemodified));
             // TO DO: actual link to download.
             $text = get_string('download');
             $icon = html_writer::empty_tag('img', array('src' => $this->output->pix_url('/t/download'),
                                                     'alt' => $text, 'class' => 'iconsmall'));
-            $url = new moodle_url("?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage&amp;download=1&amp;file=$download->coursestoreid", array());
+            $params = array(
+                'sort' => $sort,
+                'dir'  => $dir,
+                'page' => $page,
+                'perpage' => $perpage,
+                'download' => 1,
+                'file' => $download->coursestoreid
+            );
+            $url = new moodle_url('', $params);
             $attributes = array('href' => $url);
             $link = html_writer::tag('a', $icon, $attributes);
             $html .= html_writer::tag('td', $link);
@@ -150,16 +166,16 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('tbody');
         foreach ($results as $result) {
             $html .= html_writer::start_tag('tr');
-            $html .= html_writer::tag('td', $result->coursefullname);
-            $html .= html_writer::tag('td', userdate($result->filetimemodified));
-            $html .= html_writer::tag('td', $result->backupfilename);
-            $html .= html_writer::tag('td', display_size($result->filesize));
+            $html .= html_writer::tag('td', s($result->coursefullname));
+            $html .= html_writer::tag('td', s(userdate($result->filetimemodified)));
+            $html .= html_writer::tag('td', s($result->backupfilename));
+            $html .= html_writer::tag('td', s(display_size($result->filesize)));
             if ($result->timetransferstarted > 0) {
-                $html .= html_writer::tag('td', userdate($result->timetransferstarted));
+                $html .= html_writer::tag('td', s(userdate($result->timetransferstarted)));
             } else {
                 $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursestore'));
             }
-            $html .= html_writer::tag('td', $result->status);
+            $html .= html_writer::tag('td', s($result->status));
             $html .= html_writer::start_tag('tr');
         }
         $html .= html_writer::end_tag('tbody');
