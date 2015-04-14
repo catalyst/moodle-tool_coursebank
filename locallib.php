@@ -992,6 +992,7 @@ class coursestore_ws_manager {
     public function get_downloads($sesskey, array $params = null, $sort ='', $dir='ASC', $page=0, $recordsperpage=0) {
         $url = 'downloads';
         $url .= '?page=' . (int) $page . '&perpage=' . (int) $recordsperpage;
+        $url .= '&sort=' . $sort . '&order=' . $dir;
 
         $nonemptyarray = is_array($params) && !empty($params);
         $query = $nonemptyarray ? array('query' => $params) : array();
