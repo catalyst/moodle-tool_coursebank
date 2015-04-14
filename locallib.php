@@ -79,15 +79,17 @@ abstract class tool_coursestore {
      * Test that a connection to the configured web service consumer can be
      * made successfully.
      *
-     * @param coursestore_ws_manager $wsman  Web service manager object
-     * @return bool                          True for success, false otherwise
+     * @param  coursestore_ws_manager $wsman  Web service manager object.
+     * @param  string               $sesskey  Course bank session key.
+     *
+     * @return bool                           True for success, false otherwise.
      */
-    public static function check_connection(coursestore_ws_manager $wsman, $auth=false) {
+    public static function check_connection(coursestore_ws_manager $wsman, $sesskey=false) {
         global $USER;
 
         $success = false;
-        if ($auth) {
-            $checkresult = $wsman->get_test($auth);
+        if ($sesskey) {
+            $checkresult = $wsman->get_test($sesskey);
             $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
         }
 
@@ -119,12 +121,12 @@ abstract class tool_coursestore {
      *                                       in kB
      * @param int                    $count  Number of HTTP requests to make
      * @param int                    $retry  Number of retry attempts
-     * @param string                  $auth  Session key
+     * @param string                  $sesskey  Session key
      *
      * @return int                  Approximate connection speed in kbps
      */
     public static function check_connection_speed(coursestore_ws_manager $wsman,
-            $testsize, $count, $retry, $auth) {
+            $testsize, $count, $retry, $sesskey) {
         global $USER;
 
         $check = str_pad('', $testsize * 1000, '0');
@@ -133,7 +135,8 @@ abstract class tool_coursestore {
         // Make $count requests with the dummy data.
         for ($i = 0; $i < $count; $i++) {
             for ($j = 0; $j <= $retry; $j++) {
-                $response = $wsman->get_test($auth, $check, $count, $testsize, $starttime, $endtime);
+                $response = $wsman->get_test(
+                        $sesskey, $check, $count, $testsize, $starttime, $endtime);
                 if ($response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
                     break;
                 }
@@ -151,6 +154,15 @@ abstract class tool_coursestore {
         return $speed;
 
     }
+    /**
+     * Calculate rough transfer speed based on request count, transfer size,
+     * start time and end time.
+     *
+     * @param    int    $count      Number of requests sent.
+     * @param    int    $testsize   Size of transfer data in bytes.
+     * @param    float  $starttime  Epoch time of test start (microtime).
+     * @param    float  $endtime    Epoch time of test completion (microtime).
+     */
     public static function calculate_speed($count, $testsize, $starttime, $endtime) {
         $elapsed = $endtime - $starttime;
 
@@ -158,17 +170,38 @@ abstract class tool_coursestore {
         $speed = round(($testsize * $count * 8 ) / $elapsed, 2);
         return $speed;
     }
+    /**
+     * Fetch configured chunk size in kB from Moodle config.
+     *
+     * @return int $chunksize
+     */
     public static function get_config_chunk_size() {
         return get_config('tool_coursestore', 'chunksize');
     }
-
+    /**
+     * Calculate total number of chunks, given individual chunks size in kB and
+     * overall filesize in bytes.
+     *
+     * @param int $chunksize  Individual chunk size in kilobytes.
+     * @param int $filesize   Total file size in bytes.
+     */
     public static function calculate_total_chunks($chunksize, $filesize) {
         return ceil($filesize / ($chunksize * 1000));
     }
     /**
      * Function to fetch course store records for display on the summary
-     * page.
+     * page. Returns an array of the form:
      *
+     *              array('results' => array(...),
+     *                    'count '  => int $count)
+     *
+     * @param string $sort         Sort field.
+     * @param string $dir          Direction of sort.
+     * @param string $extraselect  Additional select SQL.
+     * @param array  $extraparams  Additional parameters.
+     * @param array $fieldstosort  Potential sort fields.
+     *
+     * @return array
      */
     public static function get_summary_data($sort='status', $dir='ASC', $extraselect='',
             array $extraparams=null, $page=0, $recordsperpage=0,
