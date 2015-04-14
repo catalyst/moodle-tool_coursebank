@@ -40,7 +40,8 @@ $page         = optional_param('page', 0, PARAM_INT);
 $perpage      = optional_param('perpage', 50, PARAM_INT);
 
 $context = context_system::instance();
-require_login();
+require_login(null, false);
+require_capability('tool/coursestore:view', $context);
 
 admin_externalpage_setup('tool_coursestore_download');
 
@@ -70,6 +71,7 @@ if (!$sesskey = tool_coursestore::get_session()) {
 
 // Downloading.
 if ($download == 1 and intval($file) > 0) {
+    require_capability('tool/coursestore:download', $context);
     $downloadurl = $wsman->get_backup($sesskey, $file, true);
     $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";
     $errorcode = '';

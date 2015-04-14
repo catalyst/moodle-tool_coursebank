@@ -27,24 +27,31 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
-    /* allows the user to view the course store settings */
-//     'tool/coursestore:view' => array(
-//         'riskbitmask' => RISK_CONFIG,
-//         'captype' => 'read',
-//         'contextlevel' => CONTEXT_SYSTEM,
-//         'archetypes' => array(
-//             'manager' => CAP_ALLOW
-//         ),
-//     ),
+     'tool/coursestore:view' => array(
+         'riskbitmask' => RISK_CONFIG,
+         'captype' => 'read',
+         'contextlevel' => CONTEXT_SYSTEM,
+         'archetypes' => array(
+             'manager' => CAP_ALLOW
+         ),
+     ),
 
-//     /* allows the user to edit the course store settings */
-//     'tool/coursestore:edit' => array(
-//         'riskbitmask' => RISK_CONFIG | RISK_XSS,
-//         'captype' => 'write',
-//         'contextlevel' => CONTEXT_SYSTEM,
-//         'archetypes' => array(
-//             'manager' => CAP_ALLOW
-//         ),
-//     ),
+     'tool/coursestore:download' => array(
+         'riskbitmask' => RISK_CONFIG,
+         'captype' => 'read',
+         'contextlevel' => CONTEXT_SYSTEM,
+         'archetypes' => array(
+             'manager' => CAP_ALLOW
+         ),
+     ),
+
+     'tool/coursestore:edit' => array(
+         'riskbitmask' => RISK_CONFIG | RISK_XSS,
+         'captype' => 'write',
+         'contextlevel' => CONTEXT_SYSTEM,
+         'archetypes' => array(
+             'manager' => CAP_ALLOW
+         ),
+     ),
 
 );

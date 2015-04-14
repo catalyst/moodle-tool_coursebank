@@ -36,7 +36,8 @@ $page         = optional_param('page', 0, PARAM_INT);
 $perpage      = optional_param('perpage', 50, PARAM_INT);
 
 $context = context_system::instance();
-require_login();
+require_login(null, false);
+require_capability('tool/coursestore:view', $context);
 
 admin_externalpage_setup('tool_coursestore_queue');
 

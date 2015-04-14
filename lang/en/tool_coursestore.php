@@ -102,6 +102,9 @@ $string['settings_loghttpdata'] = 'Log http data';
 $string['settings_loghttpdata_desc'] = 'Include transfer data in http request error logging.';
 $string['errordownloading'] = 'Error downloading the backup file.';
 $string['coursestorelogging'] = 'Course Store Logging';
+$string['coursestore:view'] = 'View a list of course store backup files';
+$string['coursestore:download'] = 'Download course store backup files';
+$string['coursestore:edit'] = 'Edit course store backup files';
 
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
