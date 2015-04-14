@@ -50,7 +50,6 @@ class coursestore_filter_filesize extends user_filter_text {
         $objs['text']->setLabel(get_string('valuefor', 'filters', $this->_label));
         $grp =& $mform->addElement('group', $this->_name.'_grp', $this->_label, $objs, '', false);
         $mform->setType($this->_name, PARAM_RAW);
-        $mform->disabledIf($this->_name, $this->_name.'_op', 'eq', 3);
         if ($this->_advanced) {
             $mform->setAdvanced($this->_name.'_grp');
         }
@@ -66,7 +65,7 @@ class coursestore_filter_filesize extends user_filter_text {
         $operator = $field.'_op';
 
         if (array_key_exists($operator, $formdata)) {
-            if ($formdata->$operator != 3 and $formdata->$field == '') {
+            if ($formdata->$field == '') {
                 // No data - no change except for empty filter.
                 return false;
             }
@@ -75,7 +74,7 @@ class coursestore_filter_filesize extends user_filter_text {
             if (isset($formdata->$field)) {
                 $fieldvalue = $formdata->$field;
             }
-            return array('operator' => (int)$formdata->$operator, 'value' => $fieldvalue);
+            return array('operator' => (int)$formdata->$operator, 'value' => (int)$fieldvalue);
         }
 
         return false;
@@ -90,8 +89,9 @@ class coursestore_filter_filesize extends user_filter_text {
         $operator = $data['operator'];
         $value    = intval($data['value']);
         $field    = $this->_field;
-
-        if ($operator != 3 and $value === '') {
+        $res = '';
+        
+        if ($value === '') {
             return '';
         }
 
@@ -104,9 +104,6 @@ class coursestore_filter_filesize extends user_filter_text {
                 break;
             case 2: // Equal to.
                 $res .= "$field = $value";
-                break;
-            case 3: // Empty.
-                $res .= "$field = ''";
                 break;
             default:
                 return '';
@@ -125,7 +122,7 @@ class coursestore_filter_filesize extends user_filter_text {
         $operator = $data['operator'];
         $value    = intval($data['value']);
 
-        if ($operator != 3 and $value === '') {
+        if ($value === '') {
             return '';
         }
 
@@ -138,9 +135,6 @@ class coursestore_filter_filesize extends user_filter_text {
                 break;
             case 2: // Equal to.
                 $params = array('operator' => '=', 'value' => $value);
-                break;
-            case 3: // Empty.
-                $params = array('operator' => 'EMPTY', 'value' => $value);
                 break;
             default:
                 return '';
@@ -168,8 +162,6 @@ class coursestore_filter_filesize extends user_filter_text {
             case 1: // Ledd than.
             case 2: // Equal to.
                 return get_string('textlabel', 'filters', $a);
-            case 3: // Empty.
-                return get_string('textlabelnovalue', 'filters', $a);
         }
 
         return '';
