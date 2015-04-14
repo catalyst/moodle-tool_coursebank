@@ -30,8 +30,10 @@ defined('MOODLE_INTERNAL') || die();
  * This event is to be triggered whenever a connection check call is made.
  *
  * @property-read array $other {
- *      status => Connection check result
- *      speed  => Resulting connection speed
+ *      status     => Connection check result
+ *      speed      => Resulting connection speed
+ *      error      => error code
+ *      error_desc => error description
  * }
  *
  * @package    tool_coursestore
@@ -53,18 +55,39 @@ class connection_checked extends \core\event\base {
         if ($this->data['other']['conncheckaction'] == 'speedtest') {
             if (isset($this->data['other']['speed'])) {
                 if ((int) $this->data['other']['speed'] === 0) {
-                    return "Connection check failed.";
+                    $desc = "Connection check failed.";
+                } else {
+                    $desc = "Connection speed tested - approximate speed: ".
+                             $this->data['other']['speed'] . " kbps.";
                 }
-                return "Connection speed tested - approximate speed: ".
-                        $this->data['other']['speed'] . " kbps.";
+
+                if (isset($this->data['other']['error'])) {
+                    $desc .= " Error code: " .  $this->data['other']['error'];
+                }
+                if (isset($this->data['other']['error_desc'])) {
+                    $desc .= " Error text: " .  $this->data['other']['error_desc'];
+                }
+                return $desc;
             }
         } else {
             if (isset($this->data['other']['status'])) {
                 if ($this->data['other']['status']) {
+                    // It's passed, it won't have an error component.
+                    // Can just return.
                     return "Connection check passed.";
                 }
             }
-                return "Connection check failed.";
+            // It's failed.
+            $desc = "Connection check failed.";
+
+            if (isset($this->data['other']['error'])) {
+                $desc .= " Error code: " .  $this->data['other']['error'];
+            }
+            if (isset($this->data['other']['error_desc'])) {
+               $desc .= " Error text: " .  $this->data['other']['error_desc'];
+            }
+            return $desc;
+
         }
     }
 

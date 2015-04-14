@@ -15,45 +15,40 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * transfer_interrupted
+ * get_session
  *
  * @package    tool_coursestore
- * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace tool_coursestore\event;
 defined('MOODLE_INTERNAL') || die();
 /**
- * transfer_interrupted
+ * get_session
  *
  * @property-read array $other {
- *      courseid      => Backup Moodle course ID
- *      coursestoreid => Course store backup ID
- *      error         => error code
- *      error_desc    => error description
+ *      error      => error code
+ *      error_desc => error description
  * }
  *
  * @package    tool_coursestore
- * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
-class transfer_interrupted extends \core\event\base {
+class get_session extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_OTHER;
     }
 
     public static function get_name() {
-        return get_string('eventtransferinterrupted', 'tool_coursestore');
+        return get_string('eventgetsession', 'tool_coursestore');
     }
 
     public function get_description() {
-        $desc = "Transfer of backup with course store id ".
-                $this->data['other']['coursestoreid'] .
-                " interruped due to error. (Original course id: " .
-                $this->data['other']['courseid'] . ")";
+        $desc = "Get a new session key.";
 
         if (isset($this->data['other']['error'])) {
             $desc .= " Error code: " .  $this->data['other']['error'];

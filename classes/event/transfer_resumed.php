@@ -28,9 +28,11 @@ defined('MOODLE_INTERNAL') || die();
  * transfer_resumed
  *
  * @property-read array $other {
- *      courseid => Backup Moodle course ID
+ *      courseid      => Backup Moodle course ID
  *      coursestoreid => Course store backup ID
- * }
+ *      error         => error code
+ *      error_desc    => error description
+* }
  *
  * @package    tool_coursestore
  * @author     Adam Riddell <adamr@catalyst-au.net>
@@ -53,6 +55,14 @@ class transfer_resumed extends \core\event\base {
                 " resumed. (Original course id: " .
                 $this->data['other']['courseid'] .
                 ")";
+
+        if (isset($this->data['other']['error'])) {
+            $desc .= " Error code: " .  $this->data['other']['error'];
+        }
+        if (isset($this->data['other']['error_desc'])) {
+            $desc .= " Error text: " .  $this->data['other']['error_desc'];
+        }
+
         return $desc;
     }
 

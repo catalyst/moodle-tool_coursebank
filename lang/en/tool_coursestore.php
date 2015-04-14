@@ -78,6 +78,7 @@ $string['nav_download'] = 'Download backups';
 $string['nav_queue'] = 'Transfer queue';
 $string['downloadsummary'] = 'Course Bank backups';
 $string['eventconnectionchecked'] = 'Connection checked';
+$string['eventgetsession'] = 'Get session key';
 $string['coursefullname'] = 'Course name';
 $string['filetimemodified'] = 'Backup date';
 $string['backupfilename'] = 'File name';
