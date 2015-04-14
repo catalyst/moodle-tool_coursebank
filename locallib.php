@@ -101,8 +101,7 @@ abstract class tool_coursestore {
                 $sesskey = self::get_session();
                 $checkresult = $wsman->get_test($sesskey);
                 $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
-            }
-            else {
+            } else {
                 // Couldn't get a session key.
                 $success = false;
             }
@@ -310,7 +309,6 @@ abstract class tool_coursestore {
                 $backup->status = self::STATUS_ERROR;
                 $DB->update_record('tool_coursestore', $backup);
                 $wsmanager->close();
-                //echo("create backup failed; chunknumber=" . $backup->chunknumber . ".\n");
                 // Log a transfer interruption event.
                 $coursebankid->log_http_error($backup->courseid, $backup->id);
                 return false;
@@ -1179,25 +1177,24 @@ class coursestore_logging {
         return true;
     }
 
-    public static function log_check_connection($http_response) {
+    public static function log_check_connection($httpresponse) {
         global $USER;
 
         $otherdata = array('conncheckaction' => 'conncheck');
-        if ((get_class($http_response) == 'coursestore_http_response')
-            && $http_response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+        if (($httpresponse instanceof coursestore_http_response)
+            && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
             $info = "Connection check passed.";
             $otherdata['status'] = true;
-        }
-        else {
+        } else {
             $info = "Connection check failed.";
             $otherdata['status'] = false;
-            if (get_class($http_response) == 'coursestore_http_response') {
+            if ($httpresponse instanceof coursestore_http_response) {
                 // Log the failure.
-                if (isset($http_response->error)) {
-                    $otherdata['error'] = $http_response->error;
+                if (isset($httpresponse->error)) {
+                    $otherdata['error'] = $httpresponse->error;
                 }
-                if (isset($http_response->error_desc)) {
-                    $otherdata['error_desc'] = $http_response->error_desc;
+                if (isset($httpresponse->error_desc)) {
+                    $otherdata['error_desc'] = $httpresponse->error_desc;
                 }
             }
         }
@@ -1213,25 +1210,24 @@ class coursestore_logging {
         );
     }
 
-    public static function log_get_session($http_response) {
+    public static function log_get_session($httpresponse) {
         global $USER;
 
         $otherdata = array();
-        if ((get_class($http_response) == 'coursestore_http_response')
-             && $http_response->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
+        if (($httpresponse instanceof coursestore_http_response)
+             && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
             // We got a new session key. Log the event.
             $info = "Get new session key succeeded.";
-        }
-        else {
+        } else {
             // Couldn't get a session key.
             $info = "Get new session key failed.";
-            if (get_class($http_response) == 'coursestore_http_response') {
+            if ($httpresponse instanceof coursestore_http_response) {
                 // Log the session key failure.
-                if (isset($http_response->error)) {
-                    $otherdata['error'] = $http_response->error;
+                if (isset($httpresponse->error)) {
+                    $otherdata['error'] = $httpresponse->error;
                 }
-                if (isset($http_response->error_desc)) {
-                    $otherdata['error_desc'] = $http_response->error_desc;
+                if (isset($httpresponse->error_desc)) {
+                    $otherdata['error_desc'] = $httpresponse->error_desc;
                 }
             }
         }
