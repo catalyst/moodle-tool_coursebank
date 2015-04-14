@@ -37,7 +37,43 @@ class coursestore_filter_filesize extends user_filter_text {
                      2 => get_string('filterisequalto', 'tool_coursestore')
         );
     }
-
+    /**
+     * Returns an array of sizes
+     *
+     * @return type
+     */
+    public function get_size() {
+        return array(0 => get_string('sizeb'),
+                     1 => get_string('sizekb'),
+                     2 => get_string('sizemb'),
+                     3 => get_string('sizegb')
+        );
+    }
+    /**
+     * Convert to bytes based on scale provided.
+     *
+     * @param int $scale Size format
+     * @param int $value
+     * @return type
+     */
+    public function value_to_bytes($scale, $value) {
+        switch($scale) {
+            case 0: // Bytes.
+                return $value;
+                break;
+            case 1: // KB.
+                return $value * 1024;;
+                break;
+            case 2: // MB.
+                return $value * pow(1024, 2);
+                break;
+            case 3: // GB.
+                return $value * pow(1024, 3);
+                break;
+            default:
+                return $value;
+        }
+    }
     /**
      * Adds controls specific to this filter in the form.
      * @param object $mform a MoodleForm object to setup
@@ -48,6 +84,7 @@ class coursestore_filter_filesize extends user_filter_text {
         $objs['text'] = $mform->createElement('text', $this->_name, null);
         $objs['select']->setLabel(get_string('limiterfor', 'filters', $this->_label));
         $objs['text']->setLabel(get_string('valuefor', 'filters', $this->_label));
+        $objs['selectscale'] = $mform->createElement('select', $this->_name.'_scale', null, $this->get_size());
         $grp =& $mform->addElement('group', $this->_name.'_grp', $this->_label, $objs, '', false);
         $mform->setType($this->_name, PARAM_RAW);
         if ($this->_advanced) {
@@ -63,7 +100,7 @@ class coursestore_filter_filesize extends user_filter_text {
     public function check_data($formdata) {
         $field    = $this->_name;
         $operator = $field.'_op';
-
+        $sacale   = $field.'_scale';
         if (array_key_exists($operator, $formdata)) {
             if ($formdata->$field == '') {
                 // No data - no change except for empty filter.
@@ -74,7 +111,7 @@ class coursestore_filter_filesize extends user_filter_text {
             if (isset($formdata->$field)) {
                 $fieldvalue = $formdata->$field;
             }
-            return array('operator' => (int)$formdata->$operator, 'value' => (int)$fieldvalue);
+            return array('operator' => (int)$formdata->$operator, 'value' => (int)$fieldvalue, 'scale' => $formdata->$sacale);
         }
 
         return false;
@@ -87,10 +124,11 @@ class coursestore_filter_filesize extends user_filter_text {
      */
     public function get_sql_filter($data) {
         $operator = $data['operator'];
-        $value    = intval($data['value']);
+        $scale    = $data['scale'];
+        $value    = $this->value_to_bytes($scale, $data['value']);
         $field    = $this->_field;
         $res = '';
-        
+
         if ($value === '') {
             return '';
         }
@@ -120,7 +158,8 @@ class coursestore_filter_filesize extends user_filter_text {
         $params = array();
 
         $operator = $data['operator'];
-        $value    = intval($data['value']);
+        $scale    = $data['scale'];
+        $value    = $this->value_to_bytes($scale, $data['value']);
 
         if ($value === '') {
             return '';
@@ -148,13 +187,15 @@ class coursestore_filter_filesize extends user_filter_text {
      * @return string active filter label
      */
     public function get_label($data) {
-        $operator  = $data['operator'];
-        $value     = $data['value'];
+        $operator = $data['operator'];
+        $scale    = $data['scale'];
+        $value    = $this->value_to_bytes($scale, $data['value']);
+
         $operators = $this->getOperators();
 
         $a = new stdClass();
         $a->label    = $this->_label;
-        $a->value    = '"'.s($value).'"';
+        $a->value    = '"' . s(display_size($value)) . '"';
         $a->operator = $operators[$operator];
 
         switch ($operator) {
