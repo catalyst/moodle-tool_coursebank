@@ -145,7 +145,7 @@ abstract class tool_coursestore {
             }
         }
         if (!isset($speed)) {
-            $speed = tool_coursestore::calculate_speed($count, $testsize, $starttime, $endtime);
+            $speed = self::calculate_speed($count, $testsize, $starttime, $endtime);
         }
 
         return $speed;
@@ -766,7 +766,7 @@ class coursestore_ws_manager {
      * @param int     $testsize     Optional - applicable to speed test. Size of data getting sent.
      * @param int     $starttime    Optional - applicable to speed test. Start time of the test.
      * @param int     $endtime      Optional - applicable to speed test. End time - sent back.
-     * 
+     *
      * @return array or bool false  Associate array response
      */
     public function get_test($auth, $data='', $count=0, $testsize=0, $starttime=0, &$endtime=0) {
@@ -1205,7 +1205,7 @@ class coursestore_logging {
         );
     }
 
-    public static function log_check_connection_speed($http_response, $speed) {
+    public static function log_check_connection_speed($httpresponse, $speed) {
         global $USER;
 
         // Log connection speed test.
@@ -1213,20 +1213,20 @@ class coursestore_logging {
             'conncheckaction' => 'speedtest',
         );
 
-        if ((get_class($http_response) == 'coursestore_http_response')
-            && $http_response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+        if (($httpresponse instanceof coursestore_http_response)
+            && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
             $info = "Connection speed test passed. Approximate speed: " . $speed . " kbps.";
             $otherdata['speed'] = $speed;
         } else {
             $info = "Connection speed test failed.";
             $otherdata['speed'] = 0;
-            if (get_class($http_response) == 'coursestore_http_response') {
+            if ($httpresponse instanceof coursestore_http_response) {
                 // Log the failure.
-                if (isset($http_response->error)) {
-                    $otherdata['error'] = $http_response->error;
+                if (isset($httpresponse->error)) {
+                    $otherdata['error'] = $httpresponse->error;
                 }
-                if (isset($http_response->error_desc)) {
-                    $otherdata['error_desc'] = $http_response->error_desc;
+                if (isset($httpresponse->error_desc)) {
+                    $otherdata['error_desc'] = $httpresponse->error_desc;
                 }
             }
         }
@@ -1242,7 +1242,7 @@ class coursestore_logging {
         );
     }
 
-    public static function log_get_session($http_response) {
+    public static function log_get_session($httpresponse) {
         global $USER;
 
         $otherdata = array();
