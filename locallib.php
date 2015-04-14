@@ -190,8 +190,9 @@ abstract class tool_coursestore {
      *
      */
     public static function get_summary_data($sort='status', $dir='ASC', $extraselect='',
-                                            array $extraparams=null, $page=0, $recordsperpage=0,
-                                            $fieldstosort=array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'status')) {
+            array $extraparams=null, $page=0, $recordsperpage=0,
+            $fieldstosort=array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'status')) {
+
         global $DB;
 
         if (is_array($fieldstosort) and in_array($sort, $fieldstosort)) {
@@ -300,7 +301,7 @@ abstract class tool_coursestore {
                 'categoryid'   => $backup->categoryid,
                 'categoryname' => $backup->categoryname,
             );
-            if(!isset($backup->timetransferstarted) or $backup->timetransferstarted == 0) {
+            if (!isset($backup->timetransferstarted) or $backup->timetransferstarted == 0) {
                 $backup->timetransferstarted = time();
             }
             $coursebankid = $wsmanager->post_backup($data, $sessionkey, $retries);
@@ -941,29 +942,29 @@ class coursestore_ws_manager {
      * One of the parameters is an Associative array $params
      * A simple example:
      *
-            Array
-            (
-                [coursefullname] => Array
-                    (
-                        [0] => Array
-                            (
-                                [operator] => LIKE
-                                [value] => test
-                            )
-
-                    )
-
-                [filetimemodified] => Array
-                    (
-                        [0] => Array
-                            (
-                                [operator] => >=
-                                [value] => 1428415200
-                            )
-
-                    )
-
-            )
+     *       Array
+     *       (
+     *           [coursefullname] => Array
+     *               (
+     *                   [0] => Array
+     *                       (
+     *                           [operator] => LIKE
+     *                           [value] => test
+     *                       )
+     *
+     *               )
+     *
+     *           [filetimemodified] => Array
+     *               (
+     *                   [0] => Array
+     *                       (
+     *                           [operator] => >=
+     *                           [value] => 1428415200
+     *                       )
+     *
+     *               )
+     *
+     *       )
      *
      * The first level keys contain field names (e.g coursefullname,
      * backupfilename, filesize, filetimemodified, status)
@@ -1129,12 +1130,12 @@ class coursestore_logging {
      * @param array $other Other data we may want to use
      * @return boolean
      */
-    public static function log_event($info='', $eventname='coursestore_logging', $action='', $module='', $courseid=SITEID, $url='', $userid=0, $other = array()) {
+    public static function log_event($info='', $eventname='coursestore_logging', $action='', $module='', $courseid=SITEID,
+            $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
 
         // First log information for debugging purposes.
         if ($CFG->debug >= DEBUG_ALL) {
-            error_log("DEBUG: ".$CFG->debug);
             error_log($info);
         }
 

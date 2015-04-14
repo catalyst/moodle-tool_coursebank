@@ -114,7 +114,13 @@ $PAGE->set_title($header);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($header);
 
-$filtering = new coursestore_filtering('download', array('coursefullname' => 0, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
+$filterparams = array(
+        'coursefullname' => 0,
+        'backupfilename' => 1,
+        'filesize' => 1,
+        'filetimemodified' => 1
+);
+$filtering = new coursestore_filtering('download', $filterparams);
 $extraparams = $filtering->get_param_filter();
 
 $response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
