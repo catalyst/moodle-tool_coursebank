@@ -28,12 +28,14 @@ defined('MOODLE_INTERNAL') || die();
  * coursestore_logging
  *
  * @property-read array $other {
- *      courseid => Moodle course ID
- *      module   => Name of the module
- *      action   => Name of the action
- *      url      => URL
- *      info     => Error text
- *      userid   => Moodle User ID
+ *      courseid   => Moodle course ID
+ *      module     => Name of the module
+ *      action     => Name of the action
+ *      url        => URL
+ *      info       => Error text
+ *      userid     => Moodle User ID
+ *      error      => error code
+ *      error_desc => error description
  * }
  *
  *
@@ -57,6 +59,14 @@ class coursestore_logging extends \core\event\base {
 
     public function get_description() {
         $desc = $this->data['other']['info'];
+
+        if (isset($this->data['other']['error'])) {
+            $desc .= " Error code: " .  $this->data['other']['error'];
+        }
+        if (isset($this->data['other']['error_desc'])) {
+            $desc .= " Error text: " .  $this->data['other']['error_desc'];
+        }
+
         return $desc;
     }
 

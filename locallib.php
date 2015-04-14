@@ -274,11 +274,10 @@ abstract class tool_coursestore {
         $coursestorefilepath = self::get_coursestore_filepath($backup);
         $file = fopen($coursestorefilepath, 'rb');
 
-        // Log transfer_started/resumed event.
-        if ($backup->chunknumber == 0) {
-            coursestore_logging::log_transfer_started($backup);
-        } else {
-            coursestore_logging::log_transfer_resumed($backup);
+        // Log transfer_resumed event.
+        if ($backup->chunknumber > 0) {
+            // Don't need to log the started. It will be logged in the post_backup call.
+            coursestore_logging::log_transfer_resumed($backup, null, 'course');
         }
 
         // Set offset based on chunk number.
@@ -848,6 +847,60 @@ class coursestore_ws_manager {
         return $this->send('backup/'. $backupid, array(), 'GET', $headers);
 
     }
+    public static function get_post_backup_validated_hash($data) {
+        return md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
+    }
+    public static function check_post_backup_data_is_same($response, $data) {
+        if ($response->body->fileid != $data['fileid']) {
+            //debugging("fileid", DEBUG_DEVELOPER);
+            return false;
+        }
+        if ($response->body->filename != $data['filename']) {
+            //debugging("filename", DEBUG_DEVELOPER);
+            return false;
+        }
+        if ($response->body->filehash != $data['filehash']) {
+            //debugging("filehash", DEBUG_DEVELOPER);
+            return false;
+        }
+        if ($response->body->filesize != $data['filesize']) {
+            //debugging("filesize", DEBUG_DEVELOPER);
+            return false;
+        }
+        if ($response->body->chunksize != $data['chunksize']) {
+            //debugging("chunksize", DEBUG_DEVELOPER);
+            return false;
+        }
+        if ($response->body->totalchunks != $data['totalchunks']) {
+            //debugging("totalchunks", DEBUG_DEVELOPER);
+            return false;
+        }
+        if ($response->body->courseid != $data['courseid']) {
+            //debugging("courseid", DEBUG_DEVELOPER);
+            return false;
+        }
+        if ($response->body->coursename != $data['coursename']) {
+            //debugging("coursename", DEBUG_DEVELOPER);
+            return false;
+        }
+        $dtresonse = new DateTime($response->body->coursestartdate);
+        $dtdata = new DateTime($data['startdate']);
+        $responsedate = $dtresonse->format('Y-m-d H:i:s');
+        $datadate = $dtdata->format('Y-m-d H:i:s');
+        if ($responsedate != $datadate) {
+            //debugging("startdate: response=" . $response->body->coursestartdate . "; data=" . $data['startdate'], DEBUG_DEVELOPER);
+            return false;
+        }
+        if ($response->body->categoryid != $data['categoryid']) {
+            //debugging("categoryid", DEBUG_DEVELOPER);
+            return false;
+        }
+        if ($response->body->categoryname != $data['categoryname']) {
+            //debugging("categoryname", DEBUG_DEVELOPER);
+            return false;
+        }
+        return true;
+    }
     /**
      * Create a backup resource.
      *
@@ -857,18 +910,24 @@ class coursestore_ws_manager {
     public function post_backup($data, $sessionkey, $retries) {
 
         $response = $this->send('backup', $data, 'POST', $sessionkey, $retries);
+        coursestore_logging::log_transfer_started($data, $response, 'course');
 
         if ($response->httpcode == self::WS_HTTP_CREATED) {
             // Make sure the hash is good.
             $returnhash = $response->body->hash;
-            $validatehash = md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
+            $validatehash = self::get_post_backup_validated_hash($data);
             if ($returnhash != $validatehash) {
                 return $response;
             } else {
                 return (int) $data['fileid'];
             }
         } else if ($response->httpcode == self::WS_HTTP_CONFLICT) {
-            // The backup already exists, continue.
+            // The backup already exists.
+            // Check the data coming back is the same as what we sent.
+            if (!self::check_post_backup_data_is_same($response, $data)) {
+                return $response;
+            }
+            // It's the same, continue.
             return (int) $data['fileid'];
         }
         // Unexpected response or no response received.
@@ -1299,24 +1358,75 @@ class coursestore_logging {
         );
     }
     /**
-     * Log the fact that transfers for a backup have started.
+     * Log the fact that transfers for a course backup or chunk have started.
      *
-     * @param object $backup    Course store database record object
+     * @param mixed $backup    if object: Course store database record object
+     *                         if array: data getting sent to webservice.
+     * @param object $httpresponse
+     * @param string $level    either 'course' or 'chunk'.
      */
-    public static function log_transfer_started($backup) {
+    public static function log_transfer_started($backup, $httpresponse=null, $level='course') {
         global $USER;
 
-        $info = "Transfer of backup with course store id $backup->id " .
-                "started. (Course ID: $backup->courseid)";
+        if (is_object($backup)) {
+            // This is the backup object.
+            $coursestoreid = $backup->id;
+            $courseid = $backup->courseid;
+        } else if (is_array($backup)) {
+            // This is the data that is getting sent to the webservice.
+            $coursestoreid = $backup['fileid'];
+            $courseid = $backup['courseid'];
+        }
+
         $otherdata = array(
-            'coursestoreid' => $backup->id
+            'level'         => $level,
+            'coursestoreid' => $coursestoreid,
         );
+        if (($httpresponse instanceof coursestore_http_response)
+            && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
+            // At this stage, $backup is an array.
+            $validatehash = coursestore_ws_manager::get_post_backup_validated_hash($backup);
+            if ($validatehash != $httpresponse->body->hash) {
+                $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
+                        "failed. (Course ID: $courseid)";
+                $otherdata['error_desc'] = "Returned hash ({$httpresponse->body->hash}) " .
+                                           "does not match validated hash ($validatehash).";
+            } else {
+                $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
+                        "started. (Course ID: $courseid)";
+            }
+        } else {
+            $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
+                    "failed. (Course ID: $courseid)";
+            if ($httpresponse instanceof coursestore_http_response) {
+                if ($httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_CONFLICT && $level == 'course') {
+                    // The course was already created.
+                    // Check if Course Bank has the same data as us.
+                    if (!coursestore_ws_manager::check_post_backup_data_is_same($httpresponse, $backup)) {
+                        $info .= " The backup already exists.";
+                    }
+                    else {
+                        // It's ok, will continue.
+                        $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
+                        "started. (Course ID: $courseid) It already exists in Course Bank.  Will continue.";
+                    }
+                }
+                // Log the session key failure.
+                if (isset($httpresponse->error)) {
+                    $otherdata['error'] = $httpresponse->error;
+                }
+                if (isset($httpresponse->error_desc)) {
+                    $otherdata['error_desc'] = $httpresponse->error_desc;
+                }
+            }
+        }
+
         self::log_event(
             $info,
             'transfer_started',
             'Transfer started',
             self::LOG_MODULE_COURSE_STORE,
-            $backup->courseid,
+            $courseid,
             '',
             $USER->id,
             $otherdata

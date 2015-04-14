@@ -30,10 +30,11 @@ defined('MOODLE_INTERNAL') || die();
  * This event is to be triggered whenever a connection check call is made.
  *
  * @property-read array $other {
- *      status     => Connection check result
- *      speed      => Resulting connection speed
- *      error      => error code
- *      error_desc => error description
+ *      conncheckaction => set to speedtest, if checking speed. set to 'conncheck', if checking connection.
+ *      status          => Connection check result
+ *      speed           => Resulting connection speed
+ *      error           => error code
+ *      error_desc      => error description
  * }
  *
  * @package    tool_coursestore

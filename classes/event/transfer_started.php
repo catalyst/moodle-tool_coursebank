@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  * transfer_started
  *
  * @property-read array $other {
+ *      info          => Text description of the event.
  *      courseid      => Backup Moodle course ID
  *      coursestoreid => Course store backup ID
  *      error         => error code
@@ -50,11 +51,7 @@ class transfer_started extends \core\event\base {
     }
 
     public function get_description() {
-        $desc = "Transfer of backup with course store id ".
-                $this->data['other']['coursestoreid'] .
-                " started. (Original course id: " .
-                $this->data['other']['courseid'] .
-                ")";
+        $desc = $this->data['other']['info'];
 
         if (isset($this->data['other']['error'])) {
             $desc .= " Error code: " .  $this->data['other']['error'];
