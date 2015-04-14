@@ -242,22 +242,11 @@ abstract class tool_coursestore {
         $file = fopen($coursestorefilepath, 'rb');
 
         // Log transfer_started/resumed event.
-        $transferaction = $backup->chunknumber == 0 ? 'started' : 'resumed';
-        $info = "Transfer of backup with course store id $backup->id " .
-                "started. (Course ID: $backup->courseid)";
-        $otherdata = array(
-            'coursestoreid' => $backup->id
-            );
-        coursestore_logging::log_event(
-                $info,
-                'transfer_' . $transferaction,
-                'Transfer ' . $transferaction,
-                'Course store',
-                $backup->courseid,
-                '',
-                $USER->id,
-                $otherdata
-        );
+        if ($backup->chunknumber == 0) {
+            coursestore_logging::log_transfer_started($backup);
+        } else {
+            coursestore_logging::log_transfer_resumed($backup);
+        }
 
         // Set offset based on chunk number.
         if ($backup->chunknumber != 0) {
@@ -1108,6 +1097,8 @@ class coursestore_http_response {
  *
  */
 class coursestore_logging {
+    const LOG_MODULE_COURSE_STORE = 'Course store';
+
     /**
      * Method to log course store events, using either the modern events 2
      * functionality for Moodle 2.7+, or legacy ("add_to_log") logging for
@@ -1193,11 +1184,11 @@ class coursestore_logging {
                 }
             }
         }
-        self::log_event(
+        coursestore_logging::log_event(
             $info,
             'connection_checked',
             'Connection check',
-            'Course store',
+            coursestore_logging::LOG_MODULE_COURSE_STORE,
             SITEID,
             '',
             $USER->id,
@@ -1230,11 +1221,11 @@ class coursestore_logging {
                 }
             }
         }
-        self::log_event(
+        coursestore_logging::log_event(
             $info,
             'connection_checked',
             'Connection check',
-            'Course store',
+            coursestore_logging::LOG_MODULE_COURSE_STORE,
             SITEID,
             '',
             $USER->id,
@@ -1263,12 +1254,60 @@ class coursestore_logging {
                 }
             }
         }
-        self::log_event(
+        coursestore_logging::log_event(
             $info,
             'get_session',
             'Get session key',
-            'Course store',
+            coursestore_logging::LOG_MODULE_COURSE_STORE,
             SITEID,
+            '',
+            $USER->id,
+            $otherdata
+        );
+    }
+    /**
+     * Log the fact that transfers for a backup have started.
+     *
+     * @param object $backup    Course store database record object
+     */
+    public static function log_transfer_started($backup) {
+        global $USER;
+
+        $info = "Transfer of backup with course store id $backup->id " .
+                "started. (Course ID: $backup->courseid)";
+        $otherdata = array(
+            'coursestoreid' => $backup->id
+        );
+        coursestore_logging::log_event(
+            $info,
+            'transfer_started',
+            'Transfer started',
+            coursestore_logging::LOG_MODULE_COURSE_STORE,
+            $backup->courseid,
+            '',
+            $USER->id,
+            $otherdata
+        );
+    }
+    /**
+     * Log the fact that transfers for a backup have resumed.
+     *
+     * @param object $backup    Course store database record object
+     */
+    public static function log_transfer_resumed($backup) {
+        global $USER;
+
+        $info = "Transfer of backup with course store id $backup->id " .
+                "resumed. (Course ID: $backup->courseid)";
+        $otherdata = array(
+            'coursestoreid' => $backup->id
+        );
+        coursestore_logging::log_event(
+            $info,
+            'transfer_resumed',
+            'Transfer resumed',
+            coursestore_logging::LOG_MODULE_COURSE_STORE,
+            $backup->courseid,
             '',
             $USER->id,
             $otherdata
