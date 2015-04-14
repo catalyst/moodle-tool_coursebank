@@ -1217,11 +1217,11 @@ class coursestore_logging {
                 }
             }
         }
-        coursestore_logging::log_event(
+        self::log_event(
             $info,
             'connection_checked',
             'Connection check',
-            coursestore_logging::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_STORE,
             SITEID,
             '',
             $USER->id,
@@ -1254,11 +1254,11 @@ class coursestore_logging {
                 }
             }
         }
-        coursestore_logging::log_event(
+        self::log_event(
             $info,
             'connection_checked',
             'Connection check',
-            coursestore_logging::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_STORE,
             SITEID,
             '',
             $USER->id,
@@ -1287,11 +1287,11 @@ class coursestore_logging {
                 }
             }
         }
-        coursestore_logging::log_event(
+        self::log_event(
             $info,
             'get_session',
             'Get session key',
-            coursestore_logging::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_STORE,
             SITEID,
             '',
             $USER->id,
@@ -1311,11 +1311,11 @@ class coursestore_logging {
         $otherdata = array(
             'coursestoreid' => $backup->id
         );
-        coursestore_logging::log_event(
+        self::log_event(
             $info,
             'transfer_started',
             'Transfer started',
-            coursestore_logging::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_STORE,
             $backup->courseid,
             '',
             $USER->id,
@@ -1335,11 +1335,11 @@ class coursestore_logging {
         $otherdata = array(
             'coursestoreid' => $backup->id
         );
-        coursestore_logging::log_event(
+        self::log_event(
             $info,
             'transfer_resumed',
             'Transfer resumed',
-            coursestore_logging::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_STORE,
             $backup->courseid,
             '',
             $USER->id,
