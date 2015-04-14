@@ -128,12 +128,12 @@ abstract class tool_coursestore {
         global $USER;
 
         $check = str_pad('', $testsize * 1000, '0');
-        $start = microtime(true);
+        $starttime = microtime(true);
 
         // Make $count requests with the dummy data.
         for ($i = 0; $i < $count; $i++) {
             for ($j = 0; $j <= $retry; $j++) {
-                $response = $wsman->get_test($auth, $check);
+                $response = $wsman->get_test($auth, $check, $count, $testsize, $starttime, $endtime);
                 if ($response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
                     break;
                 }
@@ -145,36 +145,18 @@ abstract class tool_coursestore {
             }
         }
         if (!isset($speed)) {
-            $elapsed = microtime(true) - $start;
+            $speed = tool_coursestore::calculate_speed($count, $testsize, $starttime, $endtime);
+        }
 
-            // Convert 'total kB transferred'/'total time' into kb/s.
-            $speed = round(($testsize * $count * 8 ) / $elapsed, 2);
-        }
-        // Log connection speed test.
-        $result = $speed === 0 ? 'failed' : "$speed kbps";
-        $info = "Connection speed test: $result.";
-        $otherdata = array(
-            'conncheckaction' => 'speedtest',
-            'speed' => $speed
-            );
-        if (isset($response->body->error)) {
-            $otherdata['error'] = $response->body->error;
-        }
-        if (isset($response->body->error_desc)) {
-            $otherdata['error_desc'] = $response->body->error_desc;
-        }
-        coursestore_logging::log_event(
-                $info,
-                'connection_checked',
-                'Connection check',
-                'Course store',
-                SITEID,
-                '',
-                $USER->id,
-                $otherdata
-        );
         return $speed;
 
+    }
+    public static function calculate_speed($count, $testsize, $starttime, $endtime) {
+        $elapsed = $endtime - $starttime;
+
+        // Convert 'total kB transferred'/'total time' into kb/s.
+        $speed = round(($testsize * $count * 8 ) / $elapsed, 2);
+        return $speed;
     }
     public static function get_config_chunk_size() {
         return get_config('tool_coursestore', 'chunksize');
@@ -780,9 +762,14 @@ class coursestore_ws_manager {
      *
      * @param string  $auth         Authorization string
      * @param string  $data         Test data string
+     * @param int     $count        Optional - applicable to speed test. Iteration number.
+     * @param int     $testsize     Optional - applicable to speed test. Size of data getting sent.
+     * @param int     $starttime    Optional - applicable to speed test. Start time of the test.
+     * @param int     $endtime      Optional - applicable to speed test. End time - sent back.
+     * 
      * @return array or bool false  Associate array response
      */
-    public function get_test($auth, $data=' ') {
+    public function get_test($auth, $data='', $count=0, $testsize=0, $starttime=0, &$endtime=0) {
         $headers = array(
             self::WS_AUTH_SESSION_KEY => $auth
         );
@@ -790,7 +777,14 @@ class coursestore_ws_manager {
             'data' => base64_encode($data)
         );
         $result = $this->send('test', $json, 'GET', $headers);
-        coursestore_logging::log_check_connection($result);
+        if ($data == '') {
+            coursestore_logging::log_check_connection($result);
+        } else {
+            // It's the speed test.
+            $endtime = microtime(true);
+            $speed = tool_coursestore::calculate_speed($count, $testsize, $starttime, $endtime);
+            coursestore_logging::log_check_connection_speed($result, $speed);
+        }
         return $result;
     }
     /**
@@ -1211,7 +1205,44 @@ class coursestore_logging {
         );
     }
 
-    public static function log_get_session($httpresponse) {
+    public static function log_check_connection_speed($http_response, $speed) {
+        global $USER;
+
+        // Log connection speed test.
+        $otherdata = array(
+            'conncheckaction' => 'speedtest',
+        );
+
+        if ((get_class($http_response) == 'coursestore_http_response')
+            && $http_response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+            $info = "Connection speed test passed. Approximate speed: " . $speed . " kbps.";
+            $otherdata['speed'] = $speed;
+        } else {
+            $info = "Connection speed test failed.";
+            $otherdata['speed'] = 0;
+            if (get_class($http_response) == 'coursestore_http_response') {
+                // Log the failure.
+                if (isset($http_response->error)) {
+                    $otherdata['error'] = $http_response->error;
+                }
+                if (isset($http_response->error_desc)) {
+                    $otherdata['error_desc'] = $http_response->error_desc;
+                }
+            }
+        }
+        self::log_event(
+            $info,
+            'connection_checked',
+            'Connection check',
+            'Course store',
+            SITEID,
+            '',
+            $USER->id,
+            $otherdata
+        );
+    }
+
+    public static function log_get_session($http_response) {
         global $USER;
 
         $otherdata = array();
