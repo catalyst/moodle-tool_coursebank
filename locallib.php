@@ -995,7 +995,9 @@ class coursestore_ws_manager {
         $url = 'downloads';
         $url .= '?page=' . (int) $page . '&perpage=' . (int) $recordsperpage;
 
-        return $this->send($url, array(), 'GET', $sesskey);
+        $nonemptyarray = is_array($params) && !empty($params);
+        $query = $nonemptyarray ? array('query' => $params) : array();
+        return $this->send($url, $query, 'GET', $sesskey);
     }
     /**
      * Get count of backup files available from course bank instance.

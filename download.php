@@ -124,7 +124,7 @@ $filtering = new coursestore_filtering('download', $filterparams);
 $extraparams = $filtering->get_param_filter();
 
 $response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
-if (isset($response->body->error)) {
+if ($response->httpcode != $wsman::WS_HTTP_OK) {
     $redirecturl = new moodle_url(
             '/admin/tool/coursestore/check_connection.php',
             array('action' => 'conncheck')
@@ -132,7 +132,7 @@ if (isset($response->body->error)) {
     redirect($redirecturl, '', 0);
 }
 
-$count = $wsman->get_downloadcount($sesskey, $extraparams);
+$count = $wsman->get_downloadcount($sesskey);
 if (isset($count->body->error)) {
     $redirecturl = new moodle_url(
             '/admin/tool/coursestore/check_connection.php',
