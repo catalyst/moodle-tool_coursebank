@@ -54,10 +54,10 @@ class coursestore_filter_text extends user_filter_text {
                 $params = array('operator' => '=', 'value' => $value);
                 break;
             case 3: // Starts with.
-                $params = array('operator' => '%LIKE', 'value' => $value);
+                $params = array('operator' => 'LIKE%', 'value' => $value);
                 break;
             case 4: // Ends with.
-                $params = array('operator' => 'LIKE%', 'value' => $value);
+                $params = array('operator' => '%LIKE', 'value' => $value);
                 break;
             case 5: // Empty.
                 $params = array('operator' => 'EMPTY', 'value' => $value);
