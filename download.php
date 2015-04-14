@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die;
 
 $download     = optional_param('download', 0, PARAM_INT);
 $file         = optional_param('file', 0, PARAM_INT);
-$sort         = optional_param('sort', 'coursename', PARAM_ALPHANUM);
+$sort         = optional_param('sort', 'coursefullname', PARAM_ALPHANUM);
 $dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
 $page         = optional_param('page', 0, PARAM_INT);
 $perpage      = optional_param('perpage', 50, PARAM_INT);
