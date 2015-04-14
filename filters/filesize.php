@@ -31,18 +31,18 @@ class coursestore_filter_filesize extends user_filter_text {
      * Returns an array of comparison operators
      * @return array of comparison operators
      */
-    public function getOperators() {
+    public function getoperators() {
         return array(0 => get_string('filtermorethan', 'tool_coursestore'),
                      1 => get_string('filterlessthan', 'tool_coursestore'),
-                     2 => get_string('filterisequalto', 'tool_coursestore'),
-                     3 => get_string('isempty', 'filters'));
+                     2 => get_string('filterisequalto', 'tool_coursestore')
+        );
     }
 
     /**
      * Adds controls specific to this filter in the form.
      * @param object $mform a MoodleForm object to setup
      */
-    public function setupForm(&$mform) {
+    public function setupform(&$mform) {
         $objs = array();
         $objs['select'] = $mform->createElement('select', $this->_name.'_op', null, $this->getOperators());
         $objs['text'] = $mform->createElement('text', $this->_name, null);
