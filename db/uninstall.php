@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
 
 function xmldb_tool_coursestore_uninstall() {
     global $CFG, $DB;
