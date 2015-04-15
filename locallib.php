@@ -389,21 +389,7 @@ abstract class tool_coursestore {
             $DB->update_record('tool_coursestore', $backup);
 
             // Log transfer_completed event.
-            $info = "Transfer of backup with course store id $backup->id " .
-                    "completed. (Course ID: $backup->courseid)";
-            $otherdata = array(
-                'coursestoreid' => $backup->id
-                );
-            coursestore_logging::log_event(
-                    $info,
-                    'transfer_completed',
-                    'Transfer completed',
-                    'Course store',
-                    $backup->courseid,
-                    '',
-                    $USER->id,
-                    $otherdata
-            );
+            coursestore_logging::log_transfer_completed($backup);
         }
 
         $wsmanager->close();
@@ -1478,6 +1464,31 @@ class coursestore_logging {
             '',
             $USER->id,
             $otherdata
+        );
+    }
+    /**
+     * Log transfer completion event.
+     *
+     * @param object $backup    Course store database record object
+     */
+    public static function log_transfer_completed($backup) {
+        global $USER;
+
+        // Log transfer_completed event.
+        $info = "Transfer of backup with course store id $backup->id " .
+                "completed. (Course ID: $backup->courseid)";
+        $otherdata = array(
+            'coursestoreid' => $backup->id
+            );
+        self::log_event(
+                $info,
+                'transfer_completed',
+                'Transfer completed',
+                self::LOG_MODULE_COURSE_STORE,
+                $backup->courseid,
+                '',
+                $USER->id,
+                $otherdata
         );
     }
 }
