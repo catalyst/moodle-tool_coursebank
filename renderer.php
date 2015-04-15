@@ -76,7 +76,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             } else {
                 $html .= html_writer::tag('td', get_string('notcompleted', 'tool_coursestore'));
             }
-            $html .= html_writer::tag('td', s($result->status));
+            $html .= html_writer::tag('td', s($this->course_store_get_status($result)));
             $html .= html_writer::start_tag('tr');
         }
         $html .= html_writer::end_tag('tbody');
@@ -117,22 +117,8 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             $html .= html_writer::tag('td', s($download->backupfilename));
             $html .= html_writer::tag('td', s(display_size($download->filesize)));
             $html .= html_writer::tag('td', s($download->filetimemodified));
-            // TO DO: actual link to download.
-            $text = get_string('download');
-            $icon = html_writer::empty_tag('img', array('src' => $this->output->pix_url('/t/download'),
-                                                    'alt' => $text, 'class' => 'iconsmall'));
-            $params = array(
-                'sort' => $sort,
-                'dir'  => $dir,
-                'page' => $page,
-                'perpage' => $perpage,
-                'download' => 1,
-                'file' => $download->coursestoreid
-            );
-            $url = new moodle_url('', $params);
-            $attributes = array('href' => $url);
-            $link = html_writer::tag('a', $icon, $attributes);
-            $html .= html_writer::tag('td', $link);
+            $links = $this->course_store_get_download_actions_links($download);
+            $html .= html_writer::tag('td', $links);
             $html .= html_writer::start_tag('tr');
         }
         $html .= html_writer::end_tag('tbody');
@@ -160,6 +146,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         foreach ($columns as $column) {
             $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir, $page, $perpage));
         }
+        $html .= html_writer::tag('th', get_string('action'));
         $html .= html_writer::end_tag('tr');
         $html .= html_writer::end_tag('thead');
 
@@ -175,13 +162,95 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             } else {
                 $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursestore'));
             }
-            $html .= html_writer::tag('td', s($result->status));
+            $html .= html_writer::tag('td', s($this->course_store_get_status($result)));
+            $link = $this->course_store_get_queue_actions_links($result);
+            $html .= html_writer::tag('td', $link);
             $html .= html_writer::start_tag('tr');
         }
         $html .= html_writer::end_tag('tbody');
         $html .= html_writer::end_tag('table');
         $html .= $this->box_end();
         return $html;
+    }
+    /**
+     * Generates human readable status
+     *
+     * @param object $result
+     * @return string
+     */
+    private function course_store_get_status($result) {
+        $statusmap = tool_coursestore::get_statuses();
+        if (isset($statusmap[$result->status])) {
+            return $statusmap[$result->status];
+        }
+        return '';
+    }
+    /**
+     * Generates action links for download page
+     *
+     * @param object $result
+     * @return HTML
+     */
+    private function course_store_get_download_actions_links($result) {
+        $text = get_string('download');
+        $icon = html_writer::empty_tag('img',
+                array('src' => $this->pix_url('t/download')->out(false),
+                    'alt' => $text
+                ));
+        $url = new moodle_url($this->page->url, array('download' => 1, 'file' => $result->coursestoreid));
+        $links = html_writer::link($url, $icon);
+
+        return $links;
+    }
+    /**
+     * Generates action links for queue page
+     *
+     * @param object $result
+     * @return HTML
+     */
+    private function course_store_get_queue_actions_links($result) {
+        $links = '';
+        $buttons = array();
+        $status = $result->status;
+
+        $noaction = tool_coursestore::get_noaction_statuses();
+        $canstop  = tool_coursestore::get_canstop_statuses();
+        $stopped  = tool_coursestore::get_stopped_statuses();
+
+        if (!in_array($status, $noaction)) {
+             // Stop link.
+            if (in_array($status, $canstop)) {
+                $text = get_string('cancel');
+                $icon = html_writer::empty_tag('img',
+                        array('src' => $this->pix_url('t/block')->out(false),
+                            'alt' => $text
+                        ));
+                $url = new moodle_url($this->page->url, array('action' => 'stop', 'id' => $result->id));
+                $buttons[] = html_writer::link($url, $icon);
+            }
+            // Go link.
+            if (in_array($status, $stopped)) {
+                $text = get_string('go');
+                $icon = html_writer::empty_tag('img',
+                        array('src' => $this->pix_url('t/collapsed')->out(false),
+                            'alt' => $text
+                        ));
+                $url = new moodle_url($this->page->url, array('action' => 'go', 'id' => $result->id));
+                $buttons[] = html_writer::link($url, $icon);
+            }
+            // Delete link.
+            $text = get_string('delete');
+            $icon = html_writer::empty_tag('img',
+                    array('src' => $this->pix_url('t/delete')->out(false),
+                        'alt' => $text
+                    ));
+            $url = new moodle_url($this->page->url, array('action' => 'delete', 'id' => $result->id));
+            $buttons[] = html_writer::link($url, $icon);
+
+            $links = implode(' ', $buttons);
+        }
+
+        return $links;
     }
     /**
      * Returns the display name of a field

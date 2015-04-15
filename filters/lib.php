@@ -218,9 +218,15 @@ class coursestore_filtering {
     public function get_status_choices() {
         $statuses = tool_coursestore::get_statuses();
 
-        // Remove STATUS_FINISHED form a filter on the queue page.
-        if ($this->prefix == 'queue' and isset($statuses[tool_coursestore::STATUS_FINISHED])) {
-            unset($statuses[tool_coursestore::STATUS_FINISHED]);
+        if ($this->prefix == 'queue') {
+            // Remove STATUS_FINISHED from a filter on the queue page.
+            if (isset($statuses[tool_coursestore::STATUS_FINISHED])) {
+                unset($statuses[tool_coursestore::STATUS_FINISHED]);
+            }
+            // Remove STATUS_CANCELLED from a filter on the queue page.
+            if (isset($statuses[tool_coursestore::STATUS_CANCELLED])) {
+                unset($statuses[tool_coursestore::STATUS_CANCELLED]);
+            }
         }
 
         return $statuses;

@@ -64,6 +64,8 @@ $string['statuserror'] = 'Error';
 $string['statusinprogress'] = 'Transfer in progress';
 $string['statusnotstarted'] = 'Transfer pending';
 $string['statusfinished'] = 'Transfer complete';
+$string['statusonhold'] = 'Transfer is on hold';
+$string['statuscancelled'] = 'Transfer is cancelled';
 $string['settings_requestretries'] = 'HTTP request retries';
 $string['settings_requestretries_desc'] = 'Number of times to reattempt the sending of an individual failed request.';
 $string['settings_authtoken'] = 'Authentication token';
@@ -107,7 +109,10 @@ $string['coursestorelogging'] = 'Course Store Logging';
 $string['coursestore:view'] = 'View a list of course store backup files';
 $string['coursestore:download'] = 'Download course store backup files';
 $string['coursestore:edit'] = 'Edit course store backup files';
-
+$string['errorupdatingstatus'] = 'Error updating status';
+$string['check_delete'] = 'Are you absolutely sure you want to completely delete {$a} from the transferring queue?';
+$string['check_stop'] = 'Are you absolutely sure you want to put transferring of {$a} on hold?';
+$string['check_go'] = 'Are you absolutely sure you want to resume transferring of {$a}?';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';

@@ -31,6 +31,8 @@ abstract class tool_coursestore {
     const STATUS_NOTSTARTED = 0;
     const STATUS_INPROGRESS = 1;
     const STATUS_FINISHED = 2;
+    const STATUS_ONHOLD = 3;
+    const STATUS_CANCELLED = 4;
     const STATUS_ERROR = 99;
     /**
      * Returns an array of available statuses
@@ -41,12 +43,16 @@ abstract class tool_coursestore {
         $inprogress   = get_string('statusinprogress', 'tool_coursestore');
         $statuserror  = get_string('statuserror', 'tool_coursestore');
         $finished     = get_string('statusfinished', 'tool_coursestore');
+        $onhold       = get_string('statusonhold', 'tool_coursestore');
+        $cancelled    = get_string('statuscancelled', 'tool_coursestore');
 
         $statuses = array(
             self::STATUS_NOTSTARTED => $notstarted,
             self::STATUS_INPROGRESS => $inprogress,
             self::STATUS_FINISHED   => $finished,
-            self::STATUS_ERROR      => $statuserror
+            self::STATUS_ONHOLD     => $onhold,
+            self::STATUS_CANCELLED  => $cancelled,
+            self::STATUS_ERROR      => $statuserror,
         );
 
         return $statuses;
@@ -217,14 +223,6 @@ abstract class tool_coursestore {
 
         $results = $DB->get_records_select('tool_coursestore', $extraselect, $extraparams, $sort, '*', $page, $recordsperpage);
         $count = $DB->count_records_select('tool_coursestore', $extraselect, $extraparams);
-
-        $statusmap = self::get_statuses();
-
-        foreach ($results as $result) {
-            if (isset($statusmap[$result->status])) {
-                $result->status = $statusmap[$result->status];
-            }
-        }
 
         return array('results' => $results, 'count' => $count);
     }
@@ -668,6 +666,90 @@ abstract class tool_coursestore {
         } else {
             return false;
         }
+    }
+    /**
+     * Updates status for coursebackup record
+     *
+     * @param object $coursebackup  An object with contents equal to fieldname=>fieldvalue.
+     * @param int $status A new status
+     * @return boolean
+     */
+    public static function update_status($coursebackup, $status) {
+        global $DB;
+
+        $statuses = self::get_statuses();
+        $noactionstatuses = self::get_noaction_statuses();
+        // Check if a new status exists.
+        if (!array_key_exists($status, $statuses)) {
+            coursestore_logging::log_event("Updating status: a new status $status is not exist");
+            return false;
+        }
+        // Check if record exists.
+        if (!$DB->record_exists('tool_coursestore', array('id' => $coursebackup->id))) {
+            coursestore_logging::log_event("Updating status: record $coursebackup->id is not exist");
+            return false;
+        }
+        // Check if we can change current status.
+        if (in_array($coursebackup->status, $noactionstatuses)) {
+            coursestore_logging::log_event("Updating status: current status $coursebackup->status for ID $coursebackup->id is in noaction list. Can not update status.");
+            return false;
+        }
+        // Finally update.
+        $oldstatus = $coursebackup->status;
+        $coursebackup->status = $status;
+        $DB->update_record('tool_coursestore', $coursebackup);
+        coursestore_logging::log_event("Updating status: successfully updated status from $oldstatus to $status for ID $coursebackup->id");
+
+        return true;
+    }
+    /**
+     * Returns a list of unchangeable statuses
+     *
+     * @return array
+     */
+    public static function get_noaction_statuses() {
+        $noaction = array(
+            self::STATUS_INPROGRESS,
+            self::STATUS_FINISHED,
+            self::STATUS_CANCELLED,
+        );
+        return $noaction;
+    }
+    /**
+     * Returns a list of statuses wich may be stopped
+     *
+     * @return array
+     */
+    public static function get_canstop_statuses() {
+        $canstop = array(
+            self::STATUS_NOTSTARTED,
+            self::STATUS_ERROR,
+        );
+        return $canstop;
+    }
+    /**
+     * Returns a list of statuses wich are stopped but can be changed
+     *
+     * @return array
+     */
+    public static function get_stopped_statuses() {
+        $stopped = array(
+            self::STATUS_ONHOLD,
+        );
+        return $stopped;
+    }
+    /**
+     * Returns a list of existing actions
+     *
+     * @return type
+     */
+    public static function get_actions() {
+        $actions = array(
+            'delete' => self::STATUS_CANCELLED,
+            'stop'   => self::STATUS_ONHOLD,
+            'go'     => self::STATUS_NOTSTARTED,
+        );
+        return $actions;
     }
 }
 
