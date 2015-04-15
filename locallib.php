@@ -230,7 +230,7 @@ abstract class tool_coursestore {
      * Send the initial post_backup.
      * @param object $wsmanager Webservice class manager.
      * @param object $backup    Course store database record object
-     * 
+     *
      * @return int  0 = all good, continue.
      *             -1 = some error, don't continue.
      *              1 = all good but don't continue -> i.e. Course Bank already has the backup.
@@ -318,6 +318,7 @@ abstract class tool_coursestore {
         $DB->update_record('tool_coursestore', $backup);
         return 0;
     }
+
     /**
      * Convenience function to handle sending a file along with the relevant
      * metatadata.
@@ -539,9 +540,9 @@ abstract class tool_coursestore {
     public static function generate_uuid() {
         $data = openssl_random_pseudo_bytes(16);
 
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
-    
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // Set version to 0100.
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // Set bits 6-7 to 10.
+
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
     /**
@@ -790,7 +791,10 @@ abstract class tool_coursestore {
         $oldstatus = $coursebackup->status;
         $coursebackup->status = $status;
         $DB->update_record('tool_coursestore', $coursebackup);
-        coursestore_logging::log_event("Updating status: successfully updated status from $oldstatus to $status for ID $coursebackup->id");
+        coursestore_logging::log_event("Updating status: successfully " .
+                "updated status from $oldstatus to $status for ID " .
+                "$coursebackup->id"
+        );
 
         return true;
     }
@@ -1139,7 +1143,7 @@ class coursestore_ws_manager {
             $validatehash = self::get_backup_validated_hash($data);
 
             if ($returnhash != $validatehash) {
-                // hashes don't match, possible network error.
+                // Hashes don't match, possible network error.
                 // Should try again later.
                 return $response;
             } else {
