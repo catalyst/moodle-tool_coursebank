@@ -861,54 +861,45 @@ class coursestore_ws_manager {
         return md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
     }
     public static function check_post_backup_data_is_same($response, $data) {
-        if ($response->body->fileid != $data['fileid']) {
-            //debugging("fileid", DEBUG_DEVELOPER);
+
+        $fields = array(
+                'fileid',
+                'filename',
+                'filehash',
+                'filesize',
+                'chunksize',
+                'totalchunks',
+                'courseid',
+                'coursename',
+                'categoryid',
+                'categoryname'
+        );
+        // Check that each of the above fields matches, log an error if not.
+        foreach ($fields as $field) {
+            $info = "Local value for $field does not match coursebank value.";
+            $response->log_http_error(
+                    $data['courseid'],
+                    $data['coursestoreid'],
+                    $info
+            );
             return false;
         }
-        if ($response->body->filename != $data['filename']) {
-            //debugging("filename", DEBUG_DEVELOPER);
-            return false;
-        }
-        if ($response->body->filehash != $data['filehash']) {
-            //debugging("filehash", DEBUG_DEVELOPER);
-            return false;
-        }
-        if ($response->body->filesize != $data['filesize']) {
-            //debugging("filesize", DEBUG_DEVELOPER);
-            return false;
-        }
-        if ($response->body->chunksize != $data['chunksize']) {
-            //debugging("chunksize", DEBUG_DEVELOPER);
-            return false;
-        }
-        if ($response->body->totalchunks != $data['totalchunks']) {
-            //debugging("totalchunks", DEBUG_DEVELOPER);
-            return false;
-        }
-        if ($response->body->courseid != $data['courseid']) {
-            //debugging("courseid", DEBUG_DEVELOPER);
-            return false;
-        }
-        if ($response->body->coursename != $data['coursename']) {
-            //debugging("coursename", DEBUG_DEVELOPER);
-            return false;
-        }
+
         $dtresonse = new DateTime($response->body->coursestartdate);
         $dtdata = new DateTime($data['startdate']);
         $responsedate = $dtresonse->format('Y-m-d H:i:s');
         $datadate = $dtdata->format('Y-m-d H:i:s');
         if ($responsedate != $datadate) {
-            //debugging("startdate: response=" . $response->body->coursestartdate . "; data=" . $data['startdate'], DEBUG_DEVELOPER);
+            $info = "startdate: response=" . $response->body->coursestartdate .
+                    "; data=" . $data['startdate'];
+            $response->log_http_error(
+                    $data['courseid'],
+                    $data['coursestoreid'],
+                    $info
+            );
             return false;
         }
-        if ($response->body->categoryid != $data['categoryid']) {
-            //debugging("categoryid", DEBUG_DEVELOPER);
-            return false;
-        }
-        if ($response->body->categoryname != $data['categoryname']) {
-            //debugging("categoryname", DEBUG_DEVELOPER);
-            return false;
-        }
+
         return true;
     }
     /**
@@ -1129,10 +1120,17 @@ class coursestore_http_response {
      * data about this response and the initial request may be helpful for
      * debugging.
      *
-     * @param int $courseid
-     * @param int $coursestoreid
+     * @param int    $courseid        Moodle course ID.
+     * @param int    $coursestoreid   Course store ID.
+     * @param string $info            Additional information.
      */
-    public function log_http_error($courseid, $coursestoreid) {
+    public function log_http_error($courseid, $coursestoreid, $info='') {
+
+        // First log information for debugging purposes.
+        if ($CFG->debug >= DEBUG_ALL && !empty($info)) {
+            error_log($info);
+        }
+
         if (tool_coursestore::legacy_logging()) {
             return $this->log_http_error_legacy($courseid, $coursestoreid);
         }
@@ -1414,11 +1412,13 @@ class coursestore_logging {
                     // Check if Course Bank has the same data as us.
                     if (!coursestore_ws_manager::check_post_backup_data_is_same($httpresponse, $backup)) {
                         $info .= " The backup already exists.";
-                    }
-                    else {
+                    } else {
                         // It's ok, will continue.
-                        $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
-                        "started. (Course ID: $courseid) It already exists in Course Bank.  Will continue.";
+                        $info = "Transfer of " .
+                                ($level == 'course' ? 'backup' : 'chunk') .
+                                " for course store id $coursestoreid " .
+                        "started. (Course ID: $courseid) It already exists " .
+                        "in Course Bank.  Will continue.";
                     }
                 }
                 // Log the session key failure.
