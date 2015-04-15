@@ -28,25 +28,30 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
 require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 $PAGE->requires->js('/admin/tool/coursestore/javascript/jquery-1.11.0.min.js');
 $PAGE->requires->js('/admin/tool/coursestore/javascript/coursestore.js');
 
-$ADMIN->add('backups', new admin_category('coursestore_pages',
-        get_string('pluginname', 'tool_coursestore')));
+$displaypages = tool_coursestore_get_config('displaypages');
 
-$ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_queue',
-        get_string('nav_queue', 'tool_coursestore'),
-        "$CFG->wwwroot/$CFG->admin/tool/coursestore/queue.php", 'tool/coursestore:view'));
+if ($displaypages) {
+    $ADMIN->add('backups', new admin_category('coursestore_pages',
+            get_string('pluginname', 'tool_coursestore')));
 
-$ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_download',
-        get_string('nav_download', 'tool_coursestore'),
-        "$CFG->wwwroot/$CFG->admin/tool/coursestore/download.php", 'tool/coursestore:view'));
+    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_queue',
+            get_string('nav_queue', 'tool_coursestore'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursestore/queue.php", 'tool/coursestore:view'));
 
-$ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore',
-        get_string('nav_summary', 'tool_coursestore'),
-        "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'tool/coursestore:view'));
+    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_download',
+            get_string('nav_download', 'tool_coursestore'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursestore/download.php", 'tool/coursestore:view'));
+
+    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore',
+            get_string('nav_summary', 'tool_coursestore'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'tool/coursestore:view'));
+}
 
 if ($hassiteconfig) {
 
@@ -79,6 +84,11 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configcheckbox('tool_coursestore/externalcron',
             get_string('settings_externalcron', 'tool_coursestore'),
             get_string('settings_externalcron_desc', 'tool_coursestore'), 0));
+
+    $settings->add(new admin_setting_configcheckbox('tool_coursestore/displaypages',
+            get_string('settings_displaypages', 'tool_coursestore'),
+            get_string('settings_displaypages_desc', 'tool_coursestore'), 1));
+
     $settings->add(new admin_setting_configtext('tool_coursestore/url',
             get_string('settings_url', 'tool_coursestore'),
             get_string('settings_url_desc', 'tool_coursestore'),
