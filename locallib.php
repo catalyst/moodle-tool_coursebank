@@ -668,6 +668,13 @@ abstract class tool_coursestore {
         $transferrs->close();
 
     }
+    /**
+     * Test the Moodle version number and return true if the Moodle version is
+     * older than Moodle 2.7. If this is the case, we will need to use the
+     * legacy "add_to_log" function to log events.
+     *
+     * @return bool  Whether or not legacy logging will be necessary.
+     */
     public static function legacy_logging() {
         global $CFG;
         if ((float) $CFG->version < 2014051200) {
