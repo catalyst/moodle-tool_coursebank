@@ -227,6 +227,97 @@ abstract class tool_coursestore {
         return array('results' => $results, 'count' => $count);
     }
     /**
+     * Send the initial post_backup.
+     * @param object $wsmanager Webservice class manager.
+     * @param object $backup    Course store database record object
+     * 
+     * @return int  0 = all good, continue.
+     *             -1 = some error, don't continue.
+     *              1 = all good but don't continue -> i.e. Course Bank already has the backup.
+     */
+    private static function initialise_backup(coursestore_ws_manager $wsmanager, $backup, $sessionkey, $retries) {
+        global $DB;
+
+        $coursedate = '';
+        if ($backup->coursestartdate > 0) {
+            $dt = new DateTime("@" . $backup->coursestartdate);
+            $coursedate = $dt->format('Y-m-d H:i:s');
+        }
+        $data = array(
+            'fileid'       => $backup->id,
+            'filehash'     => $backup->contenthash,
+            'filename'     => $backup->backupfilename,
+            'filesize'     => $backup->filesize,
+            'chunksize'    => $backup->chunksize,
+            'totalchunks'  => $backup->totalchunks,
+            'courseid'     => $backup->courseid,
+            'coursename'   => $backup->courseshortname,
+            'startdate'    => $coursedate,
+            'categoryid'   => $backup->categoryid,
+            'categoryname' => $backup->categoryname,
+        );
+        if (!isset($backup->timetransferstarted) || $backup->timetransferstarted == 0) {
+            $backup->timetransferstarted = time();
+        }
+        $postresponse = $wsmanager->post_backup($data, $sessionkey, $retries);
+        // Unexpected http response or none received.
+        if (!is_int($postresponse)) {
+            $deletechunks = false;
+            if ($postresponse->httpcode == coursestore_ws_manager::WS_HTTP_CONFLICT) {
+                // Course Bank already has some data for this backup.
+                if ($postresponse->body->is_completed) {
+                    // Can skip this one as it's already been sent to Course Bank and is complete.
+                    // Data may not match due to chunk size settings changing.
+                    $backup->status = self::STATUS_FINISHED;
+                    $backup->timecompleted = time();
+                    $DB->update_record('tool_coursestore', $backup);
+                    // Don't let the send_backup() continue.
+                    return 1;
+                } else if ($postresponse->body->chunksreceived == 0) {
+                    // Course Bank has some other data for this backup.
+                    // But no chunks have been sent yet.
+                    // Try to update it.
+                    //unset($data['fileid']);
+                    $putresponse = $wsmanager->put_backup($sessionkey, $data, $backup->id, $retries);
+                    if ($putresponse !== true) {
+                        if ($putresponse->httpcode == coursestore_ws_manager::WS_HTTP_BAD_REQUEST) {
+                            if (isset($putresponse->body->chunksreceived)) {
+                                // We've sent chunks to Course Bank already?
+                                if ($putresponse->body->chunksreceived == 0) {
+                                    // Possible network error. Should retry again later.
+                                    $backup->status = self::STATUS_ERROR;
+                                    $DB->update_record('tool_coursestore', $backup);
+                                    // Log a transfer interruption event.
+                                    $putresponse->log_http_error($backup->courseid, $backup->id);
+                                    return -1;
+                                }
+                                // Yes, we need to delete the chunks.
+                                $deletechunks = true;
+                            }
+                        }
+                    }
+                } else {
+                    // We need to delete the chunks, then update the backup, then continue.
+                    $deletechunks = true;
+                }
+            }
+            if ($deletechunks) {
+                // TODO: sent requests to delete chunks.
+                // TODO: update the backup
+                // TODO: continue.
+            } else {
+                $backup->status = self::STATUS_ERROR;
+                $DB->update_record('tool_coursestore', $backup);
+                // Log a transfer interruption event.
+                $postresponse->log_http_error($backup->courseid, $backup->id);
+                return -1;
+            }
+        }
+        $backup->status = self::STATUS_INPROGRESS;
+        $DB->update_record('tool_coursestore', $backup);
+        return 0;
+    }
+    /**
      * Convenience function to handle sending a file along with the relevant
      * metatadata.
      *
@@ -274,7 +365,7 @@ abstract class tool_coursestore {
 
         // Log transfer_resumed event.
         if ($backup->chunknumber > 0) {
-            // Don't need to log the started. It will be logged in the post_backup call.
+            // Don't need to log the start. It will be logged in the post_backup call.
             coursestore_logging::log_transfer_resumed($backup, null, 'course');
         }
 
@@ -283,39 +374,20 @@ abstract class tool_coursestore {
             fseek($file, $backup->chunknumber * $chunksize);
         } else if ($backup->chunknumber == 0) {
             // Initialise the backup record.
-            $coursedate = '';
-            if ($backup->coursestartdate > 0) {
-                $dt = new DateTime("@" . $backup->coursestartdate);
-                $coursedate = $dt->format('Y-m-d H:i:s');
+            $result = self::initialise_backup($wsmanager, $backup, $sessionkey, $retries);
+            switch ($result) {
+                case 0:
+                    // continue on.
+                    break;
+                case 1:
+                    $wsmanager->close();
+                    return true;
+                    break;
+                case -1:
+                    $wsmanager->close();
+                    return false;
+                    break;
             }
-            $data = array(
-                'fileid'       => $backup->id,
-                'filehash'     => $backup->contenthash,
-                'filename'     => $backup->backupfilename,
-                'filesize'     => $backup->filesize,
-                'chunksize'    => $backup->chunksize,
-                'totalchunks'  => $backup->totalchunks,
-                'courseid'     => $backup->courseid,
-                'coursename'   => $backup->courseshortname,
-                'startdate'    => $coursedate,
-                'categoryid'   => $backup->categoryid,
-                'categoryname' => $backup->categoryname,
-            );
-            if (!isset($backup->timetransferstarted) or $backup->timetransferstarted == 0) {
-                $backup->timetransferstarted = time();
-            }
-            $coursebankid = $wsmanager->post_backup($data, $sessionkey, $retries);
-            // Unexpected http response or none received.
-            if (!is_int($coursebankid)) {
-                $backup->status = self::STATUS_ERROR;
-                $DB->update_record('tool_coursestore', $backup);
-                $wsmanager->close();
-                // Log a transfer interruption event.
-                $coursebankid->log_http_error($backup->courseid, $backup->id);
-                return false;
-            }
-            $backup->status = self::STATUS_INPROGRESS;
-            $DB->update_record('tool_coursestore', $backup);
         }
 
         // Read the file in chunks, attempt to send them.
@@ -366,11 +438,8 @@ abstract class tool_coursestore {
                 'chunksize' => $backup->chunksize,
                 'totalchunks' => $backup->totalchunks
             );
-            if (!isset($coursebankid)) {
-                $coursebankid = $backup->id;
-            }
             // Confirm the backup file as complete.
-            $completion = $wsmanager->put_backup_complete($sessionkey, $data, $coursebankid);
+            $completion = $wsmanager->put_backup_complete($sessionkey, $data, $backup->id);
             if ($completion->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
                 $backup->status = self::STATUS_ERROR;
                 // Start from the beginning next time.
@@ -939,7 +1008,7 @@ class coursestore_ws_manager {
         return $this->send('backup/'. $backupid, array(), 'GET', $headers);
 
     }
-    public static function get_post_backup_validated_hash($data) {
+    public static function get_backup_validated_hash($data) {
         return md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
     }
     public static function check_post_backup_data_is_same($response, $data) {
@@ -987,10 +1056,13 @@ class coursestore_ws_manager {
     /**
      * Create a backup resource.
      *
-     * @param string $auth      Authorization string
+     * @param array  $data            Array of data to post.
+     * @param string $sessionkey      Session token
+     * @param int    $retries         Number of retries to attempt sending
+     *                                when an error occurs.
      *
      */
-    public function post_backup($data, $sessionkey, $retries) {
+    public function post_backup($data, $sessionkey, $retries=5) {
 
         $response = $this->send('backup', $data, 'POST', $sessionkey, $retries);
         coursestore_logging::log_transfer_started($data, $response, 'course');
@@ -998,33 +1070,75 @@ class coursestore_ws_manager {
         if ($response->httpcode == self::WS_HTTP_CREATED) {
             // Make sure the hash is good.
             $returnhash = $response->body->hash;
-            $validatehash = self::get_post_backup_validated_hash($data);
+            $validatehash = self::get_backup_validated_hash($data);
             if ($returnhash != $validatehash) {
                 return $response;
             } else {
+                // Possible network error. Should retry again later.
                 return (int) $data['fileid'];
             }
         } else if ($response->httpcode == self::WS_HTTP_CONFLICT) {
             // The backup already exists.
             // Check the data coming back is the same as what we sent.
             if (!self::check_post_backup_data_is_same($response, $data)) {
+                // Need to deal with this.
                 return $response;
             }
             // It's the same, continue.
             return (int) $data['fileid'];
         }
         // Unexpected response or no response received.
+        // Should retry again later.
         return $response;
     }
 
     /**
      * Update a backup resource.
      *
+     * @param string $sessionkey      Session token
+     * @param array  $data            Array of data to update.
+     * @param int    $backupid        Our coursestore id.
+     * @param int    $retries         Number of retries to attempt sending
+     *                                when an error occurs.
+     *
+     */
+    public function put_backup($sessionkey, $data, $backupid, $retries=5) {
+
+        //debugging(__FUNCTION__ . ": data=" . print_r($data, true), DEBUG_DEVELOPER);
+        $response = $this->send('backup/' . $backupid, $data, 'PUT', $sessionkey);
+        coursestore_logging::log_backup_updated($data, $response);
+
+        if ($response->httpcode == self::WS_HTTP_OK) {
+            // Make sure the hash is good.
+            $returnhash = $response->body->hash;
+
+            // Add the fileid to the data array - the PUT doesn't use it
+            // but the get_backup_validated_hash() function needs it.
+            $data['fileid'] = $backupid;
+            $validatehash = self::get_backup_validated_hash($data);
+
+            if ($returnhash != $validatehash) {
+                // hashes don't match, possible network error.
+                // Should try again later.
+                return $response;
+            } else {
+                // All good!
+                return true;
+            }
+        }
+        // Unexpected response or no response received.
+        // Should retry again later.
+        return $response;
+    }
+
+    /**
+     * Update a backup resource that it's complete.
+     *
      * @param string $auth      Authorization string
      * @param int    $backupid  ID referencing course bank backup resource
      *
      */
-    public function put_backup_complete($sessionkey, $data, $backupid, $retries=4) {
+    public function put_backup_complete($sessionkey, $data, $backupid, $retries=5) {
 
         return $this->send('backupcomplete/' . $backupid, $data, 'PUT', $sessionkey);
     }
@@ -1047,7 +1161,7 @@ class coursestore_ws_manager {
      * @param array  $data      Data for transfer
      *
      */
-    public function put_chunk($data, $backupid, $chunknumber, $sessionkey, $retries) {
+    public function put_chunk($data, $backupid, $chunknumber, $sessionkey, $retries=5) {
 
         // Grab the original data so we don't have to decode it to check the hash.
         $originaldata = $data['original_data'];
@@ -1475,7 +1589,7 @@ class coursestore_logging {
         if (($httpresponse instanceof coursestore_http_response)
             && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
             // At this stage, $backup is an array.
-            $validatehash = coursestore_ws_manager::get_post_backup_validated_hash($backup);
+            $validatehash = coursestore_ws_manager::get_backup_validated_hash($backup);
             if ($validatehash != $httpresponse->body->hash) {
                 $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
                         "failed. (Course ID: $courseid)";
@@ -1494,6 +1608,10 @@ class coursestore_logging {
                     // Check if Course Bank has the same data as us.
                     if (!coursestore_ws_manager::check_post_backup_data_is_same($httpresponse, $backup)) {
                         $info .= " The backup already exists.";
+                        if ($httpresponse->body->is_completed) {
+                            // Course Bank already has a complete copy of this backup.
+                            $info .= " The backup is complete in Course Bank.";
+                        }
                     } else {
                         // It's ok, will continue.
                         $info = "Transfer of " .
@@ -1572,5 +1690,9 @@ class coursestore_logging {
                 $USER->id,
                 $otherdata
         );
+    }
+    public static function log_backup_updated($data, $response) {
+        // TODO: log backup updated event.
+
     }
 }
