@@ -7,6 +7,7 @@
     <TABLE NAME="tool_coursestore" COMMENT="Keeps details of the backups that have been sent and their status.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="uniqueid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="UUID."/>
         <FIELD NAME="backupfilename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the backup."/>
         <FIELD NAME="fileid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key into the files table."/>
         <FIELD NAME="chunksize" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How big the pieces of the file will be broken into."/>
@@ -38,24 +39,9 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="uq_fileid" UNIQUE="true" FIELDS="fileid" COMMENT="The linked file id into the files table."/>
+        <INDEX NAME="uq_uniqueid" UNIQUE="true" FIELDS="uniqueid" COMMENT="UUID."/>
         <INDEX NAME="ix_filedata" UNIQUE="false" FIELDS="fileid, status, backupfilename" COMMENT="Index to easily retrieve the backup file details."/>
         <INDEX NAME="ix_timecreated" UNIQUE="false" FIELDS="timecreated" COMMENT="Index to easily retrieve the backup files in chronological order."/>
-      </INDEXES>
-    </TABLE>
-    <TABLE NAME="tool_coursestore_log" COMMENT="Keeps a log of the course backup exports.">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="coursestoreid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key into the tool_coursestore table."/>
-        <FIELD NAME="errorid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The error code corresponding to this log. 0 if no error."/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time the error occurred."/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_coursestoreid" TYPE="foreign" FIELDS="coursestoreid" REFTABLE="tool_coursestore" REFFIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="ix_errorid" UNIQUE="false" FIELDS="errorid" COMMENT="Index to easily retrieve log records based on specific error code."/>
-        <INDEX NAME="ix_timecreated" UNIQUE="false" FIELDS="timecreated" COMMENT="Index to easily retrieve the log records in chronological order."/>
       </INDEXES>
     </TABLE>
   </TABLES>

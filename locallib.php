@@ -244,6 +244,7 @@ abstract class tool_coursestore {
             $coursedate = $dt->format('Y-m-d H:i:s');
         }
         $data = array(
+            'uuid'         => $backup->uniqueid,
             'fileid'       => $backup->id,
             'filehash'     => $backup->contenthash,
             'filename'     => $backup->backupfilename,
@@ -277,7 +278,8 @@ abstract class tool_coursestore {
                     // Course Bank has some other data for this backup.
                     // But no chunks have been sent yet.
                     // Try to update it.
-                    $putresponse = $wsmanager->put_backup($sessionkey, $data, $backup->id, $retries);
+                    // Don't unset the fileid or the uuid fields.
+                    $putresponse = $wsmanager->put_backup($sessionkey, $data, $backup->uniqueid, $retries);
                     if ($putresponse !== true) {
                         if ($putresponse->httpcode == coursestore_ws_manager::WS_HTTP_BAD_REQUEST) {
                             if (isset($putresponse->body->chunksreceived)) {
@@ -400,7 +402,7 @@ abstract class tool_coursestore {
 
             $response = $wsmanager->put_chunk(
                     $data,
-                    $backup->id,
+                    $backup->uniqueid,
                     $backup->chunknumber,
                     $sessionkey,
                     $retries
@@ -438,7 +440,7 @@ abstract class tool_coursestore {
                 'totalchunks' => $backup->totalchunks
             );
             // Confirm the backup file as complete.
-            $completion = $wsmanager->put_backup_complete($sessionkey, $data, $backup->id);
+            $completion = $wsmanager->put_backup_complete($sessionkey, $data, $backup->uniqueid);
             if ($completion->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
                 $backup->status = self::STATUS_ERROR;
                 // Start from the beginning next time.
@@ -528,6 +530,21 @@ abstract class tool_coursestore {
         return true;
     }
     /**
+     * Algorithm from stackoverflow: http://stackoverflow.com/questions/2040240/php-function-to-generate-v4-uuid
+     * Generates 128 bits of random data.
+     * Must have openSSL extension.
+     *
+     * @return string guid v4 string.
+     */
+    public static function generate_uuid() {
+        $data = openssl_random_pseudo_bytes(16);
+
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+    
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+    /**
      * Function to fetch course backup records from the Moodle DB, add them
      * to the course store table, and then process the files before sending
      * via web service to the configured course bank instance.
@@ -540,6 +557,7 @@ abstract class tool_coursestore {
 
         // Get a list of the course backups.
         $sqlcommon = "SELECT tcs.id,
+                       tcs.uniqueid,
                        tcs.backupfilename,
                        tcs.fileid,
                        tcs.chunksize,
@@ -573,6 +591,7 @@ abstract class tool_coursestore {
                 INNER JOIN {course_categories} cc on cr.category = cc.id";
 
         $sqlselect = "SELECT tcs.id,
+                       tcs.uniqueid,
                        tcs.backupfilename,
                        tcs.fileid,
                        tcs.chunksize,
@@ -640,6 +659,7 @@ abstract class tool_coursestore {
             if (!isset($coursebackup->status)) {
                 // The record hasn't been input in the course store table yet.
                 $cs = new stdClass();
+                $cs->uniqueid = self::generate_uuid();
                 $cs->backupfilename = $coursebackup->filename;
                 $cs->fileid = $coursebackup->f_fileid;
                 $cs->chunksize = self::get_config_chunk_size();
@@ -653,6 +673,7 @@ abstract class tool_coursestore {
                 $backupid = $DB->insert_record('tool_coursestore', $cs);
 
                 $coursebackup->id = $backupid;
+                $coursebackup->uniqueid = $cs->uniqueid;
                 $coursebackup->backupfilename = $cs->backupfilename;
                 $coursebackup->fileid = $cs->fileid;
                 $coursebackup->chunksize = $cs->chunksize;
@@ -998,24 +1019,25 @@ class coursestore_ws_manager {
      * Get a backup resource.
      *
      * @param string $auth      Authorization string.
-     * @param int    $backupid  ID referencing course bank backup resource.
+     * @param string $uniqueid  UUID referencing course bank backup resource.
      * @param bool   $download  Whether or not to generate a download link.
      */
-    public function get_backup($sesskey, $backupid, $download=false) {
+    public function get_backup($sesskey, $uniqueid, $download=false) {
         $headers = array(self::WS_AUTH_SESSION_KEY => $sesskey);
         if ($download) {
             $headers['download'] = 'true';
         }
 
-        return $this->send('backup/'. $backupid, array(), 'GET', $headers);
+        return $this->send('backup/'. $uniqueid, array(), 'GET', $headers);
 
     }
     public static function get_backup_validated_hash($data) {
-        return md5($data['fileid'] . ',' . $data['filename'] . ',' . $data['filesize']);
+        return md5($data['fileid'] . ',' .$data['uuid'] . ',' . $data['filename'] . ',' . $data['filesize']);
     }
     public static function check_post_backup_data_is_same($response, $data) {
 
         $fields = array(
+                'uuid',
                 'fileid',
                 'filename',
                 'filehash',
@@ -1099,24 +1121,21 @@ class coursestore_ws_manager {
      *
      * @param string $sessionkey      Session token
      * @param array  $data            Array of data to update.
-     * @param int    $backupid        Our coursestore id.
+     * @param string $uniqueid        UUID of coursestore record.
      * @param int    $retries         Number of retries to attempt sending
      *                                when an error occurs.
      *
      */
-    public function put_backup($sessionkey, $data, $backupid, $retries=5) {
+    public function put_backup($sessionkey, $data, $uniqueid, $retries=5) {
 
         //debugging(__FUNCTION__ . ": data=" . print_r($data, true), DEBUG_DEVELOPER);
-        $response = $this->send('backup/' . $backupid, $data, 'PUT', $sessionkey);
+        $response = $this->send('backup/' . $uniqueid, $data, 'PUT', $sessionkey);
         coursestore_logging::log_backup_updated($data, $response);
 
         if ($response->httpcode == self::WS_HTTP_OK) {
             // Make sure the hash is good.
             $returnhash = $response->body->hash;
 
-            // Add the fileid to the data array - the PUT doesn't use it
-            // but the get_backup_validated_hash() function needs it.
-            $data['fileid'] = $backupid;
             $validatehash = self::get_backup_validated_hash($data);
 
             if ($returnhash != $validatehash) {
@@ -1137,38 +1156,38 @@ class coursestore_ws_manager {
      * Update a backup resource that it's complete.
      *
      * @param string $auth      Authorization string
-     * @param int    $backupid  ID referencing course bank backup resource
+     * @param string $uniqueid  UUID referencing course bank backup resource
      *
      */
-    public function put_backup_complete($sessionkey, $data, $backupid, $retries=5) {
+    public function put_backup_complete($sessionkey, $data, $uniqueid, $retries=5) {
 
-        return $this->send('backupcomplete/' . $backupid, $data, 'PUT', $sessionkey);
+        return $this->send('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey);
     }
     /**
      * Get most recent chunk transferred for specific backup.
      *
      * @param string $auth      Authorization string
-     * @param int    $backupid  ID referencing course bank backup resource
+     * @param string $uniqueid  UUID referencing course bank backup resource
      *
      */
-    public function get_chunk($auth, $backupid) {
-        return $this->send('chunks/' . $backupid, array(), 'GET', $auth);
+    public function get_chunk($auth, $uniqueid) {
+        return $this->send('chunks/' . $uniqueid, array(), 'GET', $auth);
     }
     /**
      * Transfer chunk
      *
      * @param string $auth      Authorization string
-     * @param int    $backupid  ID referencing course bank backup resource
+     * @param string $uniqueid  UUID referencing course bank backup resource
      * @param int    $chunk     Chunk number
      * @param array  $data      Data for transfer
      *
      */
-    public function put_chunk($data, $backupid, $chunknumber, $sessionkey, $retries=5) {
+    public function put_chunk($data, $uniqueid, $chunknumber, $sessionkey, $retries=5) {
 
         // Grab the original data so we don't have to decode it to check the hash.
         $originaldata = $data['original_data'];
         unset($data['original_data']);
-        $response = $this->send('chunks/' . $backupid . '/' . $chunknumber, $data, 'PUT', $sessionkey, $retries);
+        $response = $this->send('chunks/' . $uniqueid . '/' . $chunknumber, $data, 'PUT', $sessionkey, $retries);
 
         if ($response->httpcode == self::WS_HTTP_OK) {
             // Make sure the hash is good.
@@ -1189,23 +1208,23 @@ class coursestore_ws_manager {
      *       and will likely be deprecated.
      *
      * @param string $auth      Authorization string
-     * @param int    $backupid  ID referencing course bank backup resource
+     * @param string $uniqueid  UUID referencing course bank backup resource
      * @param int    $chunk     Chunk number
      *
      */
-    public function put_chunk_confirm($auth, $backupid, $chunk) {
-        return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'PUT', $auth);
+    public function put_chunk_confirm($auth, $uniqueid, $chunk) {
+        return $this->send('chunks/' . $uniqueid . '/' . $chunk, array(), 'PUT', $auth);
     }
     /**
      * Remove chunk
      *
      * @param string $auth      Authorization string
-     * @param int    $backupid  ID referencing course bank backup resource
+     * @param string $uniqueid  UUID referencing course bank backup resource
      * @param int    $chunk     Chunk number
      *
      */
-    public function delete_chunk($auth, $backupid, $chunk) {
-        return $this->send('chunks/' . $backupid . '/' . $chunk, array(), 'DELETE', $auth);
+    public function delete_chunk($auth, $uniqueid, $chunk) {
+        return $this->send('chunks/' . $uniqueid . '/' . $chunk, array(), 'DELETE', $auth);
     }
     /**
      * Get list of backup files available for download from course bank

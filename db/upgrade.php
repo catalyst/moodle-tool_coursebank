@@ -160,5 +160,26 @@ function xmldb_tool_coursestore_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2015041300, 'tool', 'coursestore');
     }
 
+    if ($oldversion < 2015041601) {
+        $table = new xmldb_table('tool_coursestore');
+        // Define field uniqueid to be added to tool_coursestore.
+        $field = new xmldb_field('uniqueid', XMLDB_TYPE_CHAR, '36', null, XMLDB_NOTNULL, null, null, 'id');
+
+        // Conditionally launch add field uniqueid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // drop the coursestore log table.
+        $table = new xmldb_table('tool_coursestore_log');
+
+        // Conditionally launch drop table
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+
+        // Coursestore savepoint reached.
+        upgrade_plugin_savepoint(true, 2015041601, 'tool', 'coursestore');
+    }
     return true;
 }
