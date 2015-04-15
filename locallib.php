@@ -702,21 +702,8 @@ abstract class tool_coursestore {
                 $coursebackup->categoryname = $cs->categoryname;
             }
         }
-        $rs->close();
 
-        // Get all backups that are pending transfer, attempt to transfer them.
-        $sql = 'SELECT * FROM {tool_coursestore}
-                        WHERE status = :notstarted
-                           OR status = :inprogress
-                           OR status = :error';
-        $sqlparams = array(
-            'notstarted' => self::STATUS_NOTSTARTED,
-            'inprogress' => self::STATUS_INPROGRESS,
-            'error'      => self::STATUS_ERROR
-        );
-        $transferrs = $DB->get_recordset_sql($sql, $sqlparams);
-
-        foreach ($transferrs as $coursebackup) {
+        foreach ($rs as $coursebackup) {
             $result = self::send_backup($coursebackup);
             if ($result) {
                 $delete = self::delete_backup($coursebackup);
@@ -739,7 +726,7 @@ abstract class tool_coursestore {
                 break;
             }
         }
-        $transferrs->close();
+        $rs->close();
 
     }
     /**
