@@ -72,39 +72,13 @@ if (!$sesskey = tool_coursestore::get_session()) {
 // Downloading.
 if ($download == 1 and intval($file) > 0) {
     require_capability('tool/coursestore:download', $context);
-    $downloadurl = $wsman->get_backup($sesskey, $file, true);
+    $dlresponse = $wsman->get_backup($sesskey, $file, true);
     $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";
-    $errorcode = '';
-    $info = "Downloading backup file coursestoreid $file userid $USER->id: ";
 
-    if (isset($downloadurl->body->error) and isset($downloadurl->body->error_desc)) {
-        // Log it.
-        $infoadd = "ERROR: error code {$downloadurl->body->error}, error desc: {$downloadurl->body->error_desc}";
-        $errorcode = 'errordownloading';
-    }
-    if (!isset($downloadurl->body->url)) {
-        // Log it.
-        $infoadd = "ERROR: url is empty";
-        $errorcode = 'errordownloading';
-    }
-    if (!tool_coursestore_check_url($downloadurl->body->url)) {
-        $infoadd = "ERROR: url {$downloadurl->body->url} invalid";
-        $errorcode = 'errordownloading';
-    }
-    if (!tool_coursestore_is_url_available($downloadurl->body->url)) {
-        $infoadd = "ERROR: url {$downloadurl->body->url} in not available";
-        $errorcode = 'errordownloading';
-    }
-
-    if (!empty($errorcode)) {
-        $info .= $infoadd;
-        coursestore_logging::log_event($info);
-        print_error('errordownloading', 'tool_coursestore', $errorurl);
+    if (coursestore_logging::log_backup_download($dlresponse, $file)) {
+        redirect($httpresponse->body->url, '', 0);
     } else {
-        $infoadd = "SUCCESS";
-        $info .= $infoadd;
-        coursestore_logging::log_event($info);
-        redirect($downloadurl->body->url, '', 0);
+        print_error('errordownloading', 'tool_coursestore', $errorurl);
     }
 }
 

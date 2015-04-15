@@ -277,7 +277,6 @@ abstract class tool_coursestore {
                     // Course Bank has some other data for this backup.
                     // But no chunks have been sent yet.
                     // Try to update it.
-                    //unset($data['fileid']);
                     $putresponse = $wsmanager->put_backup($sessionkey, $data, $backup->id, $retries);
                     if ($putresponse !== true) {
                         if ($putresponse->httpcode == coursestore_ws_manager::WS_HTTP_BAD_REQUEST) {
@@ -377,7 +376,7 @@ abstract class tool_coursestore {
             $result = self::initialise_backup($wsmanager, $backup, $sessionkey, $retries);
             switch ($result) {
                 case 0:
-                    // continue on.
+                    // Continue on.
                     break;
                 case 1:
                     $wsmanager->close();
@@ -760,7 +759,10 @@ abstract class tool_coursestore {
         }
         // Check if we can change current status.
         if (in_array($coursebackup->status, $noactionstatuses)) {
-            coursestore_logging::log_event("Updating status: current status $coursebackup->status for ID $coursebackup->id is in noaction list. Can not update status.");
+            coursestore_logging::log_event("Updating status: current status " .
+                    "$coursebackup->status for ID $coursebackup->id is in " .
+                    "noaction list. Can not update status."
+            );
             return false;
         }
         // Finally update.
@@ -1693,6 +1695,64 @@ class coursestore_logging {
     }
     public static function log_backup_updated($data, $response) {
         // TODO: log backup updated event.
+    }
+    /**
+     * Log transfer backup download event.
+     *
+     * @param http_response $httpresponse   HTTP response object generated.
+     * @param int           $coursestoreid  Course store ID
+     *
+     * @return bool                         Success/failure of download.
+     */
+    public static function log_backup_download($httpresponse, $coursestoreid) {
+        global $USER;
 
+        $error = false;
+        $info = "Downloading backup file coursestoreid $coursestoreid userid $USER->id: ";
+
+        if (isset($httpresponse->body->error) and isset($httpresponse->body->error_desc)) {
+            // Log it.
+            $infoadd = "ERROR: error code {$httpresponse->body->error}, error desc: {$httpresponse->body->error_desc}";
+            $error = true;
+        }
+        if (!isset($httpresponse->body->url)) {
+            // Log it.
+            $infoadd = "ERROR: url is empty";
+            $error = true;
+        }
+        if (!tool_coursestore_check_url($httpresponse->body->url)) {
+            $infoadd = "ERROR: url {$httpresponse->body->url} invalid";
+            $error = true;
+        }
+        if (!tool_coursestore_is_url_available($httpresponse->body->url)) {
+            $infoadd = "ERROR: url {$httpresponse->body->url} in not available";
+            $error = true;
+        }
+
+        $courseid = isset($backup->courseid) ? $backup->courseid : 0;
+
+        // Log either success or failure event.
+        if ($error) {
+            $info .= $infoadd;
+            self::log_event(
+                    $info,
+                    'download_failed',
+                    'Course Bank download failed',
+                    self::LOG_MODULE_COURSE_STORE,
+                    $courseid,
+                    '');
+            return false;
+        } else {
+            $infoadd = "SUCCESS";
+            $info .= $infoadd;
+            self::log_event(
+                    $info,
+                    'download_failed',
+                    'Course Bank download failed',
+                    self::LOG_MODULE_COURSE_STORE,
+                    $courseid,
+                    '');
+            return true;
+        }
     }
 }
