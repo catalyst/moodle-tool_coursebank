@@ -1323,6 +1323,7 @@ class coursestore_http_response {
      * @param string $info            Additional information.
      */
     public function log_http_error($courseid, $coursestoreid, $info='') {
+        global $CFG;
 
         // First log information for debugging purposes.
         if ($CFG->debug >= DEBUG_ALL && !empty($info)) {
@@ -1414,7 +1415,7 @@ class coursestore_logging {
      * @param array $other Other data we may want to use
      * @return boolean
      */
-    public static function log_event($info='', $eventname='coursestore_logging', $action='', $module='', $courseid=SITEID,
+    private static function log_event($info='', $eventname='coursestore_logging', $action='', $module='', $courseid=SITEID,
             $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
 
