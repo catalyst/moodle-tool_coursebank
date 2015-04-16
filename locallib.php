@@ -93,7 +93,13 @@ abstract class tool_coursestore {
     public static function check_connection(coursestore_ws_manager $wsman, $sesskey=false) {
         global $USER;
 
-        return $wsman->get_test($sesskey);
+        $result = $wsman->get_test($sesskey);
+        if (isset($result->httpcode)) {
+            if ($result->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+                return true;
+            }
+        }
+        return false;
     }
     /**
      * Test the speed of a transfer of $testsize kilobytes. A total
