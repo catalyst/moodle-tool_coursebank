@@ -1015,6 +1015,29 @@ class coursestore_ws_manager {
         return $result;
     }
     /**
+     * Send a session start request.
+     *
+     * @param string    $hash      Authorization string
+     */
+    public function post_session($hash) {
+        $authdata = array(
+            'hash' => $hash,
+        );
+        $response = $this->send('session', $authdata, 'POST');
+        coursestore_logging::log_post_session($response);
+
+        if ($response->httpcode == self::WS_HTTP_CREATED) {
+            $tagsesskey = self::WS_AUTH_SESSION_KEY;
+            if (isset($response->body->$tagsesskey)) {
+                $sesskey = trim((string) $response->body->$tagsesskey);
+                return tool_coursestore::set_session($sesskey);
+            }
+        } else {
+            // Unexpected response.
+            return $response;
+        }
+    }
+    /**
      * Send a test request
      *
      * @param string  $auth         Authorization string
@@ -1043,29 +1066,6 @@ class coursestore_ws_manager {
             coursestore_logging::log_check_connection_speed($result, $speed);
         }
         return $result;
-    }
-    /**
-     * Send a session start request.
-     *
-     * @param string    $hash      Authorization string
-     */
-    public function post_session($hash) {
-        $authdata = array(
-            'hash' => $hash,
-        );
-        $response = $this->send('session', $authdata, 'POST');
-        coursestore_logging::log_get_session($response);
-
-        if ($response->httpcode == self::WS_HTTP_CREATED) {
-            $tagsesskey = self::WS_AUTH_SESSION_KEY;
-            if (isset($response->body->$tagsesskey)) {
-                $sesskey = trim((string) $response->body->$tagsesskey);
-                return tool_coursestore::set_session($sesskey);
-            }
-        } else {
-            // Unexpected response.
-            return $response;
-        }
     }
     /**
      * Get a backup resource.
@@ -1614,7 +1614,12 @@ class coursestore_logging {
         );
     }
 
-    public static function log_get_session($httpresponse) {
+    /**
+     * Log session creation event.
+     *
+     * @param coursestore_http_response $httpresponse  HTTP response object.
+     */
+    public static function log_post_session($httpresponse) {
         global $USER;
 
         $otherdata = array();
