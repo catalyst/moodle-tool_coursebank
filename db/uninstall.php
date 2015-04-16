@@ -29,7 +29,12 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
 
 function xmldb_tool_coursestore_uninstall() {
-    global $CFG, $DB;
+    global $CFG;
+
+    // Check if transfer is in progress.
+    if (tool_coursestore_does_cron_lock_exist('tool_coursestore_cronlock')) {
+        throw new transfer_in_progress();
+    }
 
     if (is_writable($CFG->dataroot)) {
         $dir = $CFG->dataroot . "/coursestore";

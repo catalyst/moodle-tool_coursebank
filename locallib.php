@@ -1822,3 +1822,16 @@ class coursestore_logging {
         }
     }
 }
+/**
+ * An exception when tool_coursestore_cronlock exists in the database.
+ *
+ */
+class transfer_in_progress extends moodle_exception {
+    /**
+     * Constructor
+     * @param string $debuginfo optional more detailed information
+     */
+    function __construct($debuginfo = NULL) {
+        parent::__construct('transferinprogress', 'tool_coursestore', '', NULL, $debuginfo);
+    }
+}
