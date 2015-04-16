@@ -30,7 +30,8 @@ function xmldb_tool_coursestore_install() {
     global $CFG, $OUTPUT, $DB;
 
     if (is_writable($CFG->dataroot)) {
-        mkdir($CFG->dataroot . "/coursestore");
+        $dir = tool_coursestore::get_coursestore_data_dir();
+        mkdir($dir);
     } else {
         throw new invalid_dataroot_permissions();
     }

@@ -37,7 +37,7 @@ function xmldb_tool_coursestore_uninstall() {
     }
 
     if (is_writable($CFG->dataroot)) {
-        $dir = $CFG->dataroot . "/coursestore";
+        $dir = tool_coursestore::get_coursestore_data_dir();
         tool_coursestore_rrmdir($dir);
     } else {
         throw new invalid_dataroot_permissions();
