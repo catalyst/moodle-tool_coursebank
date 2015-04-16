@@ -117,6 +117,7 @@ $string['transferinprogress'] = 'Can\'t continue. Transfer is in progress or may
 $string['delete'] = 'Delete from the queue';
 $string['stop'] = 'Put on hold';
 $string['go'] = 'Resume transferring';
+$string['download'] = 'Download backup file';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';

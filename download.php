@@ -33,7 +33,7 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
 defined('MOODLE_INTERNAL') || die;
 
 $download     = optional_param('download', 0, PARAM_INT);
-$file         = optional_param('file', 0, PARAM_INT);
+$file         = optional_param('file', 0, PARAM_ALPHANUMEXT);
 $sort         = optional_param('sort', 'coursefullname', PARAM_ALPHANUM);
 $dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
 $page         = optional_param('page', 0, PARAM_INT);
@@ -70,7 +70,7 @@ if (!$sesskey = tool_coursestore::get_session()) {
 }
 
 // Downloading.
-if ($download == 1 and intval($file) > 0) {
+if ($download == 1 and !empty($file)) {
     require_capability('tool/coursestore:download', $context);
     $dlresponse = $wsman->get_backup($sesskey, $file, true);
     $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";

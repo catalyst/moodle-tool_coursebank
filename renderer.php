@@ -188,7 +188,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return HTML
      */
     private function course_store_get_download_actions_links($result) {
-        // First check capability,
+        // First check capability.
         if (!has_capability('tool/coursestore:download', context_system::instance())) {
             return '';
         }
@@ -197,7 +197,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 array('src' => $this->pix_url('t/download')->out(false),
                     'alt' => $text
                 ));
-        $url = new moodle_url($this->page->url, array('download' => 1, 'file' => $result->coursestoreid));
+        $url = new moodle_url($this->page->url, array('download' => 1, 'file' => $result->uniqueid));
         $links = html_writer::link($url, $icon, array('title' => $text));
 
         return $links;
@@ -209,7 +209,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return HTML
      */
     private function course_store_get_queue_actions_links($result) {
-        // First check capability,
+        // First check capability.
         if (!has_capability('tool/coursestore:edit', context_system::instance())) {
             return '';
         }
