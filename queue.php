@@ -67,11 +67,12 @@ if (array_key_exists($action, $actions) and $id > 0) {
         echo $OUTPUT->header();
         echo $OUTPUT->heading($header);
         $optionsyes = array('action' => $action, 'id' => $id, 'confirm' => md5($coursebackup->id), 'sesskey' => sesskey());
-        echo $OUTPUT->confirm(get_string('check_'.$action, 'tool_coursestore', $coursebackup->backupfilename), new moodle_url($url, $optionsyes), $url);
+        $confirmstring = get_string('check_'.$action, 'tool_coursestore', $coursebackup->backupfilename);
+        echo $OUTPUT->confirm($confirmstring, new moodle_url($url, $optionsyes), $url);
         echo $OUTPUT->footer();
         die;
     } else if (data_submitted() and confirm_sesskey()) {
-        if (!tool_coursestore::update_status($coursebackup, $actions[$action])) {
+        if (!tool_coursestore::user_update_status($coursebackup, $actions[$action])) {
             print_error('errorupdatingstatus', 'tool_coursestore',  new moodle_url('/admin/tool/coursestore/queue.php'));
         }
     }
@@ -85,7 +86,14 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($header);
 
 // Filters.
-$filtering = new coursestore_filtering('queue', array('status' => 0, 'coursefullname' => 1, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
+$filterparams = array(
+    'status' => 0,
+    'coursefullname' => 1,
+    'backupfilename' => 1,
+    'filesize' => 1,
+    'filetimemodified' => 1
+);
+$filtering = new coursestore_filtering('queue', $filterparams);
 $extra = 'status != :status_ext1 AND status != :status_ext2';
 $params = array(
     'status_ext1' => tool_coursestore::STATUS_FINISHED,

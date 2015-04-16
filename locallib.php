@@ -751,26 +751,34 @@ abstract class tool_coursestore {
      * @param int $status A new status
      * @return boolean
      */
-    public static function update_status($coursebackup, $status) {
+    public static function user_update_status($coursebackup, $status) {
         global $DB;
 
         $statuses = self::get_statuses();
         $noactionstatuses = self::get_noaction_statuses();
         // Check if a new status exists.
         if (!array_key_exists($status, $statuses)) {
-            coursestore_logging::log_event("Updating status: a new status $status is not exist");
+            coursestore_logging::log_status_update(
+                    "Failed updating: status code \"$status\" does not exist."
+            );
             return false;
         }
         // Check if record exists.
         if (!$DB->record_exists('tool_coursestore', array('id' => $coursebackup->id))) {
-            coursestore_logging::log_event("Updating status: record $coursebackup->id is not exist");
+            coursestore_logging::log_status_update(
+                    "Failed updating: course store record with ID: " .
+                    "\"$coursebackup->id\" does not exist"
+            );
             return false;
         }
-        // Check if we can change current status.
+        // If status is a "no action" status we can't update it.
+        // This prevents us from changing the status mid-way through a transfer.
         if (in_array($coursebackup->status, $noactionstatuses)) {
-            coursestore_logging::log_event("Updating status: current status " .
-                    "$coursebackup->status for ID $coursebackup->id is in " .
-                    "noaction list. Can not update status."
+            coursestore_logging::log_status_update(
+                    "Failed updating: current status is " .
+                    "$coursebackup->status for course store backup with " .
+                    "ID $coursebackup->id. This status is in the " .
+                    "\"no action\" list."
             );
             return false;
         }
@@ -778,9 +786,10 @@ abstract class tool_coursestore {
         $oldstatus = $coursebackup->status;
         $coursebackup->status = $status;
         $DB->update_record('tool_coursestore', $coursebackup);
-        coursestore_logging::log_event("Updating status: successfully " .
-                "updated status from $oldstatus to $status for ID " .
-                "$coursebackup->id"
+        coursestore_logging::log_status_update(
+                "Updating status: successfully " .
+                "updated status from $oldstatus to $status for backup with" .
+                " ID $coursebackup->id."
         );
 
         return true;
@@ -1449,8 +1458,8 @@ class coursestore_logging {
      * @param array $other Other data we may want to use
      * @return boolean
      */
-    private static function log_event($info='', $eventname='coursestore_logging', $action='', $module='', $courseid=SITEID,
-            $url='', $userid=0, $other = array()) {
+    protected static function log_event($info='', $eventname='coursestore_logging', $action='',
+            $module=self::LOG_MODULE_COURSE_STORE, $courseid=SITEID, $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
 
         // First log information for debugging purposes.
@@ -1495,7 +1504,18 @@ class coursestore_logging {
         add_to_log($courseid, $module, $action, $url, $info, 0, $userid);
         return true;
     }
-
+    /**
+     * Log an event for a coursestore backup status update.
+     *
+     * @param string $info  Information about update
+     */
+    public static function log_status_update($info) {
+        self::log_event($info, 'coursestore_logging', 'update status');
+    }
+    /** Log a connection check event.
+     *
+     * @param coursestore_http_response $httpresponse Response object.
+     */
     public static function log_check_connection($httpresponse) {
         global $USER;
 
