@@ -93,29 +93,7 @@ abstract class tool_coursestore {
     public static function check_connection(coursestore_ws_manager $wsman, $sesskey=false) {
         global $USER;
 
-        $success = false;
-        if ($sesskey) {
-            $checkresult = $wsman->get_test($sesskey);
-            $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
-        }
-
-        // No sess key provided, or sesskey rejected. Try starting a new session.
-        $token = get_config('tool_coursestore', 'authtoken');
-        if ($token && !$success) {
-            $sessresponse = $wsman->post_session($token);
-            if ($sessresponse === true) {
-                // We got a new session key.
-                // Now check the connection.
-                $sesskey = self::get_session();
-                $checkresult = $wsman->get_test($sesskey);
-                $success = $checkresult->httpcode == coursestore_ws_manager::WS_HTTP_OK;
-            } else {
-                // Couldn't get a session key.
-                $success = false;
-            }
-        }
-
-        return $success;
+        return $wsman->get_test($sesskey);
     }
     /**
      * Test the speed of a transfer of $testsize kilobytes. A total
@@ -1000,6 +978,43 @@ class coursestore_ws_manager {
         return new coursestore_http_response(false, false, $curlopts);
     }
     /**
+     * Send the provided data in JSON encoding as an HTTP request.
+     *
+     * Call "send" to handle sending a web service request. If the request
+     * fails, attempt to reauthenticate with the site authentication token,
+     * and use the resulting session key to reattempt the original request.
+     * If this in turn fails, return the response to the caller.
+     *
+     * @param string  $resource     URL fragment to append to the base URL
+     * @param array   $data         Associative array of request data to send
+     * @param string  $method       Request method. Defaults to POST.
+     * @param int     $retries      Max number of attempts to make before
+     *                              failing
+     * @param mixed   $auth         string: Authorization string
+     *                              array: 'sesskey' => Authorisation string
+     *                                     'data'    => test data string
+     *
+     * @return array or bool false  Associative array of the form:
+     *                                  'body' => <response body array>,
+     *                                  'response => <response info array>
+     *                              Or false if connection could not be made
+     */
+    protected function send_authenticated($resource='', $data=array(), $method='POST', $auth=null, $retries = 5) {
+        // Don't try sending unless we already have a session key.
+        $result = false;
+        if ($auth) {
+            $result = $this->send($resource, $data, $method, $auth, $retries);
+        }
+        if (!$result || $result->httpcode == self::WS_HTTP_UNAUTHORIZED) {
+            $token = get_config('tool_coursestore', 'authtoken');
+            if ($this->post_session($token) === true) {
+                $sesskey = tool_coursestore::get_session();
+                return $this->send($resource, $data, $method, $sesskey, $retries);
+            }
+        }
+        return $result;
+    }
+    /**
      * Send a test request
      *
      * @param string  $auth         Authorization string
@@ -1018,7 +1033,7 @@ class coursestore_ws_manager {
         $json = array(
             'data' => base64_encode($data)
         );
-        $result = $this->send('test', $json, 'GET', $headers);
+        $result = $this->send_authenticated('test', $json, 'GET', $headers);
         if ($data == '') {
             coursestore_logging::log_check_connection($result);
         } else {
@@ -1065,7 +1080,7 @@ class coursestore_ws_manager {
             $headers['download'] = 'true';
         }
 
-        return $this->send('backup/'. $uniqueid, array(), 'GET', $headers);
+        return $this->send_authenticated('backup/'. $uniqueid, array(), 'GET', $headers);
 
     }
     public static function get_backup_validated_hash($data) {
@@ -1125,7 +1140,7 @@ class coursestore_ws_manager {
      */
     public function post_backup($data, $sessionkey, $retries=5) {
 
-        $response = $this->send('backup', $data, 'POST', $sessionkey, $retries);
+        $response = $this->send_authenticated('backup', $data, 'POST', $sessionkey, $retries);
         coursestore_logging::log_transfer_started($data, $response, 'course');
 
         if ($response->httpcode == self::WS_HTTP_CREATED) {
@@ -1166,7 +1181,7 @@ class coursestore_ws_manager {
     public function put_backup($sessionkey, $data, $uniqueid, $retries=5) {
 
         //debugging(__FUNCTION__ . ": data=" . print_r($data, true), DEBUG_DEVELOPER);
-        $response = $this->send('backup/' . $uniqueid, $data, 'PUT', $sessionkey);
+        $response = $this->send_authenticated('backup/' . $uniqueid, $data, 'PUT', $sessionkey);
         coursestore_logging::log_backup_updated($data, $response);
 
         if ($response->httpcode == self::WS_HTTP_OK) {
@@ -1198,7 +1213,7 @@ class coursestore_ws_manager {
      */
     public function put_backup_complete($sessionkey, $data, $uniqueid, $retries=5) {
 
-        return $this->send('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey);
+        return $this->send_authenticated('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey);
     }
     /**
      * Get most recent chunk transferred for specific backup.
@@ -1208,7 +1223,7 @@ class coursestore_ws_manager {
      *
      */
     public function get_chunk($auth, $uniqueid) {
-        return $this->send('chunks/' . $uniqueid, array(), 'GET', $auth);
+        return $this->send_authenticated('chunks/' . $uniqueid, array(), 'GET', $auth);
     }
     /**
      * Transfer chunk
@@ -1224,7 +1239,7 @@ class coursestore_ws_manager {
         // Grab the original data so we don't have to decode it to check the hash.
         $originaldata = $data['original_data'];
         unset($data['original_data']);
-        $response = $this->send('chunks/' . $uniqueid . '/' . $chunknumber, $data, 'PUT', $sessionkey, $retries);
+        $response = $this->send_authenticated('chunks/' . $uniqueid . '/' . $chunknumber, $data, 'PUT', $sessionkey, $retries);
 
         if ($response->httpcode == self::WS_HTTP_OK) {
             // Make sure the hash is good.
@@ -1250,7 +1265,7 @@ class coursestore_ws_manager {
      *
      */
     public function put_chunk_confirm($auth, $uniqueid, $chunk) {
-        return $this->send('chunks/' . $uniqueid . '/' . $chunk, array(), 'PUT', $auth);
+        return $this->send_authenticated('chunks/' . $uniqueid . '/' . $chunk, array(), 'PUT', $auth);
     }
     /**
      * Remove chunk
@@ -1261,7 +1276,7 @@ class coursestore_ws_manager {
      *
      */
     public function delete_chunk($auth, $uniqueid, $chunk) {
-        return $this->send('chunks/' . $uniqueid . '/' . $chunk, array(), 'DELETE', $auth);
+        return $this->send_authenticated('chunks/' . $uniqueid . '/' . $chunk, array(), 'DELETE', $auth);
     }
     /**
      * Get list of backup files available for download from course bank
@@ -1326,13 +1341,13 @@ class coursestore_ws_manager {
 
         $nonemptyarray = is_array($params) && !empty($params);
         $query = $nonemptyarray ? array('query' => $params) : array();
-        return $this->send($url, $query, 'GET', $sesskey);
+        return $this->send_authenticated($url, $query, 'GET', $sesskey);
     }
     /**
      * Get count of backup files available from course bank instance.
      */
     public function get_downloadcount($sesskey, array $params = null) {
-        return $this->send('downloadcount', array(), 'GET', $sesskey);
+        return $this->send_authenticated('downloadcount', array(), 'GET', $sesskey);
     }
 }
 /**
