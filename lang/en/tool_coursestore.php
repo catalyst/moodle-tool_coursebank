@@ -114,6 +114,9 @@ $string['check_delete'] = 'Are you absolutely sure you want to completely delete
 $string['check_stop'] = 'Are you absolutely sure you want to put transferring of {$a} on hold?';
 $string['check_go'] = 'Are you absolutely sure you want to resume transferring of {$a}?';
 $string['transferinprogress'] = 'Can\'t continue. Transfer is in progress or may have been interrupted recently. The lock record is in the database.';
+$string['delete'] = 'Delete from the queue';
+$string['stop'] = 'Put on hold';
+$string['go'] = 'Resume transferring';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';

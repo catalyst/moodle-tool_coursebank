@@ -192,13 +192,13 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         if (!has_capability('tool/coursestore:download', context_system::instance())) {
             return '';
         }
-        $text = get_string('download');
+        $text = get_string('download', 'tool_coursestore');
         $icon = html_writer::empty_tag('img',
                 array('src' => $this->pix_url('t/download')->out(false),
                     'alt' => $text
                 ));
         $url = new moodle_url($this->page->url, array('download' => 1, 'file' => $result->coursestoreid));
-        $links = html_writer::link($url, $icon);
+        $links = html_writer::link($url, $icon, array('title' => $text));
 
         return $links;
     }
@@ -224,32 +224,32 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         if (!in_array($status, $noaction)) {
              // Stop link.
             if (in_array($status, $canstop)) {
-                $text = get_string('cancel');
+                $text = get_string('stop', 'tool_coursestore');
                 $icon = html_writer::empty_tag('img',
                         array('src' => $this->pix_url('t/block')->out(false),
                             'alt' => $text
                         ));
                 $url = new moodle_url($this->page->url, array('action' => 'stop', 'id' => $result->id));
-                $buttons[] = html_writer::link($url, $icon);
+                $buttons[] = html_writer::link($url, $icon, array('title' => $text));
             }
             // Go link.
             if (in_array($status, $stopped)) {
-                $text = get_string('go');
+                $text = get_string('go', 'tool_coursestore');
                 $icon = html_writer::empty_tag('img',
                         array('src' => $this->pix_url('t/collapsed')->out(false),
                             'alt' => $text
                         ));
                 $url = new moodle_url($this->page->url, array('action' => 'go', 'id' => $result->id));
-                $buttons[] = html_writer::link($url, $icon);
+                $buttons[] = html_writer::link($url, $icon, array('title' => $text));
             }
             // Delete link.
-            $text = get_string('delete');
+            $text = get_string('delete', 'tool_coursestore');
             $icon = html_writer::empty_tag('img',
                     array('src' => $this->pix_url('t/delete')->out(false),
                         'alt' => $text
                     ));
             $url = new moodle_url($this->page->url, array('action' => 'delete', 'id' => $result->id));
-            $buttons[] = html_writer::link($url, $icon);
+            $buttons[] = html_writer::link($url, $icon, array('title' => $text));
 
             $links = implode(' ', $buttons);
         }
