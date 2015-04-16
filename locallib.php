@@ -1080,8 +1080,9 @@ class coursestore_ws_manager {
             $headers['download'] = 'true';
         }
 
-        return $this->send_authenticated('backup/'. $uniqueid, array(), 'GET', $headers);
-
+        $result = $this->send_authenticated('backup/'. $uniqueid, array(), 'GET', $headers);
+        coursestore_logging::log_get_backup($result);
+        return $result;
     }
     public static function get_backup_validated_hash($data) {
         return md5($data['fileid'] . ',' .$data['uuid'] . ',' . $data['filename'] . ',' . $data['filesize']);
@@ -1576,7 +1577,6 @@ class coursestore_logging {
             $otherdata
         );
     }
-
     public static function log_check_connection_speed($httpresponse, $speed) {
         global $USER;
 
@@ -1644,6 +1644,36 @@ class coursestore_logging {
             $info,
             'get_session',
             'Get session key',
+            self::LOG_MODULE_COURSE_STORE,
+            SITEID,
+            '',
+            $USER->id,
+            $otherdata
+        );
+    }
+    /** Log event for get_backup request.
+     *
+     * @param coursestore_http_response $httpresponse Response object.
+     */
+    public static function log_get_backup($httpresponse) {
+        global $USER;
+
+        if ($httprseponse->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+            $otherdata = array('status' => true);
+        } else {
+            $otherdata = array(
+                'status' => false,
+                'error'  => $httpresponse->error_desc,
+                'error'  => $httpresponse->error
+            );
+        }
+        $status = $otherdata['status'] ? 'Succeeded' : 'Failed';
+        $info = 'Get backup request ' . $status . '.';
+
+        self::log_event(
+            $info,
+            'get_backup_request',
+            'Get backup information',
             self::LOG_MODULE_COURSE_STORE,
             SITEID,
             '',
@@ -1851,7 +1881,7 @@ class transfer_in_progress extends moodle_exception {
      * Constructor
      * @param string $debuginfo optional more detailed information
      */
-    function __construct($debuginfo = NULL) {
+    public function __construct($debuginfo = NULL) {
         parent::__construct('transferinprogress', 'tool_coursestore', '', NULL, $debuginfo);
     }
 }
