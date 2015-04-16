@@ -15,18 +15,39 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * get_session
  *
- * @package    tool
- * @subpackage coursestore
- * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
- * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @package    tool_coursestore
+ * @author     Adam Riddel <adamr@catlyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace tool_coursestore\event;
+defined('MOODLE_INTERNAL') || die();
+/**
+ * http_request
+ *
+ * @property-read array $other {
+ *      error      => error code
+ *      error_desc => error description
+ * }
+ *
+ **/
+class http_request extends \core\event\base {
+    protected function init() {
+        $this->data['crud'] = 'r';
+        $this->data['edulevel'] = self::LEVEL_OTHER;
+    }
 
-defined('MOODLE_INTERNAL') || die;
+    public static function get_name() {
+        return get_string('eventhttprequest', 'tool_coursestore');
+    }
 
-$plugin->version   = 2015041602;
-$plugin->requires  = 2013111800;
-$plugin->component = 'tool_coursestore';
+    public function get_description() {
+        return $this->data['other']['info'];
+    }
+
+    public function get_url() {
+        return new \moodle_url('/admin/tool/coursestore/index.php');
+    }
+}
