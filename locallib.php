@@ -856,27 +856,40 @@ abstract class tool_coursestore_error {
     // Etc. populate as needed.
 
     /**
-     * Checks if we get valid URL and user is ready to be redirected.
+     * Checks if response body contains errors.
      *
      * @param type $httpresponse
      * @return boolean
      */
-    public static function validate_backup_download_response($httpresponse) {
-
+    public static function is_response_error($httpresponse) {
         if (isset($httpresponse->body->error) and isset($httpresponse->body->error_desc)) {
-            return false;
+            return true;
+        }
+
+        return false;
+    }
+    /**
+     * Checks if the response is valid and file mcan be downloaded.
+     *
+     * @param type $httpresponse
+     * @return boolean
+     */
+    public static function is_response_backup_download_error($httpresponse) {
+
+        if (self::is_response_error($httpresponse)) {
+            return true;
         }
         if (!isset($httpresponse->body->url)) {
-            return false;
+            return true;
         }
         if (!tool_coursestore_check_url($httpresponse->body->url)) {
-            return false;
+            return true;
         }
         if (!tool_coursestore_is_url_available($httpresponse->body->url)) {
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 }
 

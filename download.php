@@ -75,10 +75,10 @@ if ($download == 1 and intval($file) > 0) {
     $dlresponse = $wsman->get_backup($sesskey, $file, true);
     $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";
 
-    $redirectready = tool_coursestore_error::validate_backup_download_response($dlresponse);
+    $error = tool_coursestore_error::is_response_backup_download_error($dlresponse);
     coursestore_logging::log_backup_download($dlresponse, $file);
 
-    if ($redirectready) {
+    if (!$error) {
         redirect($dlresponse->body->url, '', 0);
     } else {
         print_error('errordownloading', 'tool_coursestore', $errorurl);
