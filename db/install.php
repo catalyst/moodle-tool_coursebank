@@ -26,6 +26,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+
 function xmldb_tool_coursestore_install() {
     global $CFG, $OUTPUT, $DB;
 
