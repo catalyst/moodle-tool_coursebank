@@ -33,8 +33,6 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return string $html          Body HTML output
      */
     public function course_store_main($results, $sort='', $dir='', $page='', $perpage='') {
-        global $CFG;
-
         $columns = array(
                 'coursefullname',
                 'filetimemodified',
@@ -90,8 +88,6 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return string $html          Body HTML output
      */
     public function course_store_downloads($downloads, $sort='', $dir='', $page='', $perpage='') {
-        global $CFG;
-
         $columns = array('coursefullname', 'backupfilename', 'filesize',  'filetimemodified');
 
         $html = $this->box_start();
@@ -192,6 +188,10 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return HTML
      */
     private function course_store_get_download_actions_links($result) {
+        // First check capability,
+        if (!has_capability('tool/coursestore:download', context_system::instance())) {
+            return '';
+        }
         $text = get_string('download');
         $icon = html_writer::empty_tag('img',
                 array('src' => $this->pix_url('t/download')->out(false),
@@ -209,6 +209,10 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return HTML
      */
     private function course_store_get_queue_actions_links($result) {
+        // First check capability,
+        if (!has_capability('tool/coursestore:edit', context_system::instance())) {
+            return '';
+        }
         $links = '';
         $buttons = array();
         $status = $result->status;
