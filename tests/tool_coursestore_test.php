@@ -224,7 +224,7 @@ class tool_coursestore_testcase extends advanced_testcase {
      * @group tool_coursestore
      */
     public function test_get_noaction_statuses() {
-        $statuses = tool_coursestore::get_statuses();
+        $statuses = tool_coursestore::get_noaction_statuses();
         $this->assertCount(3, $statuses);
         $this->assertEquals(7, array_sum($statuses));
     }
@@ -232,16 +232,16 @@ class tool_coursestore_testcase extends advanced_testcase {
      * @group tool_coursestore
      */
     public function test_get_canstop_statuses() {
-        $statuses = tool_coursestore::get_statuses();
+        $statuses = tool_coursestore::get_canstop_statuses();
         $this->assertCount(2, $statuses);
-        $this->assertEquals(99, array_sum(array_flip($statuses)));
+        $this->assertEquals(99, array_sum($statuses));
     }
     /**
      * @group tool_coursestore
      */
     public function test_get_stopped_statuses() {
-        $statuses = tool_coursestore::get_statuses();
+        $statuses = tool_coursestore::get_stopped_statuses();
         $this->assertCount(1, $statuses);
-        $this->assertEquals(3, array_sum(array_flip($statuses)));
+        $this->assertEquals(3, array_sum($statuses));
     }
 }
