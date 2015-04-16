@@ -1567,7 +1567,9 @@ class coursestore_logging {
      * @param string                   eventdesc    Event description.
      * @param string                   action       Action description.
      */
-    protected function log_generic_request($httpresponse, $eventname, $eventdesc, $action) {
+    protected static function log_generic_request($httpresponse, $eventname, $eventdesc, $action) {
+        global $USER;
+
         if ($httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
             $otherdata = array('status' => true);
         } else {
