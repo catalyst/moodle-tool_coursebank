@@ -845,6 +845,30 @@ abstract class tool_coursestore_error {
     const ERROR_TIMEOUT              = 100;
     const ERROR_MAX_ATTEMPTS_REACHED = 101;
     // Etc. populate as needed.
+
+    /**
+     * Checks if we get valid URL and user is ready to be redirected.
+     *
+     * @param type $httpresponse
+     * @return boolean
+     */
+    public static function validate_backup_download_response($httpresponse) {
+
+        if (isset($httpresponse->body->error) and isset($httpresponse->body->error_desc)) {
+            return false;
+        }
+        if (!isset($httpresponse->body->url)) {
+            return false;
+        }
+        if (!tool_coursestore_check_url($httpresponse->body->url)) {
+            return false;
+        }
+        if (!tool_coursestore_is_url_available($httpresponse->body->url)) {
+            return false;
+        }
+
+        return true;
+    }
 }
 
 /**
@@ -1747,23 +1771,21 @@ class coursestore_logging {
             $info .= $infoadd;
             self::log_event(
                     $info,
-                    'download_failed',
+                    'coursestore_logging',
                     'Course Bank download failed',
                     self::LOG_MODULE_COURSE_STORE,
                     $courseid,
                     '');
-            return false;
         } else {
             $infoadd = "SUCCESS";
             $info .= $infoadd;
             self::log_event(
                     $info,
-                    'download_failed',
-                    'Course Bank download failed',
+                    'coursestore_logging',
+                    'Course Bank download success',
                     self::LOG_MODULE_COURSE_STORE,
                     $courseid,
                     '');
-            return true;
         }
     }
 }
