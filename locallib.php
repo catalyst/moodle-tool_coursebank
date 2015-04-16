@@ -1104,27 +1104,29 @@ class coursestore_ws_manager {
     public static function check_post_backup_data_is_same($response, $data) {
 
         $fields = array(
-                'uuid',
-                'fileid',
-                'filename',
-                'filehash',
-                'filesize',
-                'chunksize',
-                'totalchunks',
-                'courseid',
-                'coursename',
-                'categoryid',
-                'categoryname'
+                'uuid' => 'uniqueid',
+                'fileid' => 'fileid',
+                'filename' => 'filename',
+                'filehash' => 'filehash',
+                'filesize' => 'filesize',
+                'chunksize' => 'chunksize',
+                'totalchunks' => 'totalchunks',
+                'courseid' => 'courseid',
+                'coursename' => 'coursename',
+                'categoryid' => 'categoryid',
+                'categoryname' => 'categoryname'
         );
         // Check that each of the above fields matches, log an error if not.
-        foreach ($fields as $field) {
-            $info = "Local value for $field does not match coursebank value.";
-            $response->log_http_error(
-                    $data['courseid'],
-                    $data['coursestoreid'],
-                    $info
-            );
-            return false;
+        foreach ($fields as $datafield => $responsefield) {
+            if ($response[$responsefield] != $data[$datafield]) {
+                $info = "Local value for $field does not match coursebank value.";
+                $response->log_http_error(
+                        $data['courseid'],
+                        $data['coursestoreid'],
+                        $info
+                );
+                return false;
+            }
         }
 
         $dtresonse = new DateTime($response->body->coursestartdate);
