@@ -76,7 +76,7 @@ if ($download == 1 and intval($file) > 0) {
     $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";
 
     if (coursestore_logging::log_backup_download($dlresponse, $file)) {
-        redirect($httpresponse->body->url, '', 0);
+        redirect($dlresponse->body->url, '', 0);
     } else {
         print_error('errordownloading', 'tool_coursestore', $errorurl);
     }
