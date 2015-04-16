@@ -211,6 +211,74 @@ abstract class tool_coursestore {
         return array('results' => $results, 'count' => $count);
     }
     /**
+     * 
+     * @param coursestore_ws_manager $wsmanager
+     * @param object $backup         Course store database record object
+     * @param array  $data           Data array to post/put.
+     * @param string $sessionkey     Session token
+     * @param int    $retries        Number of retries to attempt sending
+     *                               when an error occurs.
+     * @return array of: int     result null = needs further investigation.
+     *                                    -1 = some error, don't continue.
+     *                                     1 = all good but don't continue 
+     *                                         -> i.e. Course Bank already has the backup.
+     *                   boolean deletechunks - whether or not chunks should be deleted.
+     *                   int     highestiterator - highest iterator Cours Bank has received for this backup.
+     *                   coursestore_http_response putresponse - the response from the put request.
+     *
+     */
+    private static function update_backup(coursestore_ws_manager $wsmanager, $data, $backup, $sessionkey, $retries) {
+        global $DB;
+
+        $result = null;
+        $deletechunks = false;
+        $highestiterator = 0;
+        $putresponse = $wsmanager->put_backup($sessionkey, $data, $backup->uniqueid, $retries);
+        if ($putresponse !== true) {
+            if ($putresponse->httpcode == coursestore_ws_manager::WS_HTTP_BAD_REQUEST) {
+                if (isset($putresponse->body->chunksreceived)) {
+                    // We've sent chunks to Course Bank already?
+                    if ($putresponse->body->chunksreceived == 0) {
+                        // Possible network error. Should retry again later.
+                        $backup->status = self::STATUS_ERROR;
+                        $DB->update_record('tool_coursestore', $backup);
+                        // Log a transfer interruption event.
+                        $putresponse->log_http_error($backup->courseid, $backup->id);
+                        return array('result'          => -1,
+                                     'deletechunks'    => $deletechunks,
+                                     'highestiterator' => $highestiterator,
+                                     'putresponse'     => $putresponse);
+                    }
+                    // Yes, we need to delete the chunks.
+                    $deletechunks = true;
+                    $highestiterator = $putresponse->body->highestchunkiterator;
+                }
+                else if (isset($putresponse->body->is_completed)) {
+                    // We've sent chunks to Course Bank already?
+                    if ($putresponse->body->is_completed) {
+                        // Can skip this one as it's already been sent to Course Bank and is complete.
+                        // Another process (?!?) may have completed this in the meantime.
+                        $backup->status = self::STATUS_FINISHED;
+                        $backup->timecompleted = time();
+                        $DB->update_record('tool_coursestore', $backup);
+                        // Don't let the send_backup() continue.
+                        return array('result'          => 1,
+                                     'deletechunks'    => $deletechunks,
+                                     'highestiterator' => $highestiterator,
+                                     'putresponse'     => $putresponse);
+                    }
+                    // Otherwise, something else is wrong. Try again later.
+                    // Actually, if is_completed is set, it will always be true
+                    // and we shouldn't be here at this point.
+                }
+            }
+        }
+        return array('result'          => null,
+                     'deletechunks'    => $deletechunks,
+                     'highestiterator' => $highestiterator,
+                     'putresponse'     => $putresponse);
+    }
+    /**
      * Send the initial post_backup.
      * @param object $wsmanager Webservice class manager.
      * @param object $backup    Course store database record object
@@ -248,6 +316,8 @@ abstract class tool_coursestore {
         // Unexpected http response or none received.
         if (!is_int($postresponse)) {
             $deletechunks = false;
+            $highestiterator = 0;
+            $putresponse = null;
             if ($postresponse->httpcode == coursestore_ws_manager::WS_HTTP_CONFLICT) {
                 // Course Bank already has some data for this backup.
                 if ($postresponse->body->is_completed) {
@@ -263,33 +333,49 @@ abstract class tool_coursestore {
                     // But no chunks have been sent yet.
                     // Try to update it.
                     // Don't unset the fileid or the uuid fields.
-                    $putresponse = $wsmanager->put_backup($sessionkey, $data, $backup->uniqueid, $retries);
-                    if ($putresponse !== true) {
-                        if ($putresponse->httpcode == coursestore_ws_manager::WS_HTTP_BAD_REQUEST) {
-                            if (isset($putresponse->body->chunksreceived)) {
-                                // We've sent chunks to Course Bank already?
-                                if ($putresponse->body->chunksreceived == 0) {
-                                    // Possible network error. Should retry again later.
-                                    $backup->status = self::STATUS_ERROR;
-                                    $DB->update_record('tool_coursestore', $backup);
-                                    // Log a transfer interruption event.
-                                    $putresponse->log_http_error($backup->courseid, $backup->id);
-                                    return -1;
-                                }
-                                // Yes, we need to delete the chunks.
-                                $deletechunks = true;
-                            }
-                        }
+                    list($result, $deletechunks, $highestiterator, $putresponse) =
+                        self::update_backup($wsmanager, $data, $backup, $sessionkey, $retries);
+                    if (!is_null($result)) {
+                        return $result;
                     }
                 } else {
+                    // post_backup informs us that there's already data for this backup
+                    // in Course Bank.  And, that it's already started receiving
+                    // chunks.
                     // We need to delete the chunks, then update the backup, then continue.
-                    $deletechunks = true;
+                    if (isset($postresponse->body->chunksreceived)) {
+                        $deletechunks = true;
+                        $highestiterator = $postresponse->body->highestchunkiterator;
+                    }
                 }
             }
             if ($deletechunks) {
-                // TODO: sent requests to delete chunks.
-                // TODO: update the backup
-                // TODO: continue.
+                // Delete chunks up to the highest iterator sent so far.
+                for ($iterator = 0; $iterator < $highestiterator; $iterator++) {
+                    $deleteresponse = $wsmanager->delete_chunk($sessionkey, $backup->uniqueid, $iterator, $retries);
+                    if ($deleteresponse->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
+                        // something is wrong. Try again later.
+                        $backup->status = self::STATUS_ERROR;
+                        $DB->update_record('tool_coursestore', $backup);
+                        // Log a transfer interruption event.
+                        $deleteresponse->log_http_error($backup->courseid, $backup->id);
+                        return -1;
+                    }
+                }
+                list($result, $deletechunks, $highestiterator, $putresponse) =
+                    self::update_backup($wsmanager, $data, $backup, $sessionkey, $retries);
+                if (!is_null($result)) {
+                    return $result;
+                }
+                if ($deletechunks || $highestiterator > 0) {
+                    // Something is wrong. Try again later.
+                    $backup->status = self::STATUS_ERROR;
+                    $DB->update_record('tool_coursestore', $backup);
+                    // Log a transfer interruption event.
+                    $putresponse->log_http_error($backup->courseid, $backup->id);
+                    return -1;
+                }
+                // continue.
             } else {
                 $backup->status = self::STATUS_ERROR;
                 $DB->update_record('tool_coursestore', $backup);
@@ -302,7 +388,6 @@ abstract class tool_coursestore {
         $DB->update_record('tool_coursestore', $backup);
         return 0;
     }
-
     /**
      * Convenience function to handle sending a file along with the relevant
      * metatadata.
@@ -1101,10 +1186,10 @@ class coursestore_ws_manager {
     public static function get_backup_validated_hash($data) {
         return md5($data['fileid'] . ',' .$data['uuid'] . ',' . $data['filename'] . ',' . $data['filesize']);
     }
-    public static function check_post_backup_data_is_same($response, $data) {
+    public static function check_post_backup_data_is_same(coursestore_http_response $httpresponse, $data) {
 
         $fields = array(
-                'uuid' => 'uniqueid',
+                'uuid' => 'uuid',
                 'fileid' => 'fileid',
                 'filename' => 'filename',
                 'filehash' => 'filehash',
@@ -1118,27 +1203,27 @@ class coursestore_ws_manager {
         );
         // Check that each of the above fields matches, log an error if not.
         foreach ($fields as $datafield => $responsefield) {
-            if ($response[$responsefield] != $data[$datafield]) {
-                $info = "Local value for $field does not match coursebank value.";
-                $response->log_http_error(
+            if (!isset($httpresponse->body->$responsefield) || $httpresponse->body->$responsefield != $data[$datafield]) {
+                $info = "Local value for $datafield does not match coursebank value.";
+                $httpresponse->log_http_error(
                         $data['courseid'],
-                        $data['coursestoreid'],
+                        $data['fileid'],
                         $info
                 );
                 return false;
             }
         }
 
-        $dtresonse = new DateTime($response->body->coursestartdate);
+        $dtresonse = new DateTime($httpresponse->body->coursestartdate);
         $dtdata = new DateTime($data['startdate']);
         $responsedate = $dtresonse->format('Y-m-d H:i:s');
         $datadate = $dtdata->format('Y-m-d H:i:s');
         if ($responsedate != $datadate) {
-            $info = "startdate: response=" . $response->body->coursestartdate .
+            $info = "startdate: response=" . $httpresponse->body->coursestartdate .
                     "; data=" . $data['startdate'];
-            $response->log_http_error(
+            $httpresponse->log_http_error(
                     $data['courseid'],
-                    $data['coursestoreid'],
+                    $data['fileid'],
                     $info
             );
             return false;
@@ -1276,29 +1361,15 @@ class coursestore_ws_manager {
     }
 
     /**
-     * Update chunk status to confirmed
-     *
-     * NOTE: This function is not currently in use due to architectural changes
-     *       and will likely be deprecated.
-     *
-     * @param string $auth      Authorization string
-     * @param string $uniqueid  UUID referencing course bank backup resource
-     * @param int    $chunk     Chunk number
-     *
-     */
-    public function put_chunk_confirm($auth, $uniqueid, $chunk) {
-        return $this->send_authenticated('chunks/' . $uniqueid . '/' . $chunk, array(), 'PUT', $auth);
-    }
-    /**
      * Remove chunk
      *
-     * @param string $auth      Authorization string
-     * @param string $uniqueid  UUID referencing course bank backup resource
-     * @param int    $chunk     Chunk number
+     * @param string $auth           Authorization string
+     * @param string $uniqueid       UUID referencing course bank backup resource
+     * @param int    $chunkiterator  Chunk number
      *
      */
-    public function delete_chunk($auth, $uniqueid, $chunk) {
-        $result = $this->send_authenticated('chunks/' . $uniqueid . '/' . $chunk, array(), 'DELETE', $auth);
+    public function delete_chunk($sessionkey, $uniqueid, $chunkiterator, $retries=5) {
+        $result = $this->send_authenticated('chunks/' . $uniqueid . '/' . $chunkiterator, array(), 'DELETE', $sessionkey, $retries);
         coursestore_logging::log_delete_chunk($result);
         return $result;
     }
