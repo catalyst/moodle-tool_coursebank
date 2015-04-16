@@ -212,4 +212,36 @@ class tool_coursestore_testcase extends advanced_testcase {
         $result = $wsman->put_chunk($data, 1, 2, 'sesskey', 0);
         $this->assertEquals($response, $result);
     }
+    /**
+     * @group tool_coursestore
+     */
+    public function test_get_statuses() {
+        $statuses = tool_coursestore::get_statuses();
+        $this->assertCount(6, $statuses);
+        $this->assertEquals(109, array_sum(array_flip($statuses)));
+    }
+    /**
+     * @group tool_coursestore
+     */
+    public function test_get_noaction_statuses() {
+        $statuses = tool_coursestore::get_statuses();
+        $this->assertCount(3, $statuses);
+        $this->assertEquals(7, array_sum($statuses));
+    }
+    /**
+     * @group tool_coursestore
+     */
+    public function test_get_canstop_statuses() {
+        $statuses = tool_coursestore::get_statuses();
+        $this->assertCount(2, $statuses);
+        $this->assertEquals(99, array_sum(array_flip($statuses)));
+    }
+    /**
+     * @group tool_coursestore
+     */
+    public function test_get_stopped_statuses() {
+        $statuses = tool_coursestore::get_statuses();
+        $this->assertCount(1, $statuses);
+        $this->assertEquals(3, array_sum(array_flip($statuses)));
+    }
 }
