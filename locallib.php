@@ -211,7 +211,7 @@ abstract class tool_coursestore {
         return array('results' => $results, 'count' => $count);
     }
     /**
-     * 
+     *
      * @param coursestore_ws_manager $wsmanager
      * @param object $backup         Course store database record object
      * @param array  $data           Data array to post/put.
@@ -220,7 +220,7 @@ abstract class tool_coursestore {
      *                               when an error occurs.
      * @return array of: int     result null = needs further investigation.
      *                                    -1 = some error, don't continue.
-     *                                     1 = all good but don't continue 
+     *                                     1 = all good but don't continue
      *                                         -> i.e. Course Bank already has the backup.
      *                   boolean deletechunks - whether or not chunks should be deleted.
      *                   int     highestiterator - highest iterator Cours Bank has received for this backup.
@@ -690,21 +690,31 @@ abstract class tool_coursestore {
                 WHERE tcs.id IS NULL
                 AND ct.contextlevel = :contextcourse1
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
+                AND   tcs.status IN (:statusnotstarted, :statusinprogress, :statuserror)
                 UNION
                 " . $sqlselect . "
                 INNER JOIN {tool_coursestore} tcs on tcs.fileid = f.id
                 WHERE ct.contextlevel = :contextcourse2
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
-                AND   tcs.status IN (:statusnotstarted, :statusinprogress, :statuserror)
+                AND   tcs.status IN (:statusnotstarted2, :statusinprogress2, :statuserror2)
                 UNION
                 " . $sqlselect . "
                 RIGHT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
                 WHERE f.id IS NULL
                 AND tcs.isbackedup = 1
+                AND tcs.status IN (:statusnotstarted3, :statusinprogress3, :statuserror3)
                 ORDER BY timecreated";
+        // This could possibly be done better... But moodle expects each instance of the variable to be provided separately,
+        // so we have this.
         $params = array('statusnotstarted' => self::STATUS_NOTSTARTED,
                         'statuserror' => self::STATUS_ERROR,
                         'statusinprogress' => self::STATUS_INPROGRESS,
+                        'statusnotstarted2' => self::STATUS_NOTSTARTED,
+                        'statuserror2' => self::STATUS_ERROR,
+                        'statusinprogress2' => self::STATUS_INPROGRESS,
+                        'statusnotstarted3' => self::STATUS_NOTSTARTED,
+                        'statuserror3' => self::STATUS_ERROR,
+                        'statusinprogress3' => self::STATUS_INPROGRESS,
                         'contextcourse1' => CONTEXT_COURSE,
                         'contextcourse2' => CONTEXT_COURSE
                         );
