@@ -252,8 +252,7 @@ abstract class tool_coursestore {
                     // Yes, we need to delete the chunks.
                     $deletechunks = true;
                     $highestiterator = $putresponse->body->highestchunkiterator;
-                }
-                else if (isset($putresponse->body->is_completed)) {
+                } else if (isset($putresponse->body->is_completed)) {
                     // We've sent chunks to Course Bank already?
                     if ($putresponse->body->is_completed) {
                         // Can skip this one as it's already been sent to Course Bank and is complete.
@@ -329,20 +328,20 @@ abstract class tool_coursestore {
                     // Don't let the send_backup() continue.
                     return 1;
                 } else if ($postresponse->body->chunksreceived == 0) {
-                    // Course Bank has some other data for this backup.
-                    // But no chunks have been sent yet.
-                    // Try to update it.
-                    // Don't unset the fileid or the uuid fields.
+                    /* Course Bank has some other data for this backup.
+                     * But no chunks have been sent yet.
+                     * Try to update it.
+                     * Don't unset the fileid or the uuid fields.*/
                     list($result, $deletechunks, $highestiterator, $putresponse) =
                         self::update_backup($wsmanager, $data, $backup, $sessionkey, $retries);
                     if (!is_null($result)) {
                         return $result;
                     }
                 } else {
-                    // post_backup informs us that there's already data for this backup
-                    // in Course Bank.  And, that it's already started receiving
-                    // chunks.
-                    // We need to delete the chunks, then update the backup, then continue.
+                    /* Post_backup informs us that there's already data for this backup
+                     * in Course Bank.  And, that it's already started receiving
+                     * chunks.
+                     * We need to delete the chunks, then update the backup, then continue.*/
                     if (isset($postresponse->body->chunksreceived)) {
                         $deletechunks = true;
                         $highestiterator = $postresponse->body->highestchunkiterator;
@@ -353,9 +352,9 @@ abstract class tool_coursestore {
                 // Delete chunks up to the highest iterator sent so far.
                 for ($iterator = 0; $iterator < $highestiterator; $iterator++) {
                     $deleteresponse = $wsmanager->delete_chunk($sessionkey, $backup->uniqueid, $iterator, $retries);
-                    // Ignore any errors for this.  Perhaps one of the chunks is missing and
-                    // that's why we're getting an error.
-                    // Anyway, the update below should catch any errors.
+                    /* Ignore any errors for this.  Perhaps one of the chunks is missing and
+                     * that's why we're getting an error.
+                     * Anyway, the update below should catch any errors.*/
                 }
                 list($result, $deletechunks, $highestiterator, $putresponse) =
                     self::update_backup($wsmanager, $data, $backup, $sessionkey, $retries);
@@ -370,7 +369,7 @@ abstract class tool_coursestore {
                     $putresponse->log_http_error($backup->courseid, $backup->id);
                     return -1;
                 }
-                // continue.
+                // Continue.
             } else {
                 $backup->status = self::STATUS_ERROR;
                 $DB->update_record('tool_coursestore', $backup);
@@ -1209,9 +1208,9 @@ class coursestore_ws_manager {
             }
         }
 
-        $dtresonse = new DateTime($httpresponse->body->coursestartdate);
+        $dtresponse = new DateTime($httpresponse->body->coursestartdate);
         $dtdata = new DateTime($data['startdate']);
-        $responsedate = $dtresonse->format('Y-m-d H:i:s');
+        $responsedate = $dtresponse->format('Y-m-d H:i:s');
         $datadate = $dtdata->format('Y-m-d H:i:s');
         if ($responsedate != $datadate) {
             $info = "startdate: response=" . $httpresponse->body->coursestartdate .
@@ -1247,7 +1246,6 @@ class coursestore_ws_manager {
             if ($returnhash != $validatehash) {
                 return $response;
             } else {
-                // Possible network error. Should retry again later.
                 return (int) $data['fileid'];
             }
         } else if ($response->httpcode == self::WS_HTTP_CONFLICT) {
