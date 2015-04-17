@@ -353,14 +353,9 @@ abstract class tool_coursestore {
                 // Delete chunks up to the highest iterator sent so far.
                 for ($iterator = 0; $iterator < $highestiterator; $iterator++) {
                     $deleteresponse = $wsmanager->delete_chunk($sessionkey, $backup->uniqueid, $iterator, $retries);
-                    if ($deleteresponse->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
-                        // something is wrong. Try again later.
-                        $backup->status = self::STATUS_ERROR;
-                        $DB->update_record('tool_coursestore', $backup);
-                        // Log a transfer interruption event.
-                        $deleteresponse->log_http_error($backup->courseid, $backup->id);
-                        return -1;
-                    }
+                    // Ignore any errors for this.  Perhaps one of the chunks is missing and
+                    // that's why we're getting an error.
+                    // Anyway, the update below should catch any errors.
                 }
                 list($result, $deletechunks, $highestiterator, $putresponse) =
                     self::update_backup($wsmanager, $data, $backup, $sessionkey, $retries);
