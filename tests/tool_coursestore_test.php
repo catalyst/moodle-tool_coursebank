@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * PHPUnit data generator tests
@@ -63,15 +77,28 @@ class tool_coursestore_testcase extends advanced_testcase {
         $this->resetAfterTest(true);
         $wsman = new coursestore_ws_manager_tester();
 
-        // Test false response
-        $wsman->set_response(false);
-        $this->assertEquals(false, $wsman->get_test('sesskey'));
+        // Test successful response.
+        $info = array(
+            'http_code' => coursestore_ws_manager_tester::WS_HTTP_OK
+        );
+        $body = new stdClass();
+        $response = new coursestore_http_response($body, $info);
 
-        // Test successful response
-        $wsman->set_response(true);
-        $this->assertEquals(true, $wsman->get_test('sesskey'));
+        $wsman->set_response($response);
+        $this->assertEquals($response, $wsman->get_test('sesskey'));
 
-        //TODO: Refactor connection checks into get_test, add more tests.
+        // Test failure response.
+        $info = array(
+            'http_code' => coursestore_ws_manager_tester::WS_HTTP_BAD_REQUEST
+        );
+        $body = new stdClass();
+        $body->error = coursestore_ws_manager_tester::WS_STATUS_ERROR_INVALID_JSON_DATA;
+        $body->err_desc = 'Error message';
+
+        $response = new coursestore_http_response($body, $info);
+
+        $wsman->set_response($response);
+        $this->assertEquals($response, $wsman->get_test('sesskey'));
 
     }
     /**
@@ -95,7 +122,7 @@ class tool_coursestore_testcase extends advanced_testcase {
         $response = new coursestore_http_response($body, $info);
         $wsman->set_response($response);
         $this->assertEquals(true, $wsman->post_session('hash'));
-        // Test that sess key has been saved properly
+        // Test that sess key has been saved properly.
         $sesskeylocal = get_config('tool_coursestore', 'sessionkey');
         $this->assertEquals('sesskey', $sesskeylocal);
 
@@ -127,10 +154,19 @@ class tool_coursestore_testcase extends advanced_testcase {
         $testdata = array(
             'fileid' => 1,
             'filename' => 'test.mbz',
-            'filesize' => 20000
+            'filehash' => 'somehash',
+            'filesize' => 20000,
+            'courseid' => 4,
+            'uuid' => '139ae275-4b4d-4150-8be1-f588bdb85c1f',
+            'chunksize' => 100,
+            'totalchunks' => 40,
+            'coursename' => 'test course',
+            'categoryid' => 2,
+            'categoryname' => 'test category',
+            'startdate' => 1233456789
         );
-        $body->hash = md5($testdata['fileid'] . ',' . $testdata['filename'] . ',' .
-                $testdata['filesize']);
+        $body->hash = md5($testdata['fileid'] . ',' . $testdata['uuid'] .
+                ',' . $testdata['filename'] . ',' . $testdata['filesize']);
 
         $response = new coursestore_http_response($body, $info);
         $wsman->set_response($response);
@@ -150,6 +186,11 @@ class tool_coursestore_testcase extends advanced_testcase {
 
         // Test response if backup already exists.
         $info['http_code'] = coursestore_ws_manager_tester::WS_HTTP_CONFLICT;
+        $body->is_completed = true;
+        foreach ($testdata as $field => $value) {
+            $body->$field = $value;
+        }
+        $body->coursestartdate = $testdata['startdate'];
         $response = new coursestore_http_response($body, $info);
         $wsman->set_response($response);
         $result = $wsman->post_backup($testdata, 'sesskey', 0);
