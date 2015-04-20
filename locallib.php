@@ -776,14 +776,25 @@ abstract class tool_coursestore {
         // Get all backups that are pending transfer, attempt to transfer them.
         $sql = 'SELECT * FROM {tool_coursestore}
                         WHERE status IN (:notstarted, :inprogress, :error)';
-        $sqlparams = array(
+        $contstatus = array(
             'notstarted' => self::STATUS_NOTSTARTED,
             'inprogress' => self::STATUS_INPROGRESS,
             'error'      => self::STATUS_ERROR
         );
-        $transferrs = $DB->get_recordset_sql($sql, $sqlparams);
+        $transferrs = $DB->get_recordset_sql($sql, $contstatus);
 
         foreach ($transferrs as $coursebackup) {
+            $idparam = array('id' => $coursebackup->id);
+            $status = $DB->get_field(
+                    'tool_coursestore',
+                    'status',
+                    $idparam,
+                    MUST_EXIST
+            );
+            // Skip this course if its status is on-hold or cancelled.
+            if (!in_array($status, $contstatus)) {
+                continue;
+            }
             $result = self::send_backup($coursebackup);
             if ($result) {
                 $delete = self::delete_backup($coursebackup);
