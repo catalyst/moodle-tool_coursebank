@@ -793,6 +793,9 @@ abstract class tool_coursestore {
             );
             // Skip this course if its status is on-hold or cancelled.
             if (!in_array($status, $contstatus)) {
+                mtrace("Skipping transfer of backup with Course Store ID " .
+                        "$coursebackup->id and status code $status" .
+                        " (Course ID: $coursebackup->courseid).");
                 continue;
             }
             $result = self::send_backup($coursebackup);
