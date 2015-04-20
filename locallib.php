@@ -690,7 +690,6 @@ abstract class tool_coursestore {
                 WHERE tcs.id IS NULL
                 AND ct.contextlevel = :contextcourse1
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
-                AND   tcs.status IN (:statusnotstarted, :statusinprogress, :statuserror)
                 UNION
                 " . $sqlselect . "
                 INNER JOIN {tool_coursestore} tcs on tcs.fileid = f.id
