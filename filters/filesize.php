@@ -34,7 +34,6 @@ class coursestore_filter_filesize extends user_filter_text {
     public function getoperators() {
         return array(0 => get_string('filtermorethan', 'tool_coursestore'),
                      1 => get_string('filterlessthan', 'tool_coursestore'),
-                     2 => get_string('filterisequalto', 'tool_coursestore')
         );
     }
     /**
@@ -62,7 +61,7 @@ class coursestore_filter_filesize extends user_filter_text {
                 return $value;
                 break;
             case 1: // KB.
-                return $value * 1024;;
+                return $value * 1024;
                 break;
             case 2: // MB.
                 return $value * pow(1024, 2);
@@ -109,9 +108,9 @@ class coursestore_filter_filesize extends user_filter_text {
             // If field value is set then use it, else it's null.
             $fieldvalue = null;
             if (isset($formdata->$field)) {
-                $fieldvalue = $formdata->$field;
+                $fieldvalue = floatval($formdata->$field);
             }
-            return array('operator' => (int)$formdata->$operator, 'value' => (int)$fieldvalue, 'scale' => $formdata->$sacale);
+            return array('operator' => (int)$formdata->$operator, 'value' => $fieldvalue, 'scale' => $formdata->$sacale);
         }
 
         return false;
@@ -139,9 +138,6 @@ class coursestore_filter_filesize extends user_filter_text {
                 break;
             case 1: // Less than.
                 $res .= "$field < $value";
-                break;
-            case 2: // Equal to.
-                $res .= "$field = $value";
                 break;
             default:
                 return '';
@@ -201,7 +197,6 @@ class coursestore_filter_filesize extends user_filter_text {
         switch ($operator) {
             case 0: // More than.
             case 1: // Ledd than.
-            case 2: // Equal to.
                 return get_string('textlabel', 'filters', $a);
         }
 

@@ -48,10 +48,10 @@ class tool_coursestore_filters_testcase extends advanced_testcase {
 
     public function test_filter_filesize() {
         $data = array();
-        $filter = new coursestore_filter_filesize('filesize', get_string('filesize', 'tool_coursestore'), 1, 'filesize');;
+        $filter = new coursestore_filter_filesize('filesize', get_string('filesize', 'tool_coursestore'), 1, 'filesize');
 
         $operators = $filter->getoperators();
-        $this->assertCount(3, $operators);
+        $this->assertCount(2, $operators);
 
         $sizes = $filter->get_size();
         $this->assertCount(4, $sizes);
@@ -78,15 +78,6 @@ class tool_coursestore_filters_testcase extends advanced_testcase {
         $expected = array('operator' => '<', 'value' => 1048576);
         $this->assertEquals($expected, $params);
         $this->assertEquals('filesize < 1048576', $sqlparams[0]);
-
-        $data['operator'] = 2;
-        $data['scale'] = 2;
-        $data['value'] = 1024;
-        $sqlparams = $filter->get_sql_filter($data);
-        $params = $filter->get_param_filter($data);
-        $expected = array('operator' => '=', 'value' => 1073741824);
-        $this->assertEquals($expected, $params);
-        $this->assertEquals('filesize = 1073741824', $sqlparams[0]);
 
         $data['operator'] = 0;
         $data['scale'] = 3;
