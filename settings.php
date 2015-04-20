@@ -51,6 +51,10 @@ if ($displaypages) {
     $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore',
             get_string('nav_summary', 'tool_coursestore'),
             "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'tool/coursestore:view'));
+
+    $ADMIN->add('reports', new admin_externalpage('tool_coursestore_report',
+            get_string('nav_report', 'tool_coursestore'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursestore/report.php", 'tool/coursestore:viewlogs'));
 }
 
 if ($hassiteconfig) {

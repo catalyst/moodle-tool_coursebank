@@ -27,6 +27,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2015041602;
+$plugin->version   = 2015042000;
 $plugin->requires  = 2013111800;
 $plugin->component = 'tool_coursestore';
