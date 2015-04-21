@@ -516,4 +516,103 @@ class tool_coursestore_renderer extends plugin_renderer_base {
 
         return $html;
     }
+
+    /**
+     * Render report page.
+     *
+     * @param tool_coursestore_renderable $report object of report.
+     */
+    public function render_tool_coursestore_renderable(tool_coursestore_renderable $report) {
+        if (empty($report->lagacy) and empty($report->selectedlogreader)) {
+            echo $this->output->notification(get_string('nologreaderenabled', 'tool_coursestore'), 'notifyproblem');
+            return;
+        }
+        if ($report->showselectorform) {
+            $this->report_selector_form($report);
+        }
+
+        if ($report->showreport) {
+            $report->tablelog->out($report->perpage, true);
+        }
+    }
+
+    /**
+     * Prints/return reader selector
+     *
+     * @param tool_coursestore_renderable $report report.
+     */
+    public function reader_selector(tool_coursestore_renderable $report) {
+        $readers = $report->get_readers(true);
+        if (empty($readers)) {
+            $readers = array(get_string('nologreaderenabled', 'tool_coursestore'));
+        }
+        $url = fullclone ($report->url);
+        $url->remove_params(array('logreader'));
+        $select = new single_select($url, 'logreader', $readers, $report->selectedlogreader, null);
+        $select->set_label(get_string('selectlogreader', 'tool_coursestore'));
+        echo $this->output->render($select);
+    }
+
+    /**
+     * This function is used to generate and display selector form
+     *
+     * @param tool_coursestore_renderable $report report.
+     */
+    public function report_selector_form(tool_coursestore_renderable $report) {
+        echo html_writer::start_tag('form', array('class' => 'logselecform', 'action' => $report->url, 'method' => 'get'));
+        echo html_writer::start_div();
+        echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'chooselog', 'value' => '1'));
+
+        // Add date selector.
+        $dates = $report->get_date_options();
+        echo html_writer::label(get_string('date'), 'menudate', false, array('class' => 'accesshide'));
+        echo html_writer::select($dates, "date", $report->date, get_string("alldays"));
+
+        // Add user selector.
+        $users = $report->get_user_list();
+        if ($report->showusers) {
+            echo html_writer::label(get_string('selctauser'), 'menuuser', false, array('class' => 'accesshide'));
+            echo html_writer::select($users, "user", $report->userid, get_string("allparticipants"));
+        } else {
+            $users = array();
+            if (!empty($report->userid)) {
+                $users[$report->userid] = $report->get_selected_user_fullname();
+            } else {
+                $users[0] = get_string('allparticipants');
+            }
+            echo html_writer::label(get_string('selctauser'), 'menuuser', false, array('class' => 'accesshide'));
+            echo html_writer::select($users, "user", $report->userid, false);
+            $a = new stdClass();
+            $a->url = new moodle_url('/report/log/index.php', array('chooselog' => 0,
+                'user' => $report->userid,
+                'date' => $report->date, 'type' => $report->type,
+                'showusers' => 1, 'showcourses' => $report->showcourses));
+            $a->url = $a->url->out(false);
+            print_string('logtoomanyusers', 'moodle', $a);
+        }
+
+        // Add activity selector.
+        $activities = $report->get_type_list();
+        echo html_writer::label(get_string('activities'), 'type', false, array('class' => 'accesshide'));
+        echo html_writer::select($activities, "type", $report->type, get_string("allactivities"));
+
+        // Add reader option.
+        // If there is some reader available then only show submit button.
+        $readers = $report->get_readers(true);
+        if (!empty($readers)) {
+            if (count($readers) == 1) {
+                $attributes = array('type' => 'hidden', 'name' => 'logreader', 'value' => key($readers));
+                echo html_writer::empty_tag('input', $attributes);
+            } else {
+                echo html_writer::label(get_string('selectlogreader', 'tool_coursestore'), 'menureader', false,
+                        array('class' => 'accesshide'));
+                echo html_writer::select($readers, 'logreader', $report->selectedlogreader, false);
+            }
+            echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('gettheselogs')));
+        } else if (!empty($report->lagacy)) {
+            echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('gettheselogs')));
+        }
+        echo html_writer::end_div();
+        echo html_writer::end_tag('form');
+    }
 }

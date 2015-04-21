@@ -811,6 +811,8 @@ abstract class tool_coursestore {
                             'tool_coursestore',
                             $coursebackup->backupfilename
                     );
+                    // Log it.
+                    coursestore_logging::log_delete_backup($delfail);
                     mtrace($delfail . "\n");
                 }
             } else {
@@ -819,6 +821,8 @@ abstract class tool_coursestore {
                         'tool_coursestore',
                         $coursebackup->backupfilename
                 );
+                // Log it.
+                tool_coursestore::log_send_backup($bufail);
                 mtrace($bufail . "\n");
                 // Stop sending backups until this one is resolved.
                 break;
@@ -839,6 +843,11 @@ abstract class tool_coursestore {
         if ((float) $CFG->version < 2014051200) {
             return true;
         } else {
+            $logtable = tool_coursestore_get_log_table_name();
+            // If no log table, then it's legacy log table.
+            if (empty($logtable)) {
+                return true;
+            }
             return false;
         }
     }
@@ -887,7 +896,8 @@ abstract class tool_coursestore {
         coursestore_logging::log_status_update(
                 "Updating status: successfully " .
                 "updated status from $oldstatus to $status for backup with" .
-                " ID $coursebackup->id."
+                " ID $coursebackup->id.",
+                true
         );
 
         return true;
@@ -1671,6 +1681,10 @@ class coursestore_logging {
             );
         }
         $status = $otherdata['status'] ? 'Succeeded' : 'Failed';
+
+        if ($status == 'Failed') {
+            $eventname = $eventname . '_failed';
+        }
         $info = $eventdesc . ' ' . $status . '.';
 
         self::log_event(
@@ -1689,8 +1703,13 @@ class coursestore_logging {
      *
      * @param string $info  Information about update
      */
-    public static function log_status_update($info) {
-        self::log_event($info, 'coursestore_logging', 'update status');
+    public static function log_status_update($info, $result = false) {
+        if (!$result) {
+            $event = 'status_update_failed';
+        } else {
+            $event = 'status_updated';
+        }
+        self::log_event($info, $event, 'Update status');
     }
     /** Log a connection check event.
      *
@@ -1702,9 +1721,11 @@ class coursestore_logging {
         $otherdata = array('conncheckaction' => 'conncheck');
         if (($httpresponse instanceof coursestore_http_response)
             && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+            $event = 'connection_checked';
             $info = "Connection check passed.";
             $otherdata['status'] = true;
         } else {
+            $event = 'connection_check_failed';
             $info = "Connection check failed.";
             $otherdata['status'] = false;
             if ($httpresponse instanceof coursestore_http_response) {
@@ -1719,7 +1740,7 @@ class coursestore_logging {
         }
         self::log_event(
             $info,
-            'connection_checked',
+            $event,
             'Connection check',
             self::LOG_MODULE_COURSE_STORE,
             SITEID,
@@ -1738,9 +1759,11 @@ class coursestore_logging {
 
         if (($httpresponse instanceof coursestore_http_response)
             && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+            $event = 'connection_checked';
             $info = "Connection speed test passed. Approximate speed: " . $speed . " kbps.";
             $otherdata['speed'] = $speed;
         } else {
+            $event = 'connection_check_failed';
             $info = "Connection speed test failed.";
             $otherdata['speed'] = 0;
             if ($httpresponse instanceof coursestore_http_response) {
@@ -1755,7 +1778,7 @@ class coursestore_logging {
         }
         self::log_event(
             $info,
-            'connection_checked',
+            $event,
             'Connection check',
             self::LOG_MODULE_COURSE_STORE,
             SITEID,
@@ -1777,9 +1800,11 @@ class coursestore_logging {
         if (($httpresponse instanceof coursestore_http_response)
              && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
             // We got a new session key. Log the event.
+            $event = 'get_session';
             $info = "Get new session key succeeded.";
         } else {
             // Couldn't get a session key.
+            $event = 'get_session_failed';
             $info = "Get new session key failed.";
             if ($httpresponse instanceof coursestore_http_response) {
                 // Log the session key failure.
@@ -1793,7 +1818,7 @@ class coursestore_logging {
         }
         self::log_event(
             $info,
-            'get_session',
+            $event,
             'Get session key',
             self::LOG_MODULE_COURSE_STORE,
             SITEID,
@@ -1858,7 +1883,7 @@ class coursestore_logging {
         global $USER;
 
         self::log_generic_request(
-                $httpresponse, 'get_downloadcount_request', 'GET download count request',
+                $httpresponse, 'http_request', 'GET download count request',
                 'Get count of available Course Bank backups.'
         );
     }
@@ -1892,15 +1917,18 @@ class coursestore_logging {
             // At this stage, $backup is an array.
             $validatehash = coursestore_ws_manager::get_backup_validated_hash($backup);
             if ($validatehash != $httpresponse->body->hash) {
+                $event = 'transfer_start_failed';
                 $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
                         "failed. (Course ID: $courseid)";
                 $otherdata['error_desc'] = "Returned hash ({$httpresponse->body->hash}) " .
                                            "does not match validated hash ($validatehash).";
             } else {
+                $event = 'transfer_started';
                 $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
                         "started. (Course ID: $courseid)";
             }
         } else {
+            $event = 'transfer_start_failed';
             $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
                     "failed. (Course ID: $courseid)";
             if ($httpresponse instanceof coursestore_http_response) {
@@ -1915,6 +1943,7 @@ class coursestore_logging {
                         }
                     } else {
                         // It's ok, will continue.
+                        $event = 'transfer_started';
                         $info = "Transfer of " .
                                 ($level == 'course' ? 'backup' : 'chunk') .
                                 " for course store id $coursestoreid " .
@@ -1934,7 +1963,7 @@ class coursestore_logging {
 
         self::log_event(
             $info,
-            'transfer_started',
+            $event,
             'Transfer started',
             self::LOG_MODULE_COURSE_STORE,
             $courseid,
@@ -1996,6 +2025,30 @@ class coursestore_logging {
         // TODO: log backup updated event.
     }
     /**
+     * Log final status of backup sending.
+     *
+     * @param string $info
+     * @param bool $result
+     */
+    public static function log_send_backup($info, $result = false) {
+        if (!$result) {
+            $event = 'backup_send_failed';
+        }
+        self::log_event($info, $event, 'Sending backup');
+    }
+    /**
+     * Log deleting backup
+     *
+     * @param string $info
+     * @param bool $result
+     */
+    public static function log_delete_backup($info, $result = false) {
+        if (!$result) {
+            $event = 'backup_delete_failed';
+        }
+        self::log_event($info, $event, 'Deleting backup');
+    }
+    /**
      * Log transfer backup download event.
      *
      * @param http_response $httpresponse   HTTP response object generated.
@@ -2032,25 +2085,20 @@ class coursestore_logging {
 
         // Log either success or failure event.
         if ($error) {
+            $event = 'backup_download_failed';
             $info .= $infoadd;
-            self::log_event(
-                    $info,
-                    'coursestore_logging',
-                    'Course Bank download failed',
-                    self::LOG_MODULE_COURSE_STORE,
-                    $courseid,
-                    '');
         } else {
+            $event = 'backup_downloaded';
             $infoadd = "SUCCESS";
             $info .= $infoadd;
-            self::log_event(
-                    $info,
-                    'coursestore_logging',
-                    'Course Bank download success',
-                    self::LOG_MODULE_COURSE_STORE,
-                    $courseid,
-                    '');
         }
+        self::log_event(
+                $info,
+                $event,
+                'Backup file download',
+                self::LOG_MODULE_COURSE_STORE,
+                $courseid,
+                '');
     }
 }
 /**
