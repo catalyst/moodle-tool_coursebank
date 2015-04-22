@@ -95,6 +95,12 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 get_string('backupfiles', 'tool_coursestore', count((array)$downloads)),
                 3
         );
+        // Don't output the table if there are no results.
+        if (count($downloads <= 0)) {
+            $html .= $this->box_end();
+            return $html;
+        }
+
         $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
