@@ -96,7 +96,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 3
         );
         // Don't output the table if there are no results.
-        if (count($downloads <= 0)) {
+        if (count((array) $downloads ) <= 0) {
             $html .= $this->box_end();
             return $html;
         }
