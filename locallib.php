@@ -307,6 +307,7 @@ abstract class tool_coursestore {
             'startdate'    => $coursedate,
             'categoryid'   => $backup->categoryid,
             'categoryname' => $backup->categoryname,
+            'filetimemodified' => $backup->filetimemodified
         );
         if (!isset($backup->timetransferstarted) || $backup->timetransferstarted == 0) {
             $backup->timetransferstarted = time();

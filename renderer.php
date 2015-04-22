@@ -88,7 +88,6 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return string $html          Body HTML output
      */
     public function course_store_downloads($downloads, $sort='', $dir='', $page='', $perpage='') {
-        global $DB;
         $columns = array('coursefullname', 'backupfilename', 'filesize',  'filetimemodified');
 
         $html = $this->box_start();
@@ -113,9 +112,8 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             $html .= html_writer::tag('td', s($download->coursefullname));
             $html .= html_writer::tag('td', s($download->backupfilename));
             $html .= html_writer::tag('td', s(display_size($download->filesize)));
-            $params = array('courseid' => $download->courseid, 'backupfilename' => $download->backupfilename);
-            $file = $DB->get_record('tool_coursestore', $params, '*', MUST_EXIST);
-            $html .= html_writer::tag('td', s(userdate($file->filetimemodified)));
+            $dateformatted = userdate(strtotime($download->filetimemodified));
+            $html .= html_writer::tag('td', s($dateformatted));
             $links = $this->course_store_get_download_actions_links($download);
             $html .= html_writer::tag('td', $links);
             $html .= html_writer::start_tag('tr');
