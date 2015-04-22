@@ -129,7 +129,6 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return string $html Body HTML output
      */
     public function course_store_queue($results, $sort='', $dir='', $page='', $perpage='') {
-
         $columns = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'timecreated', 'status');
 
         $html = $this->box_start();
@@ -137,6 +136,12 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 get_string('backupfiles', 'tool_coursestore', count($results)),
                 3
         );
+        // Don't output the table if there are no results.
+        if (count($results <= 0)) {
+            $html .= $this->box_end();
+            return $html;
+        }
+
         $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
