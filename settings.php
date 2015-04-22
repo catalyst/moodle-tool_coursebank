@@ -85,19 +85,17 @@ if ($hassiteconfig) {
             $enableoptions
     );
     $settings->add($enable);
-    $settings->add(new admin_setting_configcheckbox('tool_coursestore/externalcron',
-            get_string('settings_externalcron', 'tool_coursestore'),
-            get_string('settings_externalcron_desc', 'tool_coursestore'), 0));
-
-    $settings->add(new admin_setting_configcheckbox('tool_coursestore/displaypages',
-            get_string('settings_displaypages', 'tool_coursestore'),
-            get_string('settings_displaypages_desc', 'tool_coursestore'), 1));
-
     $settings->add(new admin_setting_configtext('tool_coursestore/url',
             get_string('settings_url', 'tool_coursestore'),
             get_string('settings_url_desc', 'tool_coursestore'),
             '',
             PARAM_URL)
+    );
+    $settings->add(new admin_setting_configtext('tool_coursestore/authtoken',
+            get_string('settings_authtoken', 'tool_coursestore'),
+            get_string('settings_authtoken_desc', 'tool_coursestore'),
+            '',
+            PARAM_TEXT)
     );
     $chunksizeopts = array(
         10  => '10kB',
@@ -114,6 +112,14 @@ if ($hassiteconfig) {
             500,
             $chunksizeopts)
     );
+    $settings->add(new admin_setting_configcheckbox('tool_coursestore/externalcron',
+            get_string('settings_externalcron', 'tool_coursestore'),
+            get_string('settings_externalcron_desc', 'tool_coursestore'), 0));
+
+    $settings->add(new admin_setting_configcheckbox('tool_coursestore/displaypages',
+            get_string('settings_displaypages', 'tool_coursestore'),
+            get_string('settings_displaypages_desc', 'tool_coursestore'), 1));
+
     $settings->add(new admin_setting_configtext('tool_coursestore/timeout',
             get_string('settings_timeout', 'tool_coursestore'),
             get_string('settings_timeout_desc', 'tool_coursestore'),
@@ -125,12 +131,6 @@ if ($hassiteconfig) {
             get_string('settings_requestretries', 'tool_coursestore'),
             4,
             PARAM_INT)
-    );
-    $settings->add(new admin_setting_configtext('tool_coursestore/authtoken',
-            get_string('settings_authtoken', 'tool_coursestore'),
-            get_string('settings_authtoken_desc', 'tool_coursestore'),
-            '',
-            PARAM_TEXT)
     );
     $settings->add(new admin_setting_configcheckbox('tool_coursestore/loghttpdata',
             get_string('settings_loghttpdata', 'tool_coursestore'),
