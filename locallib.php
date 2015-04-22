@@ -34,6 +34,8 @@ abstract class tool_coursestore {
     const STATUS_ONHOLD = 3;
     const STATUS_CANCELLED = 4;
     const STATUS_ERROR = 99;
+    const DEFAULT_TIMEOUT = 10;
+    const DEFAULT_RETRIES = 4;
     /**
      * Returns an array of available statuses
      * @return array of availble statuses
@@ -405,8 +407,8 @@ abstract class tool_coursestore {
 
         // Get required config variables.
         $urltarget = get_config('tool_coursestore', 'url');
-        $timeout = get_config('tool_coursestore', 'timeout');
-        $retries = get_config('tool_coursestore', 'requestretries');
+        $timeout = self::DEFAULT_TIMEOUT;
+        $retries = self::DEFAULT_RETRIES;
         $token = get_config('tool_coursestore', 'authtoken');
         $sessionkey = self::get_session();
 
@@ -1028,7 +1030,7 @@ class coursestore_ws_manager {
      * @param string  $url            Target URL
      * @param int     $timeout        Request time out (seconds)
      */
-    public function __construct($url, $timeout) {
+    public function __construct($url, $timeout=10) {
         $this->baseurl = $url;
         $curlopts = array(
             CURLOPT_RETURNTRANSFER => true,
@@ -1061,7 +1063,7 @@ class coursestore_ws_manager {
      *                                  'response => <response info array>
      *                              Or false if connection could not be made
      */
-    protected function send($resource='', $data=array(), $method='POST', $auth=null, $retries = 5) {
+    protected function send($resource='', $data=array(), $method='POST', $auth=null, $retries = 4) {
         $postdata = json_encode($data);
         $header = array(
             'Accept: application/json',
@@ -1116,7 +1118,7 @@ class coursestore_ws_manager {
      *                                  'response => <response info array>
      *                              Or false if connection could not be made
      */
-    protected function send_authenticated($resource='', $data=array(), $method='POST', $auth=null, $retries = 5) {
+    protected function send_authenticated($resource='', $data=array(), $method='POST', $auth=null, $retries = 4) {
         // Don't try sending unless we already have a session key.
         $result = false;
         if ($auth) {
@@ -1258,7 +1260,7 @@ class coursestore_ws_manager {
      *                                when an error occurs.
      *
      */
-    public function post_backup($data, $sessionkey, $retries=5) {
+    public function post_backup($data, $sessionkey, $retries=4) {
 
         $response = $this->send_authenticated('backup', $data, 'POST', $sessionkey, $retries);
         coursestore_logging::log_transfer_started($data, $response, 'course');
@@ -1297,7 +1299,7 @@ class coursestore_ws_manager {
      *                                when an error occurs.
      *
      */
-    public function put_backup($sessionkey, $data, $uniqueid, $retries=5) {
+    public function put_backup($sessionkey, $data, $uniqueid, $retries=4) {
 
         //debugging(__FUNCTION__ . ": data=" . print_r($data, true), DEBUG_DEVELOPER);
         $response = $this->send_authenticated('backup/' . $uniqueid, $data, 'PUT', $sessionkey);
@@ -1331,7 +1333,7 @@ class coursestore_ws_manager {
      * @param int    $retries Number of retry attempts to make.
      *
      */
-    public function put_backup_complete($sessionkey, $data, $backup, $retries=5) {
+    public function put_backup_complete($sessionkey, $data, $backup, $retries=4) {
         // Log transfer_completed event.
         coursestore_logging::log_transfer_completed($backup);
         $uniqueid = $backup->uniqueid;
@@ -1358,7 +1360,7 @@ class coursestore_ws_manager {
      * @param array  $data      Data for transfer
      *
      */
-    public function put_chunk($data, $uniqueid, $chunknumber, $sessionkey, $retries=5) {
+    public function put_chunk($data, $uniqueid, $chunknumber, $sessionkey, $retries=4) {
 
         // Grab the original data so we don't have to decode it to check the hash.
         $originaldata = $data['original_data'];
@@ -1385,7 +1387,7 @@ class coursestore_ws_manager {
      * @param int    $chunkiterator  Chunk number
      *
      */
-    public function delete_chunk($sessionkey, $uniqueid, $chunkiterator, $retries=5) {
+    public function delete_chunk($sessionkey, $uniqueid, $chunkiterator, $retries=4) {
         $result = $this->send_authenticated('chunks/' . $uniqueid . '/' . $chunkiterator, array(), 'DELETE', $sessionkey, $retries);
         coursestore_logging::log_delete_chunk($result);
         return $result;

@@ -120,18 +120,6 @@ if ($hassiteconfig) {
             get_string('settings_displaypages', 'tool_coursestore'),
             get_string('settings_displaypages_desc', 'tool_coursestore'), 1));
 
-    $settings->add(new admin_setting_configtext('tool_coursestore/timeout',
-            get_string('settings_timeout', 'tool_coursestore'),
-            get_string('settings_timeout_desc', 'tool_coursestore'),
-            30,
-            PARAM_INT)
-    );
-    $settings->add(new admin_setting_configtext('tool_coursestore/requestretries',
-            get_string('settings_requestretries', 'tool_coursestore'),
-            get_string('settings_requestretries', 'tool_coursestore'),
-            4,
-            PARAM_INT)
-    );
     $settings->add(new admin_setting_configcheckbox('tool_coursestore/loghttpdata',
             get_string('settings_loghttpdata', 'tool_coursestore'),
             get_string('settings_loghttpdata_desc', 'tool_coursestore'), 0));
