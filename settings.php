@@ -99,11 +99,20 @@ if ($hassiteconfig) {
             '',
             PARAM_URL)
     );
-    $settings->add(new admin_setting_configtext('tool_coursestore/chunksize',
+    $chunksizeopts = array(
+        10  => '10kB',
+        100 => '100kB',
+        200 => '200kB',
+        500 => '500kB',
+       1000 => '1MB',
+       1500 => '1.5MB',
+       2000 => '2MB'
+    );
+    $settings->add(new admin_setting_configselect('tool_coursestore/chunksize',
             get_string('settings_chunksize', 'tool_coursestore'),
             get_string('settings_chunksize_desc', 'tool_coursestore'),
-            100,
-            PARAM_INT)
+            500,
+            $chunksizeopts)
     );
     $settings->add(new admin_setting_configtext('tool_coursestore/timeout',
             get_string('settings_timeout', 'tool_coursestore'),
