@@ -120,9 +120,5 @@ if ($hassiteconfig) {
             get_string('settings_displaypages', 'tool_coursestore'),
             get_string('settings_displaypages_desc', 'tool_coursestore'), 1));
 
-    $settings->add(new admin_setting_configcheckbox('tool_coursestore/loghttpdata',
-            get_string('settings_loghttpdata', 'tool_coursestore'),
-            get_string('settings_loghttpdata_desc', 'tool_coursestore'), 0));
-
     $ADMIN->add('tools', $settings);
 }

@@ -113,14 +113,15 @@ abstract class tool_coursestore {
      *                                       in kB
      * @param int                    $count  Number of HTTP requests to make
      * @param int                    $retry  Number of retry attempts
-     * @param string                  $sesskey  Session key
+     * @param string               $sesskey  Session key
      *
-     * @return int                  Approximate connection speed in kbps
+     * @return int                           Approximate connection speed in
+     *                                       kbps
      */
     public static function check_connection_speed(coursestore_ws_manager $wsman,
             $testsize, $count, $retry, $sesskey) {
-        global $USER;
 
+        $count = 1;
         $check = str_pad('', $testsize * 1000, '0');
         $starttime = microtime(true);
 
@@ -1527,8 +1528,8 @@ class coursestore_http_response {
         $request = $this->request;
         $request[CURLOPT_POSTFIELDS] = (array) json_decode($request[CURLOPT_POSTFIELDS]);
 
-        // Don't include data in event unless loghttpdata is set.
-        if (!get_config('tool_coursestore', 'loghttpdata')) {
+        // Don't include data in event unless debugging is turned up.
+        if ($CFG->debug >= DEBUG_DEVELOPER) {
             unset($request[CURLOPT_POSTFIELDS]['data']);
             unset($body->data);
         }
