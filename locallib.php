@@ -388,7 +388,7 @@ abstract class tool_coursestore {
     }
     /**
      * Convenience function to handle sending a file along with the relevant
-     * metatadata.
+     * metadata.
      *
      * @param object $backup    Course store database record object
      *
