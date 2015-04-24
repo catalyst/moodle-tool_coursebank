@@ -602,10 +602,8 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             echo html_writer::label(get_string('selctauser'), 'menuuser', false, array('class' => 'accesshide'));
             echo html_writer::select($users, "user", $report->userid, false);
             $a = new stdClass();
-            $a->url = new moodle_url('/report/log/index.php', array('chooselog' => 0,
-                'user' => $report->userid,
-                'date' => $report->date, 'type' => $report->type,
-                'showusers' => 1, 'showcourses' => $report->showcourses));
+            $a->url = new moodle_url('/admin/tool/coursestore/report.php', array('chooselog' => 0,
+                'user' => $report->userid, 'date' => $report->date, 'type' => $report->type, 'showusers' => 1));
             $a->url = $a->url->out(false);
             print_string('logtoomanyusers', 'moodle', $a);
         }
