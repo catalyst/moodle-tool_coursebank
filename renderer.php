@@ -33,6 +33,10 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return string $html          Body HTML output
      */
     public function course_store_main($results, $sort='', $dir='', $page='', $perpage='') {
+        if (!is_array($results)) {
+            $results = (array)$results;
+        }
+
         $columns = array(
                 'coursefullname',
                 'filetimemodified',
@@ -48,6 +52,13 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 get_string('backupfiles', 'tool_coursestore', count($results)),
                 3
         );
+
+        // Don't output the table if there are no results.
+        if (count($results) <= 0 ) {
+            $html .= $this->box_end();
+            return $html;
+        }
+
         $html .= html_writer::start_tag('table', array('class' => 'generaltable'));
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
@@ -88,6 +99,10 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return string $html          Body HTML output
      */
     public function course_store_downloads($downloads, $sort='', $dir='', $page='', $perpage='') {
+        if (!is_array($downloads)) {
+            $downloads = (array)$downloads;
+        }
+
         $columns = array('coursefullname', 'backupfilename', 'filesize',  'filetimemodified');
 
         $html = $this->box_start();
@@ -96,7 +111,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 3
         );
         // Don't output the table if there are no results.
-        if (count((array) $downloads ) <= 0) {
+        if (count($downloads) <= 0) {
             $html .= $this->box_end();
             return $html;
         }
@@ -113,7 +128,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
 
         $html .= html_writer::start_tag('tbody');
 
-        foreach ((array) $downloads as $download) {
+        foreach ($downloads as $download) {
             $html .= html_writer::start_tag('tr');
             $html .= html_writer::tag('td', s($download->coursefullname));
             $html .= html_writer::tag('td', s($download->backupfilename));
@@ -135,6 +150,10 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @return string $html Body HTML output
      */
     public function course_store_queue($results, $sort='', $dir='', $page='', $perpage='') {
+        if (!is_array($results)) {
+            $results = (array)$results;
+        }
+
         $columns = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'timecreated', 'status');
 
         $html = $this->box_start();
@@ -143,7 +162,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 3
         );
         // Don't output the table if there are no results.
-        if (count($results <= 0)) {
+        if (count($results) <= 0 ) {
             $html .= $this->box_end();
             return $html;
         }
