@@ -44,7 +44,16 @@ class http_request_failed extends \core\event\base {
     }
 
     public function get_description() {
-        return $this->data['other']['info'];
+        $desc = $this->data['other']['info'];
+
+        if (isset($this->data['other']['error'])) {
+            $desc .= " Error code: " .  $this->data['other']['error'];
+        }
+        if (isset($this->data['other']['error_desc'])) {
+            $desc .= " Error text: " .  $this->data['other']['error_desc'];
+        }
+
+        return $desc;
     }
 
     public function get_url() {
