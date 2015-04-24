@@ -137,7 +137,8 @@ $string['eventorigin'] = 'Origin';
 $string['eventloggedas'] = '{$a->realusername} as {$a->asusername}';
 $string['selectlogreader'] = 'Select log reader';
 $string['eventname'] = 'Event name';
+$string['crontimeout'] = 'Cron execution time limit reached! Deferring transfer of remaining courses to next run.';
+$string['eventtimeoutreached_desc'] = 'Cron execition time limit reached during transfer of course {$a}.';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
-// etc...

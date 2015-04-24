@@ -36,6 +36,10 @@ abstract class tool_coursestore {
     const STATUS_ERROR = 99;
     const DEFAULT_TIMEOUT = 10;
     const DEFAULT_RETRIES = 4;
+    const SEND_SUCCESS = 0;
+    const SEND_ERROR = 1;
+    const SEND_CRON_TIMEOUT = 2;
+    const CRON_TIMEOUT = 30;
     /**
      * Returns an array of available statuses
      * @return array of availble statuses
@@ -390,11 +394,23 @@ abstract class tool_coursestore {
      * Convenience function to handle sending a file along with the relevant
      * metadata.
      *
-     * @param object $backup    Course store database record object
+     * @param object $backup      Course store database record object
+     * @param int    $starttime   Timestamp corresponding to the the time when
+     *                            the transfer task was started. Used to
+     *                            determine if a transfer should be halted due
+     *                            to cron task time out.
+     *
+     * @return int   $returncode  Return code. One of:
+     *                              0 = Successfully transferred
+     *                              1 = Error
+     *                              2 = Cron timeout
      *
      */
-    public static function send_backup($backup) {
+    public static function send_backup($backup, $starttime) {
         global $CFG, $DB, $USER;
+
+        // Calculate time limit point as timestamp.
+        $endtime = $starttime + (self::CRON_TIMEOUT) * 60;
 
         // Copy the backup file into our storage area so there are no changes to the file
         // during transfer, unless file already exists.
@@ -403,7 +419,7 @@ abstract class tool_coursestore {
         }
 
         if ($backup === false) {
-            return false;
+            return self::SEND_ERROR;
         }
 
         // Get required config variables.
@@ -419,7 +435,7 @@ abstract class tool_coursestore {
             $backup->status = self::STATUS_ERROR;
             $DB->update_record('tool_coursestore', $backup);
             $wsmanager->close();
-            return false;
+            return self::SEND_ERROR;
         }
 
         // Update again in case a new session key was given.
@@ -450,11 +466,11 @@ abstract class tool_coursestore {
                     break;
                 case 1:
                     $wsmanager->close();
-                    return true;
+                    return self::SEND_SUCCESS;
                     break;
                 case -1:
                     $wsmanager->close();
-                    return false;
+                    return self::SEND_ERROR;
                     break;
             }
         }
@@ -493,7 +509,11 @@ abstract class tool_coursestore {
                 $DB->update_record('tool_coursestore', $backup);
                 // Log a transfer interruption event.
                 $response->log_http_error($backup->courseid, $backup->id);
-                return false;
+                return self::SEND_ERROR;
+            }
+            if (time() >= $endtime) {
+                // Cron task time limit reached, delay transfer to next run.
+                return self::SEND_CRON_TIMEOUT;
             }
         }
 
@@ -518,7 +538,7 @@ abstract class tool_coursestore {
 
                 // Log a transfer interruption event.
                 $completion->log_http_error($backup->courseid, $backup->id);
-                return false;
+                return self::SEND_ERROR;
             }
             $backup->status = self::STATUS_FINISHED;
             $backup->timecompleted = time();
@@ -527,7 +547,7 @@ abstract class tool_coursestore {
 
         $wsmanager->close();
         fclose($file);
-        return true;
+        return self::SEND_SUCCESS;
     }
 
     public static function get_coursestore_data_dir() {
@@ -620,6 +640,7 @@ abstract class tool_coursestore {
     public static function fetch_backups() {
         global $CFG, $DB;
 
+        $starttime = time();
         // Get a list of the course backups.
         $sqlcommon = "SELECT tcs.id,
                        tcs.uniqueid,
@@ -802,8 +823,8 @@ abstract class tool_coursestore {
                         " (Course ID: $coursebackup->courseid).");
                 continue;
             }
-            $result = self::send_backup($coursebackup);
-            if ($result) {
+            $result = self::send_backup($coursebackup, $starttime);
+            if ($result == self::SEND_SUCCESS) {
                 $delete = self::delete_backup($coursebackup);
                 if (!$delete) {
                     $delfail = get_string(
@@ -815,6 +836,16 @@ abstract class tool_coursestore {
                     coursestore_logging::log_delete_backup($delfail);
                     mtrace($delfail . "\n");
                 }
+            } else if ($result == self::SEND_CRON_TIMEOUT) {
+                $crontimeout = get_string(
+                        'crontimeout',
+                        'tool_coursestore'
+                );
+                coursestore_logging::log_cron_timeout(
+                        $crontimeout,
+                        $coursebackup->courseid
+                );
+                break;
             } else {
                 $bufail = get_string(
                         'backupfailed',
@@ -1696,6 +1727,21 @@ class coursestore_logging {
             '',
             $USER->id,
             $otherdata
+        );
+    }
+    /**
+     * Log an event for cron run time out.
+     *
+     * @param string $info      Information about time out.
+     * @param int    $courseid  Moodle course id.
+     */
+    public static function log_cron_timeout($info, $courseid) {
+        self::log_event(
+                $info,
+                'timeout_reached',
+                'Cron timeout reached',
+                self::LOG_MODULE_COURSE_STORE,
+                $courseid
         );
     }
     /**
