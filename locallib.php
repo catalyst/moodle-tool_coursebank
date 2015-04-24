@@ -822,7 +822,7 @@ abstract class tool_coursestore {
                         $coursebackup->backupfilename
                 );
                 // Log it.
-                tool_coursestore::log_send_backup($bufail);
+                coursestore_logging::log_send_backup($bufail);
                 mtrace($bufail . "\n");
                 // Stop sending backups until this one is resolved.
                 break;
