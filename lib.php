@@ -65,8 +65,8 @@ function tool_coursestore_cron_run() {
     $name = 'tool_coursestore_cronlock';
     $canrun = tool_coursestore_can_run_cron(CRON_MOODLE);
 
-    if (!$canrun) {
-        mtrace(get_string('cron_skippingmoodle', 'tool_coursestore'));
+    if (is_string($canrun)) {
+        mtrace(get_string($canrun, 'tool_coursestore'));
         return true;
     }
 
@@ -83,21 +83,23 @@ function tool_coursestore_cron_run() {
  * Check if we can run cron.
  *
  * @param integer $type Type of cron run (moodle or external)
- * @return boolean
+ * @return boolean|string If can't run returns a key of lang string.
  */
 function tool_coursestore_can_run_cron($type) {
     $enabled = tool_coursestore_get_config('enable');
     $externalcronenabled = tool_coursestore_get_config('externalcron');
 
     if ($enabled) {
-        if ($type == CRON_MOODLE and !$externalcronenabled) {
-            return true;
-        } else if ($type == CRON_EXTERNAL and $externalcronenabled) {
-            return true;
+        if ($type == CRON_MOODLE and $externalcronenabled) {
+            return 'cron_skippingmoodle';
+        } else if ($type == CRON_EXTERNAL and !$externalcronenabled) {
+            return 'cron_skippingexternal';
         }
+    } else {
+        return 'disabled';
     }
 
-    return false;
+    return true;
 }
 /**
  * Set config to tool_coursestore plugin

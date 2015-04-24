@@ -33,8 +33,8 @@ $canrun = tool_coursestore_can_run_cron(CRON_EXTERNAL);
 $name = 'tool_coursestore_cronlock';
 $argslist = array_slice($argv, 1);
 
-if (!$canrun) {
-    mtrace(get_string('cron_skippingexternal', 'tool_coursestore'));
+if (is_string($canrun)) {
+    mtrace(get_string($canrun, 'tool_coursestore'));
     die();
 }
 
