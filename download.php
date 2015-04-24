@@ -55,19 +55,8 @@ $params = array(
 );
 $url = new moodle_url('/admin/tool/coursestore/download.php', $params);
 $urltarget = get_config('tool_coursestore', 'url');
-$timeout = get_config('tool_coursestore', 'timeout');
-$wsman = new coursestore_ws_manager($urltarget, $timeout);
-if (!$sesskey = tool_coursestore::get_session()) {
-    $hash = get_config('tool_coursestore', 'authtoken');
-    if (!$wsman->post_session($hash)) {
-        $redirecturl = new moodle_url(
-                '/admin/tool/coursestore/check_connection.php',
-                array('action' => 'conncheck')
-        );
-        redirect($redirecturl, '', 0);
-    }
-    $sesskey = tool_coursestore::get_session();
-}
+$wsman = new coursestore_ws_manager($urltarget);
+$sesskey = tool_coursestore::get_session();
 
 // Downloading.
 if ($download == 1 and !empty($file)) {
@@ -103,27 +92,30 @@ $filtering = new coursestore_filtering('download', $filterparams);
 $extraparams = $filtering->get_param_filter();
 
 $response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
-if ($response->httpcode != $wsman::WS_HTTP_OK) {
-    $redirecturl = new moodle_url(
-            '/admin/tool/coursestore/check_connection.php',
-            array('action' => 'conncheck')
-    );
-    redirect($redirecturl, '', 0);
+if ($response->httpcode != $wsman::WS_HTTP_OK or isset($response->body->error)) {
+    $error = true;
 }
 
 $count = $wsman->get_downloadcount($sesskey);
-if (isset($count->body->error)) {
-    $redirecturl = new moodle_url(
-            '/admin/tool/coursestore/check_connection.php',
-            array('action' => 'conncheck')
-    );
-    redirect($redirecturl, '', 0);
+if ($response->httpcode != $wsman::WS_HTTP_OK or isset($count->body->error)) {
+    $error = true;
 }
 
-$filtering->display_add();
-$filtering->display_active();
 $renderer = $PAGE->get_renderer('tool_coursestore');
-echo $renderer->course_store_downloads($response->body, $sort, $dir, $page, $perpage);
-echo $OUTPUT->paging_bar($count->body->backupcount, $page, $perpage, $url);
+
+if ($error) {
+    echo $OUTPUT->notification(get_string('errorgetdownloadlist', 'tool_coursestore'), 'notifyproblem');
+    $returnurl = new moodle_url($CFG->wwwroot.'/admin/settings.php', array('section' => 'coursestore_settings'));
+    echo $renderer->single_button(
+            $returnurl,
+            get_string('return', 'tool_coursestore'),
+            'get'
+    );
+} else {
+    $filtering->display_add();
+    $filtering->display_active();
+    echo $renderer->course_store_downloads($response->body, $sort, $dir, $page, $perpage);
+    echo $OUTPUT->paging_bar($count->body->backupcount, $page, $perpage, $url);
+}
 
 echo $OUTPUT->footer();

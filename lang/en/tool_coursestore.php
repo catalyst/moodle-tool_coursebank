@@ -110,6 +110,7 @@ $string['filtermorethan'] = 'more than';
 $string['filterlessthan'] = 'less than';
 $string['filterisequalto'] = 'is equal to';
 $string['errordownloading'] = 'Error downloading the backup file.';
+$string['errorgetdownloadlist'] = 'Can\'t get a list of backups from course bank. Please confirm that your course bank settings and network configuration are correct.';
 $string['coursestorelogging'] = 'Course Store Logging';
 $string['coursestore:view'] = 'View a list of course store backup files';
 $string['coursestore:download'] = 'Download course store backup files';

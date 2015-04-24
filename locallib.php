@@ -71,8 +71,11 @@ abstract class tool_coursestore {
      * @return string or bool false  Session key
      */
     public static function get_session() {
-        return get_config('tool_coursestore', 'sessionkey');
-
+        $sessionkey = get_config('tool_coursestore', 'sessionkey');
+        if (!empty($sessionkey)) {
+          return $sessionkey;
+        }
+        return '';
     }
 
     /**
