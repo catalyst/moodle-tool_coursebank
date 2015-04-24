@@ -198,32 +198,3 @@ function tool_coursestore_is_url_available($url, $invaldheaders=array('404', '40
 
     return $avaible;
 }
-
-/**
- * Returns log table name of preferred reader, if leagcy then return empty string.
- *
- * @return string table name
- */
-function tool_coursestore_get_log_table_name() {
-    // Get prefered sql_internal_reader reader (if enabled).
-    $logmanager = get_log_manager();
-    $readers = $logmanager->get_readers();
-    $logtable = '';
-
-    // Get preferred reader.
-    if (!empty($readers)) {
-        foreach ($readers as $readerpluginname => $reader) {
-            // If legacy reader is preferred reader.
-            if ($readerpluginname == 'logstore_legacy') {
-                break;
-            }
-
-            // If sql_internal_reader is preferred reader.
-            if ($reader instanceof \core\log\sql_internal_reader) {
-                $logtable = $reader->get_internal_log_table_name();
-                break;
-            }
-        }
-    }
-    return $logtable;
-}

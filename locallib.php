@@ -843,7 +843,7 @@ abstract class tool_coursestore {
         if ((float) $CFG->version < 2014051200) {
             return true;
         } else {
-            $logtable = tool_coursestore_get_log_table_name();
+            $logtable = coursestore_logging::get_log_table_name();
             // If no log table, then it's legacy log table.
             if (empty($logtable)) {
                 return true;
@@ -2099,6 +2099,35 @@ class coursestore_logging {
                 self::LOG_MODULE_COURSE_STORE,
                 $courseid,
                 '');
+    }
+
+    /**
+     * Returns log table name of preferred reader, if leagcy then return empty string.
+     *
+     * @return string table name
+     */
+    public static function get_log_table_name() {
+        // Get prefered sql_internal_reader reader (if enabled).
+        $logmanager = get_log_manager();
+        $readers = $logmanager->get_readers();
+        $logtable = '';
+
+        // Get preferred reader.
+        if (!empty($readers)) {
+            foreach ($readers as $readerpluginname => $reader) {
+                // If legacy reader is preferred reader.
+                if ($readerpluginname == 'logstore_legacy') {
+                    break;
+                }
+
+                // If sql_internal_reader is preferred reader.
+                if ($reader instanceof \core\log\sql_internal_reader) {
+                    $logtable = $reader->get_internal_log_table_name();
+                    break;
+                }
+            }
+        }
+        return $logtable;
     }
 }
 /**
