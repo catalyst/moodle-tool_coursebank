@@ -467,6 +467,14 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             'value' => get_string('speedtestsuccess', 'tool_coursestore', $urltarget),
             'class' => 'speedtestsuccess'
         );
+        $urltarget = get_config('tool_coursestore', 'url');
+        $html .= html_writer::tag('input', '', $attr);
+        $attr = array(
+            'type' => 'hidden',
+            'name' => 'chunk',
+            'value' => get_string('speedtestchunk', 'tool_coursestore', $urltarget),
+            'class' => 'speedtestchunk'
+        );
         $html .= html_writer::tag('input', '', $attr);
         $html .= $this->course_store_check_notification(
                 'speedtest',

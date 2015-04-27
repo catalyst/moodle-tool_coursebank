@@ -73,7 +73,7 @@ abstract class tool_coursestore {
     public static function get_session() {
         $sessionkey = get_config('tool_coursestore', 'sessionkey');
         if (!empty($sessionkey)) {
-          return $sessionkey;
+            return $sessionkey;
         }
         return '';
     }
@@ -111,48 +111,103 @@ abstract class tool_coursestore {
         return false;
     }
     /**
-     * Test the speed of a transfer of $testsize kilobytes. A total
-     * of $count HTTP requests will be sent. If the request fails, make
-     * $retry number of subsequent attempts.
+     * Using get_optimal_chunksize, test the speed of a transfer request.
      *
-     * @param coursestore_ws_manager $wsman  Web service manager object
-     * @param int                 $testsize  Approximate size of test transfer
-     *                                       in kB
-     * @param int                    $count  Number of HTTP requests to make
-     * @param int                    $retry  Number of retry attempts
-     * @param string               $sesskey  Session key
+     * Return an array containing both the tested transfer speed in kbps and
+     * the optimal chunk size for the site.
      *
-     * @return int                           Approximate connection speed in
-     *                                       kbps
+     * @param coursestore_ws_manager $wsman  Web service manager object.
+     * @param int                    $retry  Number of retry attempts.
+     * @param string               $sesskey  Session key.
+     *
+     * @return array                         Approximate connection speed in
+     *                                       kbps, and chunk size in kB:
+     *
+     *                                       array('speed' => $speed,
+     *                                             'chunksize' => $chunksize)
      */
     public static function check_connection_speed(coursestore_ws_manager $wsman,
-            $testsize, $count, $retry, $sesskey) {
-
-        $count = 1;
-        $check = str_pad('', $testsize * 1000, '0');
-        $starttime = microtime(true);
-
-        // Make $count requests with the dummy data.
-        for ($i = 0; $i < $count; $i++) {
-            for ($j = 0; $j <= $retry; $j++) {
-                $response = $wsman->get_test(
-                        $sesskey, $check, $count, $testsize, $starttime, $endtime);
-                if ($response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
-                    break;
-                }
+            $retry, $sesskey) {
+        $chunksizes = array(10, 100, 200, 500, 1000, 1500, 2000);
+        return self::get_optimal_chunksize($wsman, $sesskey, $chunksizes, $retry);
+    }
+    /**
+     * Send test transfer requests for each of the provided chunk sizes, and
+     * return the most optimal chunk size value (in kB), along with the
+     * transfer speed achieved in kbps.
+     *
+     * The provided array of chunk size values should be in ascending order.
+     * Iterate through this array of chunk sizes, calculating a rough transfer
+     * speed for a single request with dummy data of the corresponding chunk
+     * size. Continue iterating while increasing the chunk size improves the
+     * transfer speed by at least 10%. Stop either when this is no longer the
+     * case, or a transfer takes longer than 5 seconds.
+     *
+     * @param coursestore_ws_manager $wsman  Web service manager object.
+     * @param string               $sesskey  Session key.
+     * @param array int              $sizes  Array of chunk sizes, sorted
+     *                                       in ascending order, in kB.
+     * @param int                    $retry  Number of retry attempts.
+     *
+     * @return int                           Ideal chunk size in kB.
+     */
+    protected static function get_optimal_chunksize(coursestore_ws_manager $wsman,
+            $sesskey, $sizes=array(10, 100, 1000), $retry=1) {
+        $timeout = 5;
+        $threshold = 1.1;
+        $current = $sizes[0];
+        $speed = self::test_chunk_speed(
+                $wsman,
+                $current,
+                $retry,
+                $sesskey
+        );
+        foreach (array_slice($sizes, 1) as $size) {
+            $starttime = time();
+            $newspeed = self::test_chunk_speed($wsman, $size, $retry, $sesskey);
+            if ($newspeed < ($threshold * $speed) || (time() - $starttime) >= $timeout) {
+                break;
             }
-            // If $maxhttps unsuccessful attempts have been made.
-            if ($response->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
-                $speed = 0;
+            $speed = $newspeed;
+            $current = $size;
+        }
+        return array('speed' => $speed, 'chunksize' => $current);
+
+    }
+    /**
+     * Send a number of test transfer requests, then calculate and return a
+     * rough connection speed (in kbps) based on these transfers. If a request
+     * fails, return 0.
+     *
+     * @param coursestore_ws_manager $wsman    ws_manager object.
+     * @param int                 $testsize    Size of test data to transfer.
+     * @param int                    $retry    Number of retry attempts.
+     * @param string               $sesskey    Session key string.
+     * @param int                    $count    Number of requests to make.
+     *
+     * @return int                   $speed
+     */
+    public static function test_chunk_speed(coursestore_ws_manager $wsman,
+            $testsize, $retry, $sesskey, $count=1) {
+
+        $starttime = microtime(true);
+        for ($j = 0; $j <= $retry; $j++) {
+            $check = str_pad('', $testsize * 1000, '0');
+            $response = $wsman->get_test(
+                    $sesskey, $check, $count, $testsize, $starttime, $endtime);
+            if ($response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
                 break;
             }
         }
-        if (!isset($speed)) {
-            $speed = self::calculate_speed($count, $testsize, $starttime, $endtime);
+        if ($response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+            $elapsed = $endtime - $starttime;
+            // Convert 'total kB transferred'/'total time' into kb/s.
+            $speed = self::calculate_speed(1, $testsize, $starttime, $endtime);
+        } else {
+            $speed = 0;
         }
 
         return $speed;
-
     }
     /**
      * Calculate rough transfer speed based on request count, transfer size,
@@ -1807,9 +1862,11 @@ class coursestore_logging {
         );
 
         if (($httpresponse instanceof coursestore_http_response)
-            && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+            && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK
+            && $speed != 0) {
             $event = 'connection_checked';
-            $info = "Connection speed test passed. Approximate speed: " . $speed . " kbps.";
+            $status = ($speed > 256) ? 'passed' : 'very slow';
+            $info = "Connection speed test $status. Approximate speed: " . $speed . " kbps.";
             $otherdata['speed'] = $speed;
         } else {
             $event = 'connection_check_failed';

@@ -66,12 +66,10 @@ switch ($action) {
 
         // Initialise, check connection.
         $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
-        $testsize = 256;
 
-        $response = tool_coursestore::check_connection_speed($wsmanager, $testsize, 1, 5, $sesskey);
+        $response = tool_coursestore::check_connection_speed($wsmanager, 4, $sesskey);
         $wsmanager->close();
     default:
         break;
 }
-
 echo json_encode($response);

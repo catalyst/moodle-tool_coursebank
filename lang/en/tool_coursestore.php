@@ -49,6 +49,7 @@ $string['settings_displaypages_desc'] = 'Hide/Display Course Store pages in the 
 $string['conncheckfail'] = 'Connection to {$a} failed. Please confirm that your course bank settings and network configuration are correct.';
 $string['connchecksuccess'] = 'Connection check to {$a} passed!';
 $string['speedtestsuccess'] = 'Connection speed test to {$a} passed! The test transfer speed was approximately ';
+$string['speedtestchunk'] = 'The recommended chunk size for your system is ';
 $string['speedtestfail'] = 'Connection to {$a} failed. Please confirm that your course bank settings and network configuration are correct.';
 $string['speedtestslow'] = 'Outbound transfers to {$a} are very slow. The test transfer speed was approximately ';
 $string['checking'] = 'Checking...';

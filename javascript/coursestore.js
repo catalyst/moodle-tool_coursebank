@@ -45,8 +45,8 @@ function speed_test( event ) {
     jQuery(".speedtest-div").removeClass("hide");
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4 && xhr.status == 200) {
-            var response = +(xhr.responseText);
-            if (response == 0){
+            var response = jQuery.parseJSON( xhr.responseText );
+            if (+(response.speed) == 0){
                 // Connection has failed.
                 jQuery(".speedtest-div").addClass("hide");
                 jQuery(".speedtest-fail").removeClass("hide");
@@ -59,10 +59,11 @@ function speed_test( event ) {
                     jQuery(".speedtest-slow").addClass("hide");
                 }
             }
-            else if (response >= 256) {
+            else if (+(response.speed) >= 256) {
                 // Good connection.
                 var speedtestcontent = jQuery('.speedtestsuccess').val();
-                jQuery(".speedtest-alert-success").text(speedtestcontent + ' ' + response + ' kbps');
+                var speedtestchunk   = jQuery('.speedtestchunk').val();
+                jQuery(".speedtest-alert-success").text(speedtestcontent + ' ' + response.speed + ' kbps. ' + speedtestchunk + ' ' + response.chunksize + 'kB.');
                 jQuery(".speedtest-div").addClass("hide");
                 jQuery(".speedtest-success").removeClass("hide");
 
@@ -77,7 +78,8 @@ function speed_test( event ) {
             else {
                 // This is a slow connection.
                 var speedtestcontent = jQuery('.speedtestslow').val();
-                jQuery(".speedtest-alert-slow").text(speedtestcontent + ' ' + response + ' kbps');
+                var speedtestchunk   = jQuery('.speedtestchunk').val();
+                jQuery(".speedtest-alert-slow").text(speedtestcontent + ' ' + response.speed + ' kbps. ' + speedtestchunk + ' ' + response.chunksize + 'kB.');
                 jQuery(".speedtest-div").addClass("hide");
                 jQuery(".speedtest-slow").removeClass("hide");
 
