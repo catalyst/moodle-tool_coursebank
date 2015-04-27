@@ -31,21 +31,21 @@ require_once('../../../config.php');
 require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 
 $action = required_param('action', PARAM_TEXT);
+$response = null;
 
 // Prevent checks from returning NaN if the user has since logged out.
 isloggedin() || die;
 
-$response = null;
+$context = context_system::instance();
 
-$PAGE->set_context(null);
+$PAGE->set_context($context);
+$PAGE->set_url('/admin/tool/coursestore/ajax.php');
+
+
 echo $OUTPUT->header();
-@header('Content-type: application/json; charset=utf-8');
-
 
 switch ($action) {
     case 'conncheck':
-        $context = context_system::instance();
-
         // Get required config variables.
         $urltarget = get_config('tool_coursestore', 'url');
         $timeout = get_config('tool_coursestore', 'timeout');
@@ -59,8 +59,6 @@ switch ($action) {
 
         break;
     case 'speedtest':
-        $context = context_system::instance();
-
         // Get required config variables.
         $urltarget = get_config('tool_coursestore', 'url');
         $timeout = get_config('tool_coursestore', 'timeout');
@@ -75,4 +73,5 @@ switch ($action) {
     default:
         break;
 }
-echo print_r($response, true);
+
+echo json_encode($response);
