@@ -198,3 +198,43 @@ function tool_coursestore_is_url_available($url, $invaldheaders=array('404', '40
 
     return $avaible;
 }
+/**
+ * This class is a somewhat hacky way to ensure that the Course Store session
+ * key is discarded whenever settings are changed.
+ *
+ * (This is important because settings changes may include auth token or the
+ * Course Bank URL. Although Course Store will re-authenticate as necessary if
+ * a session key does not work, it is conceivable that using a session key
+ * associated with an old URL or token value might cause Course Bank to
+ * attribute data sent by this Course Store instance to some other instance,
+ * resulting in data corruption or overwriting.)
+ *
+ * This class extends the configempty class and overrides the output_html
+ * method in order to output a completely empty, hidden setting item. When a
+ * settings page form is saved in Moodle, settings are read in from form
+ * elements, so this invisible element allows us to empty the session key
+ * on submit without cluttering the settings page unnecessarily.
+ */
+class admin_setting_configsessionkey extends admin_setting_configempty {
+    /**
+     * Returns an XHTML string for the hidden field
+     *
+     * @param string $data
+     * @param string $query
+     * @return string XHTML string for the editor
+     */
+    public function output_html($data, $query='') {
+        $html = '<div class="form-item clearfix" id="admin-sessionkey">' .
+                    '<div class="form-setting"> '.
+                        '<div class="form-empty" >' .
+                            '<input type="hidden" '.
+                                'id="' . $this->get_id() . '"' .
+                                'name="' . $this->get_full_name() . '"' .
+                                'value=""' .
+                            '/>' .
+                        '</div>' .
+                    '</div>' .
+                '</div>';
+        return $html;
+    }
+}

@@ -141,6 +141,8 @@ $string['selectlogreader'] = 'Select log reader';
 $string['eventname'] = 'Event name';
 $string['crontimeout'] = 'Cron execution time limit reached! Deferring transfer of remaining courses to next run.';
 $string['eventtimeoutreached_desc'] = 'Cron execition time limit reached during transfer of course {$a}.';
+$string['settings_sessionkey'] = 'Session key';
+$string['settings_sessionkey_desc'] = 'Session key used by Course Store to authenticate with Course Bank.';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';

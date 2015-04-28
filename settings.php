@@ -119,6 +119,11 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configcheckbox('tool_coursestore/displaypages',
             get_string('settings_displaypages', 'tool_coursestore'),
             get_string('settings_displaypages_desc', 'tool_coursestore'), 1));
-
+    $settings->add(new admin_setting_configsessionkey(
+            'tool_coursestore/sessionkey',
+            get_string('settings_sessionkey', 'tool_coursestore'),
+            get_string('settings_sessionkey_desc', 'tool_coursestore')
+            )
+    );
     $ADMIN->add('tools', $settings);
 }
