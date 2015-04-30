@@ -673,19 +673,52 @@ abstract class tool_coursestore {
         return true;
     }
     /**
-     * Algorithm from stackoverflow: http://stackoverflow.com/questions/2040240/php-function-to-generate-v4-uuid
      * Generates 128 bits of random data.
-     * Must have openSSL extension.
      *
      * @return string guid v4 string.
      */
     public static function generate_uuid() {
-        $data = openssl_random_pseudo_bytes(16);
+        if (function_exists("openssl_random_pseudo_bytes")) {
+            // Algorithm from stackoverflow: http://stackoverflow.com/questions/2040240/php-function-to-generate-v4-uuid
+            // If openSSL extension is installed.
+            $data = openssl_random_pseudo_bytes(16);
 
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // Set version to 0100.
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // Set bits 6-7 to 10.
+            $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // Set version to 0100.
+            $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // Set bits 6-7 to 10.
 
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+            return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+
+        } else if (function_exists("uuid_create")) {
+            $uuid = '';
+            $context = null;
+            uuid_create($context);
+
+            uuid_make($context, UUID_MAKE_V4);
+            uuid_export($context, UUID_FMT_STR, $uuid);
+            return trim($uuid);
+        } else {
+            // Fallback uuid generation based on:
+            // "http://www.php.net/manual/en/function.uniqid.php#94959".
+            $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+
+                // 32 bits for "time_low".
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+
+                // 16 bits for "time_mid".
+                mt_rand(0, 0xffff),
+
+                // 16 bits for "time_hi_and_version",
+                // four most significant bits holds version number 4.
+                mt_rand(0, 0x0fff) | 0x4000,
+
+                // 16 bits, 8 bits for "clk_seq_hi_res",
+                // 8 bits for "clk_seq_low",
+                // two most significant bits holds zero and one for variant DCE1.1.
+                mt_rand(0, 0x3fff) | 0x8000,
+
+                // 48 bits for "node".
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+        }
     }
     /**
      * Function to fetch course backup records from the Moodle DB, add them
