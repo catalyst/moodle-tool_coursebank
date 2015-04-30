@@ -59,6 +59,6 @@ class backup_download_failed extends \core\event\base {
     }
 
     public function get_url() {
-        return new \moodle_url('/admin/tool/coursestore/download.php');
+        return new \moodle_url('/admin/tool/coursestore/index.php');
     }
 }

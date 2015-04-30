@@ -104,6 +104,7 @@ $string['filename'] = 'File name';
 $string['filesize'] = 'File size';
 $string['status'] = 'Status';
 $string['timecreated'] = 'Transfer started';
+$string['timetransferstarted'] = 'Transfer started';
 $string['notstarted'] = 'Not started';
 $string['timecompleted'] = 'Transfer completed';
 $string['notcompleted'] = 'Not completed';

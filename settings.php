@@ -46,11 +46,12 @@ if ($displaypages) {
 
     $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_download',
             get_string('nav_download', 'tool_coursestore'),
-            "$CFG->wwwroot/$CFG->admin/tool/coursestore/download.php", 'tool/coursestore:view'));
-
-    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore',
-            get_string('nav_summary', 'tool_coursestore'),
             "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'tool/coursestore:view'));
+
+    // Do not include this page in the menu.
+    //$ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore',
+    //        get_string('nav_summary', 'tool_coursestore'),
+    //        "$CFG->wwwroot/$CFG->admin/tool/coursestore/transfer_report.php", 'tool/coursestore:view'));
 
     $ADMIN->add('reports', new admin_externalpage('tool_coursestore_report',
             get_string('nav_report', 'tool_coursestore'),

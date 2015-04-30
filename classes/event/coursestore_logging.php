@@ -74,7 +74,7 @@ class coursestore_logging extends \core\event\base {
         if (!empty($this->data['other']['url'])) {
             return new \moodle_url($this->data['other']['url']);
         } else {
-            return new \moodle_url('/admin/tool/coursestore/index.php');
+            return new \moodle_url('/admin/tool/coursestore/queue.php');
         }
 
     }

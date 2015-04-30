@@ -15,10 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Main page for user-facing course store interface
+ * Main page for user-facing download interface
  *
  * @package    tool_coursestore
  * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @author     Dmitrii Metelkin <adamr@catalyst-au.net>*
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,41 +28,95 @@ require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
-$sort         = optional_param('sort', 'status', PARAM_ALPHANUM);
+$download     = optional_param('download', 0, PARAM_INT);
+$file         = optional_param('file', 0, PARAM_ALPHANUMEXT);
+$sort         = optional_param('sort', 'coursefullname', PARAM_ALPHANUM);
 $dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
 $page         = optional_param('page', 0, PARAM_INT);
 $perpage      = optional_param('perpage', 50, PARAM_INT);
 
 $context = context_system::instance();
-
 require_login(null, false);
 require_capability('tool/coursestore:view', $context);
 
-admin_externalpage_setup('tool_coursestore');
+admin_externalpage_setup('tool_coursestore_download');
 
-$url = new moodle_url('/admin/tool/coursestore/index.php');
+$params = array(
+    'download' => $download,
+    'file' => $file,
+    'sort' => $sort,
+    'dir' => $dir,
+    'page' => $page,
+    'perpage' => $perpage
+);
+//$url = new moodle_url('/admin/tool/coursestore/download.php', $params);
+$url = new moodle_url('/admin/tool/coursestore/index.php', $params);
+$urltarget = get_config('tool_coursestore', 'url');
+$wsman = new coursestore_ws_manager($urltarget);
+$sesskey = tool_coursestore::get_session();
+
+// Downloading.
+if ($download == 1 and !empty($file)) {
+    require_capability('tool/coursestore:download', $context);
+    $dlresponse = $wsman->get_backup($sesskey, $file, true);
+    $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";
+
+    $error = tool_coursestore_error::is_response_backup_download_error($dlresponse);
+    coursestore_logging::log_backup_download($dlresponse, $file);
+
+    if (!$error) {
+        redirect($dlresponse->body->url, '', 0);
+    } else {
+        print_error('errordownloading', 'tool_coursestore', $errorurl);
+    }
+}
+
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 
-$header = get_string('backupsummary', 'tool_coursestore');
+$header = get_string('downloadsummary', 'tool_coursestore');
 $PAGE->set_title($header);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($header);
 
-// Filters.
-$filtering = new coursestore_filtering('summary', array('status' => 0, 'coursefullname' => 1, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
-list($extraselect, $extraparams) = $filtering->get_sql_filter();
-$results = tool_coursestore::get_summary_data($sort, $dir, $extraselect, $extraparams, $page, $perpage);
-// Display filters.
-$filtering->display_add();
-$filtering->display_active();
+$filterparams = array(
+        'coursefullname' => 0,
+        'backupfilename' => 1,
+        'filesize' => 1,
+        'filetimemodified' => 1
+);
+$filtering = new coursestore_filtering('download', $filterparams);
+$extraparams = $filtering->get_param_filter();
 
-// Display table.
+$response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
+if ($response->httpcode != $wsman::WS_HTTP_OK or isset($response->body->error)) {
+    $error = true;
+}
+
+$count = $wsman->get_downloadcount($sesskey);
+if ($response->httpcode != $wsman::WS_HTTP_OK or isset($count->body->error)) {
+    $error = true;
+}
+
 $renderer = $PAGE->get_renderer('tool_coursestore');
-echo $renderer->course_store_main($results['results'], $sort, $dir, $page, $perpage);
-echo $OUTPUT->paging_bar($results['count'], $page, $perpage, $url);
-// Footer.
+
+if ($error) {
+    echo $OUTPUT->notification(get_string('errorgetdownloadlist', 'tool_coursestore'), 'notifyproblem');
+    $returnurl = new moodle_url($CFG->wwwroot.'/admin/settings.php', array('section' => 'coursestore_settings'));
+    echo $renderer->single_button(
+            $returnurl,
+            get_string('return', 'tool_coursestore'),
+            'get'
+    );
+} else {
+    $filtering->display_add();
+    $filtering->display_active();
+    echo $renderer->course_store_downloads($response->body, $sort, $dir, $page, $perpage);
+    echo $OUTPUT->paging_bar($count->body->backupcount, $page, $perpage, $url);
+}
+
 echo $OUTPUT->footer();

@@ -42,7 +42,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 'filetimemodified',
                 'backupfilename',
                 'filesize',
-                'timecreated',
+                'timetransferstarted',
                 'timecompleted',
                 'status'
         );
