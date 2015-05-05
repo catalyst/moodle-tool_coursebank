@@ -40,6 +40,8 @@ abstract class tool_coursestore {
     const SEND_ERROR = 1;
     const SEND_CRON_TIMEOUT = 2;
     const CRON_TIMEOUT = 30;
+    // Maximum number of days a backup can be for fetching.
+    const MAX_BACKUP_DAYS = 2;
     /**
      * Returns an array of available statuses
      * @return array of availble statuses
@@ -733,7 +735,7 @@ abstract class tool_coursestore {
 
         $starttime = time();
         // Get backups that are less than 2 days old.
-        $maxbackuptime = time() - (2 * DAYSECS);
+        $maxbackuptime = time() - (self::MAX_BACKUP_DAYS * DAYSECS);
         // Get a list of the course backups.
         $sqlcommon = "SELECT tcs.id,
                        tcs.uniqueid,
