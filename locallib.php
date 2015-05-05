@@ -732,6 +732,8 @@ abstract class tool_coursestore {
         global $CFG, $DB;
 
         $starttime = time();
+        // Get backups that are less than 2 days old.
+        $maxbackuptime = time() - (2 * DAYSECS);
         // Get a list of the course backups.
         $sqlcommon = "SELECT tcs.id,
                        tcs.uniqueid,
@@ -806,32 +808,38 @@ abstract class tool_coursestore {
                 WHERE tcs.id IS NULL
                 AND ct.contextlevel = :contextcourse1
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
+                AND   f.timecreated >= :maxbackuptime1
                 UNION
                 " . $sqlselect . "
                 INNER JOIN {tool_coursestore} tcs on tcs.fileid = f.id
                 WHERE ct.contextlevel = :contextcourse2
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
                 AND   tcs.status IN (:statusnotstarted2, :statusinprogress2, :statuserror2)
+                AND   f.timecreated >= :maxbackuptime2
                 UNION
                 " . $sqlselect . "
                 RIGHT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
                 WHERE f.id IS NULL
                 AND tcs.isbackedup = 1
                 AND tcs.status IN (:statusnotstarted3, :statusinprogress3, :statuserror3)
+                AND   f.timecreated >= :maxbackuptime3
                 ORDER BY timecreated";
         // This could possibly be done better... But moodle expects each instance of the variable to be provided separately,
         // so we have this.
-        $params = array('statusnotstarted' => self::STATUS_NOTSTARTED,
-                        'statuserror' => self::STATUS_ERROR,
-                        'statusinprogress' => self::STATUS_INPROGRESS,
+        $params = array('statusnotstarted'  => self::STATUS_NOTSTARTED,
+                        'statuserror'       => self::STATUS_ERROR,
+                        'statusinprogress'  => self::STATUS_INPROGRESS,
                         'statusnotstarted2' => self::STATUS_NOTSTARTED,
-                        'statuserror2' => self::STATUS_ERROR,
+                        'statuserror2'      => self::STATUS_ERROR,
                         'statusinprogress2' => self::STATUS_INPROGRESS,
                         'statusnotstarted3' => self::STATUS_NOTSTARTED,
-                        'statuserror3' => self::STATUS_ERROR,
+                        'statuserror3'      => self::STATUS_ERROR,
                         'statusinprogress3' => self::STATUS_INPROGRESS,
-                        'contextcourse1' => CONTEXT_COURSE,
-                        'contextcourse2' => CONTEXT_COURSE
+                        'contextcourse1'    => CONTEXT_COURSE,
+                        'contextcourse2'    => CONTEXT_COURSE,
+                        'maxbackuptime1'    => $maxbackuptime,
+                        'maxbackuptime2'    => $maxbackuptime,
+                        'maxbackuptime3'    => $maxbackuptime,
                         );
         $rs = $DB->get_recordset_sql($sql, $params);
 
@@ -891,11 +899,13 @@ abstract class tool_coursestore {
 
         // Get all backups that are pending transfer, attempt to transfer them.
         $sql = 'SELECT * FROM {tool_coursestore}
-                        WHERE status IN (:notstarted, :inprogress, :error)';
+                        WHERE status IN (:notstarted, :inprogress, :error)
+                        AND filetimecreated >= :maxbackuptime';
         $contstatus = array(
-            'notstarted' => self::STATUS_NOTSTARTED,
-            'inprogress' => self::STATUS_INPROGRESS,
-            'error'      => self::STATUS_ERROR
+            'notstarted'    => self::STATUS_NOTSTARTED,
+            'inprogress'    => self::STATUS_INPROGRESS,
+            'error'         => self::STATUS_ERROR,
+            'maxbackuptime' => $maxbackuptime,
         );
         $transferrs = $DB->get_recordset_sql($sql, $contstatus);
 
