@@ -187,16 +187,17 @@ function tool_coursestore_check_url($url) {
  * @return boolean
  */
 function tool_coursestore_is_url_available($url, $invaldheaders=array('404', '403', '500')) {
-    $avaible = true;
     $headers = get_headers($url);
+    if (empty($headers)) {
+        return false;
+    }
     foreach ($invaldheaders as $invalidheader) {
         if (strstr($headers[0], $invalidheader)) {
-            $avaible = false;
-            break;
+            return false;
         }
     }
 
-    return $avaible;
+    return true;
 }
 /**
  * This class is a somewhat hacky way to ensure that the Course Store session
