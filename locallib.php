@@ -640,6 +640,8 @@ abstract class tool_coursestore {
             throw new invalid_dataroot_permissions();
         }
 
+        //TODO: Remove any old backups that may have failed and later cancelled.
+
         $coursestorefilepath = self::get_coursestore_filepath($backup);
         copy($moodlefilepath, $coursestorefilepath);
 
@@ -977,6 +979,9 @@ abstract class tool_coursestore {
         if ((float) $CFG->version < 2014051200) {
             return true;
         } else {
+            if (PHPUNIT_TEST) {
+                return false;
+            }
             $logtable = coursestore_logging::get_log_table_name();
             // If no log table, then it's legacy log table.
             if (empty($logtable)) {
@@ -1023,9 +1028,12 @@ abstract class tool_coursestore {
             );
             return false;
         }
+        // Delete the copied backup - just in case. But, don't stop if the file doesn't exist.
+        self::delete_backup($coursebackup);
         // Finally update.
         $oldstatus = $coursebackup->status;
         $coursebackup->status = $status;
+        $coursebackup->isbackedup = 0;
         $DB->update_record('tool_coursestore', $coursebackup);
         coursestore_logging::log_status_update(
                 "Updating status: successfully " .
@@ -1790,10 +1798,11 @@ class coursestore_logging {
 
                 return true;
             }
+        } else {
+            // Legacy logging.
+            add_to_log($courseid, $module, $action, $url, $info, 0, $userid);
+            return true;
         }
-        // Legacy logging.
-        add_to_log($courseid, $module, $action, $url, $info, 0, $userid);
-        return true;
     }
     /** Log simple generic event for an http request.
      *

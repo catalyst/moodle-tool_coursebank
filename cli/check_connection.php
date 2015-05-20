@@ -33,11 +33,13 @@ require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
 $urltarget = get_config('tool_coursestore', 'url');
 $timeout = get_config('tool_coursestore', 'timeout');
 $maxatt = get_config('tool_coursestore', 'maxatt');
+$sessionkey = tool_coursestore::get_session();
 
 // Initialise, check connection.
 $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
-$check = array('operation' => 'check');
-if (!$wsmanager->send($check)) {
+
+// Initialise, check connection.
+if (!tool_coursestore::check_connection($wsmanager, $sessionkey)) {
     // Connection check failed.
     mtrace(get_string('conncheckfail', 'tool_coursestore', $urltarget));
 } else {

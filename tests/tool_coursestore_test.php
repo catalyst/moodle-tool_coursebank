@@ -163,7 +163,7 @@ class tool_coursestore_testcase extends advanced_testcase {
             'coursename' => 'test course',
             'categoryid' => 2,
             'categoryname' => 'test category',
-            'startdate' => 1233456789
+            'startdate' => '2015-01-01 12:00:00'
         );
         $body->hash = md5($testdata['fileid'] . ',' . $testdata['uuid'] .
                 ',' . $testdata['filename'] . ',' . $testdata['filesize']);
