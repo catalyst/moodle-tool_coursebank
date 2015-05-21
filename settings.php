@@ -82,7 +82,7 @@ if ($hassiteconfig) {
     $enable = new admin_setting_configselect('tool_coursestore/enable',
             ' '.get_string('settings_enable', 'tool_coursestore'),
             ' '.get_string('settings_enable_desc', 'tool_coursestore'),
-            0,
+            1,
             $enableoptions
     );
     $settings->add($enable);
