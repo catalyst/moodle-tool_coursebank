@@ -1310,9 +1310,6 @@ class coursestore_ws_manager {
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POSTFIELDS => $postdata,
             CURLOPT_HTTPHEADER => $header,
-            // Ignore the SSL certificate errors/warnings.
-            CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_SSL_VERIFYPEER => 0,
             CURLOPT_URL => $this->baseurl.'/'.$resource
         );
         curl_setopt_array($this->curlhandle, $curlopts);
