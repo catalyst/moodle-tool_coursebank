@@ -682,10 +682,11 @@ abstract class tool_coursestore {
     /**
      * Convenience function to handle copying the backup file to the designated storage area.
      *
-     * @param object $backup    Course store database record object
+     * @param object $backup           Course store database record object
+     * @param boolean $update_record   Update the database record to relect that the backup is no longer copied.
      *
      */
-    public static function delete_backup($backup) {
+    public static function delete_backup($backup, $update_record) {
         global $DB;
 
         $coursestorefilepath = self::get_coursestore_filepath($backup);
@@ -699,8 +700,10 @@ abstract class tool_coursestore {
 
         unlink($coursestorefilepath);
 
-        $backup->isbackedup = 0; // We have deleted the copy.
-        $DB->update_record('tool_coursestore', $backup);
+        if ($update_record == true) {
+            $backup->isbackedup = 0; // We have deleted the copy.
+            $DB->update_record('tool_coursestore', $backup);
+        }
 
         return true;
     }
@@ -753,6 +756,44 @@ abstract class tool_coursestore {
         }
     }
     /**
+     * Function to cancel old course backup records in the coursetore table
+     * which have not been completely transferred to Course Bank.
+     *
+     * It should ignore any errors and continue.
+     *
+     */
+    public static function cancel_old_backups() {
+        global $DB;
+
+        // Get backups that are older than 2 days old - that are still 'in progress', 'error', or not started yet.
+        $maxbackuptime = time() - (self::MAX_BACKUP_DAYS * DAYSECS);
+
+        $sql = "SELECT tcs.id,
+                       tcs.status,
+                       tcs.isbackedup,
+                       tcs.contenthash
+                FROM {tool_coursestore} tcs
+                WHERE tcs.status IN (:statusnotstarted, :statusinprogress, :statuserror)
+                AND   tcs.filetimecreated < :maxbackuptime";
+
+        $params = array('statusnotstarted'  => self::STATUS_NOTSTARTED,
+                        'statusinprogress'  => self::STATUS_INPROGRESS,
+                        'statuserror'       => self::STATUS_ERROR,
+                        'maxbackuptime'     => $maxbackuptime,
+                        );
+        $rs = $DB->get_recordset_sql($sql, $params);
+
+        foreach ($rs as $coursebackup) {
+            if ($coursebackup->isbackedup) {
+                self::delete_backup($coursebackup, false);
+            }
+            $coursebackup->isbackedup = 0;
+            $coursebackup->status = self::STATUS_CANCELLED;
+            $DB->update_record('tool_coursestore', $coursebackup);
+        }
+        $rs->close();
+    }
+    /**
      * Function to fetch course backup records from the Moodle DB, add them
      * to the course store table, and then process the files before sending
      * via web service to the configured course bank instance.
@@ -764,6 +805,11 @@ abstract class tool_coursestore {
         global $CFG, $DB;
 
         $starttime = time();
+
+        // Cancel any old backups that are in the coursestore table
+        // which have not been completely transferred.
+        self::cancel_old_backups();
+
         // Get backups that are less than 2 days old.
         $maxbackuptime = time() - (self::MAX_BACKUP_DAYS * DAYSECS);
         // Get a list of the course backups.
@@ -958,7 +1004,7 @@ abstract class tool_coursestore {
             }
             $result = self::send_backup($coursebackup, $starttime);
             if ($result == self::SEND_SUCCESS) {
-                $delete = self::delete_backup($coursebackup);
+                $delete = self::delete_backup($coursebackup, true);
                 if (!$delete) {
                     $delfail = get_string(
                             'deletefailed',
@@ -1057,7 +1103,7 @@ abstract class tool_coursestore {
             return false;
         }
         // Delete the copied backup - just in case. But, don't stop if the file doesn't exist.
-        self::delete_backup($coursebackup);
+        self::delete_backup($coursebackup, false);
         // Finally update.
         $oldstatus = $coursebackup->status;
         $coursebackup->status = $status;
