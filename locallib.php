@@ -640,7 +640,8 @@ abstract class tool_coursestore {
             throw new invalid_dataroot_permissions();
         }
 
-        //TODO: Remove any old backups that may have failed and later cancelled.
+        // Remove any old backups that may have failed and later cancelled.
+        self::clean_coursestore_data_dir();
 
         $coursestorefilepath = self::get_coursestore_filepath($backup);
         copy($moodlefilepath, $coursestorefilepath);
@@ -650,7 +651,34 @@ abstract class tool_coursestore {
 
         return $backup;
     }
+    /**
+     * Convenience function to clear out any old copied backup files.
+     *
+     */
+    public static function clean_coursestore_data_dir() {
+        $coursestore_data_dir = self::get_coursestore_data_dir();
+        if (!is_writable($coursestore_data_dir)) {
+            return false;
+        }
 
+        if (is_dir($coursestore_data_dir)) {
+            $maxbackuptime = time() - (self::MAX_BACKUP_DAYS * DAYSECS);
+            $objects = scandir($coursestore_data_dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    $filename = $coursestore_data_dir."/".$object;
+                    if (filetype($filename) == "file") {
+                        $filemtime = filemtime($filename);
+                        if ($filemtime < $maxbackuptime) {
+                            unlink($filename);
+                        }
+                    }
+                }
+            }
+            reset($objects);
+        }
+        return true;
+    }
     /**
      * Convenience function to handle copying the backup file to the designated storage area.
      *
@@ -1236,6 +1264,9 @@ class coursestore_ws_manager {
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POSTFIELDS => $postdata,
             CURLOPT_HTTPHEADER => $header,
+            // Ignore the SSL certificate errors/warnings.
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYPEER => 0,
             CURLOPT_URL => $this->baseurl.'/'.$resource
         );
         curl_setopt_array($this->curlhandle, $curlopts);
