@@ -37,6 +37,14 @@ $PAGE->requires->js('/admin/tool/coursestore/javascript/coursestore.js');
 $displaypages = tool_coursestore_get_config('displaypages');
 
 if ($displaypages) {
+    if (PHPUNIT_TEST) {
+        // When unit tests are run,  the menu item 'courses/backups' has not been created yet.
+        // We need to creat it so we don't get the error that the parent doesn't exist.
+        // This is not required in the real-world though as these plugins are loaded
+        // after the course menu has been set up.
+        $ADMIN->add('courses', new admin_category('backups', new lang_string('backups','admin')));
+    }
+
     $ADMIN->add('backups', new admin_category('coursestore_pages',
             get_string('pluginname', 'tool_coursestore')));
 
