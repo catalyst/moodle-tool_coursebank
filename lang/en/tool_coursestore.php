@@ -147,3 +147,8 @@ $string['settings_sessionkey_desc'] = 'Session key used by Course Store to authe
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
+
+// These strings exist in Moodle 2.7+ in lang/en/filters.php but not for Moodle 2.6 and below.
+// Will include here as they are making the unit tests fail for Moodle 2.6 and below.
+$string['limiterfor'] = '{$a} field limiter';
+$string['valuefor'] = '{$a} value';

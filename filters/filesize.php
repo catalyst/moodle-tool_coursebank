@@ -81,8 +81,8 @@ class coursestore_filter_filesize extends user_filter_text {
         $objs = array();
         $objs['select'] = $mform->createElement('select', $this->_name.'_op', null, $this->getOperators());
         $objs['text'] = $mform->createElement('text', $this->_name, null);
-        $objs['select']->setLabel(get_string('limiterfor', 'filters', $this->_label));
-        $objs['text']->setLabel(get_string('valuefor', 'filters', $this->_label));
+        $objs['select']->setLabel(get_string('limiterfor', 'tool_coursestore', $this->_label));
+        $objs['text']->setLabel(get_string('valuefor', 'tool_coursestore', $this->_label));
         $objs['selectscale'] = $mform->createElement('select', $this->_name.'_scale', null, $this->get_size());
         $grp =& $mform->addElement('group', $this->_name.'_grp', $this->_label, $objs, '', false);
         $mform->setType($this->_name, PARAM_RAW);
@@ -196,7 +196,7 @@ class coursestore_filter_filesize extends user_filter_text {
 
         switch ($operator) {
             case 0: // More than.
-            case 1: // Ledd than.
+            case 1: // Less than.
                 return get_string('textlabel', 'filters', $a);
         }
 
