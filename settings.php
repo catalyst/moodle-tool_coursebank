@@ -138,5 +138,33 @@ if ($hassiteconfig) {
             get_string('settings_sessionkey_desc', 'tool_coursestore')
             )
     );
+    $settings->add(new admin_setting_heading('coursestore_proxy_header',
+            get_string('settings_proxyheader', 'tool_coursestore'),
+            '')
+    );
+    $settings->add(new admin_setting_configtext('tool_coursestore/proxyurl',
+            get_string('settings_proxyurl', 'tool_coursestore'),
+            get_string('settings_proxyurl_desc', 'tool_coursestore'),
+            '',
+            PARAM_URL)
+    );
+    $settings->add(new admin_setting_configtext('tool_coursestore/proxyuser',
+            get_string('settings_proxyuser', 'tool_coursestore'),
+            get_string('settings_proxyuser_desc', 'tool_coursestore'),
+            '',
+            PARAM_TEXT)
+    );
+    $settings->add(new admin_setting_configpasswordunmask('tool_coursestore/proxypass',
+            get_string('settings_proxypass', 'tool_coursestore'),
+            get_string('settings_proxypass_desc', 'tool_coursestore'),
+            ''
+            )
+    );
+    $settings->add(new admin_setting_configtext('tool_coursestore/proxyport',
+            get_string('settings_proxyport', 'tool_coursestore'),
+            get_string('settings_proxyport_desc', 'tool_coursestore'),
+            '',
+            PARAM_INT)
+    );
     $ADMIN->add('tools', $settings);
 }

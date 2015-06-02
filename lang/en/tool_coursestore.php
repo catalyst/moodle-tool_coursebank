@@ -144,6 +144,15 @@ $string['crontimeout'] = 'Cron execution time limit reached! Deferring transfer 
 $string['eventtimeoutreached_desc'] = 'Cron execition time limit reached during transfer of course {$a}.';
 $string['settings_sessionkey'] = 'Session key';
 $string['settings_sessionkey_desc'] = 'Session key used by Course Store to authenticate with Course Bank.';
+$string['settings_proxyheader'] = 'Proxy configuration';
+$string['settings_proxyurl'] = 'Proxy URL';
+$string['settings_proxyurl_desc'] = 'Proxy provider URL';
+$string['settings_proxyuser'] = 'Username';
+$string['settings_proxyuser_desc'] = 'Proxy username credential';
+$string['settings_proxypass'] = 'Password';
+$string['settings_proxypass_desc'] = 'Proxy password credential';
+$string['settings_proxyport'] = 'Port';
+$string['settings_proxyport_desc'] = 'Proxy port';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
