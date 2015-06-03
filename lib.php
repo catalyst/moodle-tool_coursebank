@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+require_once($CFG->dirroot.'/lib/adminlib.php');
 
 define('CRON_MOODLE', 1);
 define('CRON_EXTERNAL', 2);
