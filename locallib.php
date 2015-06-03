@@ -1224,6 +1224,10 @@ abstract class tool_coursestore_error {
 class coursestore_ws_manager {
     private $curlhandle;
     private $baseurl;
+    private $proxyurl;
+    private $proxyuser;
+    private $proxypass;
+    private $proxyport;
 
     // HTTP response codes.
     const WS_HTTP_BAD_REQUEST = 400;
@@ -1266,6 +1270,14 @@ class coursestore_ws_manager {
         );
         $this->curlhandle = curl_init();
         curl_setopt_array($this->curlhandle, $curlopts);
+
+        // Set up proxy configuration.
+        $this->proxyurl = get_config('tool_coursestore', 'proxyurl');
+        if (!empty($this->proxyurl)) {
+            $this->proxyuser = get_config('tool_coursestore', 'proxyuser');
+            $this->proxypass = get_config('tool_coursestore', 'proxypass');
+            $this->proxyport = get_config('tool_coursestore', 'proxyport');
+        }
     }
     /**
      * Close the associated curl handler object
@@ -1312,6 +1324,12 @@ class coursestore_ws_manager {
             CURLOPT_HTTPHEADER => $header,
             CURLOPT_URL => $this->baseurl.'/'.$resource
         );
+        // Set proxy configuration if it is enabled.
+        if (!empty($this->proxyurl)) {
+            $curlopts[CURLOPT_PROXY] = $this->proxyurl;
+            $curlopts[CURLOPT_PROXYUSERPWD] = "$this->proxyuser:$this->proxypass";
+            $curlopts[CURLOPT_PROXYPORT] = $this->proxyport;
+        }
         curl_setopt_array($this->curlhandle, $curlopts);
         for ($attempt = 0; $attempt <= $retries; $attempt++) {
             $result = curl_exec($this->curlhandle);
@@ -1323,6 +1341,7 @@ class coursestore_ws_manager {
         }
         return new coursestore_http_response(false, false, $curlopts);
     }
+
     /**
      * Send the provided data in JSON encoding as an HTTP request.
      *
