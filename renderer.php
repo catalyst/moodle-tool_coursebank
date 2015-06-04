@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Course store main page renderer
+ * Course bank main page renderer
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,14 +25,14 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-class tool_coursestore_renderer extends plugin_renderer_base {
+class tool_coursebank_renderer extends plugin_renderer_base {
 
     /**
-     * Output main body of course store interface
+     * Output main body of course bank interface
      *
      * @return string $html          Body HTML output
      */
-    public function course_store_main($results, $sort='', $dir='', $page='', $perpage='') {
+    public function course_bank_main($results, $sort='', $dir='', $page='', $perpage='') {
         if (!is_array($results)) {
             $results = (array)$results;
         }
@@ -49,7 +49,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
 
         $html = $this->box_start();
         $html .= $this->heading(
-                get_string('backupfiles', 'tool_coursestore', count($results)),
+                get_string('backupfiles', 'tool_coursebank', count($results)),
                 3
         );
 
@@ -63,7 +63,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
         foreach ($columns as $column) {
-            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir, $page, $perpage));
+            $html .= html_writer::tag('th', $this->course_bank_get_column_link($column, $sort, $dir, $page, $perpage));
         }
         $html .= html_writer::end_tag('tr');
         $html .= html_writer::end_tag('thead');
@@ -78,14 +78,14 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             if ($result->timetransferstarted > 0) {
                 $html .= html_writer::tag('td', s(userdate($result->timetransferstarted)));
             } else {
-                $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursestore'));
+                $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursebank'));
             }
             if ($result->timecompleted > 0) {
                 $html .= html_writer::tag('td', s(userdate($result->timecompleted)));
             } else {
-                $html .= html_writer::tag('td', get_string('notcompleted', 'tool_coursestore'));
+                $html .= html_writer::tag('td', get_string('notcompleted', 'tool_coursebank'));
             }
-            $html .= html_writer::tag('td', s($this->course_store_get_status($result)));
+            $html .= html_writer::tag('td', s($this->course_bank_get_status($result)));
             $html .= html_writer::start_tag('tr');
         }
         $html .= html_writer::end_tag('tbody');
@@ -98,7 +98,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      *
      * @return string $html          Body HTML output
      */
-    public function course_store_downloads($downloads, $sort='', $dir='', $page='', $perpage='') {
+    public function course_bank_downloads($downloads, $sort='', $dir='', $page='', $perpage='') {
         if (!is_array($downloads)) {
             $downloads = (array)$downloads;
         }
@@ -107,7 +107,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
 
         $html = $this->box_start();
         $html .= $this->heading(
-                get_string('backupfiles', 'tool_coursestore', count((array)$downloads)),
+                get_string('backupfiles', 'tool_coursebank', count((array)$downloads)),
                 3
         );
         // Don't output the table if there are no results.
@@ -120,7 +120,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
         foreach ($columns as $column) {
-            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir, $page, $perpage));
+            $html .= html_writer::tag('th', $this->course_bank_get_column_link($column, $sort, $dir, $page, $perpage));
         }
         $html .= html_writer::tag('th', get_string('action'));
         $html .= html_writer::end_tag('tr');
@@ -135,7 +135,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             $html .= html_writer::tag('td', s(display_size($download->filesize)));
             $dateformatted = userdate(strtotime($download->filetimemodified));
             $html .= html_writer::tag('td', s($dateformatted));
-            $links = $this->course_store_get_download_actions_links($download);
+            $links = $this->course_bank_get_download_actions_links($download);
             $html .= html_writer::tag('td', $links);
             $html .= html_writer::start_tag('tr');
         }
@@ -145,11 +145,11 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         return $html;
     }
     /**
-     * Output main body of course store transfer queue
+     * Output main body of course bank transfer queue
      *
      * @return string $html Body HTML output
      */
-    public function course_store_queue($results, $sort='', $dir='', $page='', $perpage='') {
+    public function course_bank_queue($results, $sort='', $dir='', $page='', $perpage='') {
         if (!is_array($results)) {
             $results = (array)$results;
         }
@@ -158,7 +158,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
 
         $html = $this->box_start();
         $html .= $this->heading(
-                get_string('backupfiles', 'tool_coursestore', count($results)),
+                get_string('backupfiles', 'tool_coursebank', count($results)),
                 3
         );
         // Don't output the table if there are no results.
@@ -171,7 +171,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('thead');
         $html .= html_writer::start_tag('tr');
         foreach ($columns as $column) {
-            $html .= html_writer::tag('th', $this->course_store_get_column_link($column, $sort, $dir, $page, $perpage));
+            $html .= html_writer::tag('th', $this->course_bank_get_column_link($column, $sort, $dir, $page, $perpage));
         }
         $html .= html_writer::tag('th', get_string('action'));
         $html .= html_writer::end_tag('tr');
@@ -187,10 +187,10 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             if ($result->timetransferstarted > 0) {
                 $html .= html_writer::tag('td', s(userdate($result->timetransferstarted)));
             } else {
-                $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursestore'));
+                $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursebank'));
             }
-            $html .= html_writer::tag('td', s($this->course_store_get_status($result)));
-            $link = $this->course_store_get_queue_actions_links($result);
+            $html .= html_writer::tag('td', s($this->course_bank_get_status($result)));
+            $link = $this->course_bank_get_queue_actions_links($result);
             $html .= html_writer::tag('td', $link);
             $html .= html_writer::start_tag('tr');
         }
@@ -205,8 +205,8 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @param object $result
      * @return string
      */
-    private function course_store_get_status($result) {
-        $statusmap = tool_coursestore::get_statuses();
+    private function course_bank_get_status($result) {
+        $statusmap = tool_coursebank::get_statuses();
         if (isset($statusmap[$result->status])) {
             return $statusmap[$result->status];
         }
@@ -218,12 +218,12 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @param object $result
      * @return HTML
      */
-    private function course_store_get_download_actions_links($result) {
+    private function course_bank_get_download_actions_links($result) {
         // First check capability.
-        if (!has_capability('tool/coursestore:download', context_system::instance())) {
+        if (!has_capability('tool/coursebank:download', context_system::instance())) {
             return '';
         }
-        $text = get_string('download', 'tool_coursestore');
+        $text = get_string('download', 'tool_coursebank');
         $icon = html_writer::empty_tag('img',
                 array('src' => $this->pix_url('t/download')->out(false),
                     'alt' => $text
@@ -239,23 +239,23 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @param object $result
      * @return HTML
      */
-    private function course_store_get_queue_actions_links($result) {
+    private function course_bank_get_queue_actions_links($result) {
         // First check capability.
-        if (!has_capability('tool/coursestore:edit', context_system::instance())) {
+        if (!has_capability('tool/coursebank:edit', context_system::instance())) {
             return '';
         }
         $links = '';
         $buttons = array();
         $status = $result->status;
 
-        $noaction = tool_coursestore::get_noaction_statuses();
-        $canstop  = tool_coursestore::get_canstop_statuses();
-        $stopped  = tool_coursestore::get_stopped_statuses();
+        $noaction = tool_coursebank::get_noaction_statuses();
+        $canstop  = tool_coursebank::get_canstop_statuses();
+        $stopped  = tool_coursebank::get_stopped_statuses();
 
         if (!in_array($status, $noaction)) {
              // Stop link.
             if (in_array($status, $canstop)) {
-                $text = get_string('stop', 'tool_coursestore');
+                $text = get_string('stop', 'tool_coursebank');
                 $icon = html_writer::empty_tag('img',
                         array('src' => $this->pix_url('t/block')->out(false),
                             'alt' => $text
@@ -265,7 +265,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             }
             // Go link.
             if (in_array($status, $stopped)) {
-                $text = get_string('go', 'tool_coursestore');
+                $text = get_string('go', 'tool_coursebank');
                 $icon = html_writer::empty_tag('img',
                         array('src' => $this->pix_url('t/collapsed')->out(false),
                             'alt' => $text
@@ -274,7 +274,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 $buttons[] = html_writer::link($url, $icon, array('title' => $text));
             }
             // Delete link.
-            $text = get_string('delete', 'tool_coursestore');
+            $text = get_string('delete', 'tool_coursebank');
             $icon = html_writer::empty_tag('img',
                     array('src' => $this->pix_url('t/delete')->out(false),
                         'alt' => $text
@@ -293,8 +293,8 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @param string $field Field name, e.g. 'coursename'
      * @return string Text description taken from language file, e.g. 'Course name'
      */
-    private function course_store_get_field_name($field) {
-        return get_string($field, 'tool_coursestore');
+    private function course_bank_get_field_name($field) {
+        return get_string($field, 'tool_coursebank');
     }
     /**
      * Generates a link for table's header
@@ -304,9 +304,9 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      * @param string $dir Sort direction (ASC or DESC)
      * @return string HTML code of link
      */
-    private function course_store_get_column_link($column, $sort, $dir, $page, $perpage) {
+    private function course_bank_get_column_link($column, $sort, $dir, $page, $perpage) {
 
-        $name = $this->course_store_get_field_name($column);
+        $name = $this->course_bank_get_field_name($column);
         if ($sort != $column) {
             $columndir = "ASC";
             $columnicon = "";
@@ -325,12 +325,12 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      *
      * @return string $html          Result HTML output
      */
-    public function course_store_conncheck() {
+    public function course_bank_conncheck() {
         global $CFG;
 
         $html = $this->box_start();
         $html .= $this->heading(
-                get_string('connchecktitle', 'tool_coursestore'),
+                get_string('connchecktitle', 'tool_coursebank'),
                 3
         );
         // Hide the button, and then show it with js if it is enabled.
@@ -341,7 +341,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             'id' => 'conncheck',
             'type' => 'button',
             'class' => 'conncheckbutton hide',
-            'value' => get_string('conncheckbutton', 'tool_coursestore')
+            'value' => get_string('conncheckbutton', 'tool_coursebank')
         );
         $html .= html_writer::tag('input', '', $buttonattr);
         $html .= html_writer::end_tag('div');
@@ -352,12 +352,12 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         );
         $nonjsparams = array('action' => 'conncheck');
         $nonjsurl = new moodle_url(
-                $CFG->wwwroot.'/admin/tool/coursestore/check_connection.php',
+                $CFG->wwwroot.'/admin/tool/coursebank/check_connection.php',
                 $nonjsparams
         );
         $html .= html_writer::link(
                 $nonjsurl,
-                get_string('conncheckbutton', 'tool_coursestore'),
+                get_string('conncheckbutton', 'tool_coursebank'),
                 array('class' => 'conncheckurl')
         );
         $html .= html_writer::end_tag('div');
@@ -367,7 +367,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $imgattr = array(
             'class' => 'hide',
             'src'   => $CFG->wwwroot.'/pix/i/loading_small.gif',
-            'alt'   => get_string('checking', 'tool_coursestore')
+            'alt'   => get_string('checking', 'tool_coursebank')
         );
 
         $html .= html_writer::empty_tag('img', $imgattr);
@@ -381,18 +381,18 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::end_tag('div');
 
         // Success notification.
-        $urltarget = get_config('tool_coursestore', 'url');
-        $html .= $this->course_store_check_notification(
+        $urltarget = get_config('tool_coursebank', 'url');
+        $html .= $this->course_bank_check_notification(
                 'conncheck',
                 'success',
-                get_string('connchecksuccess', 'tool_coursestore', $urltarget)
+                get_string('connchecksuccess', 'tool_coursebank', $urltarget)
         );
 
         // Failure notification.
-        $html .= $this->course_store_check_notification(
+        $html .= $this->course_bank_check_notification(
                 'conncheck',
                 'fail',
-                get_string('conncheckfail', 'tool_coursestore', $urltarget)
+                get_string('conncheckfail', 'tool_coursebank', $urltarget)
         );
 
         $html .= $this->box_end();
@@ -404,12 +404,12 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      *
      * @return string $html          Result HTML output
      */
-    public function course_store_speedtest() {
+    public function course_bank_speedtest() {
         global $CFG;
 
         $html = $this->box_start();
         $html .= $this->heading(
-                get_string('speedtesttitle', 'tool_coursestore'),
+                get_string('speedtesttitle', 'tool_coursebank'),
                 3
         );
 
@@ -421,7 +421,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             'id' => 'speedtest',
             'type' => 'button',
             'class' => 'speedtestbutton',
-            'value' => get_string('speedtestbutton', 'tool_coursestore')
+            'value' => get_string('speedtestbutton', 'tool_coursebank')
         );
         $html .= html_writer::tag('input', '', $buttonattr);
         $html .= html_writer::end_tag('div');
@@ -432,12 +432,12 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         );
         $nonjsparams = array('action' => 'speedtest');
         $nonjsurl = new moodle_url(
-                $CFG->wwwroot.'/admin/tool/coursestore/check_connection.php',
+                $CFG->wwwroot.'/admin/tool/coursebank/check_connection.php',
                 $nonjsparams
         );
         $html .= html_writer::link(
                 $nonjsurl,
-                get_string('speedtestbutton', 'tool_coursestore'),
+                get_string('speedtestbutton', 'tool_coursebank'),
                 array('class' => 'speedtesturl')
         );
         $html .= html_writer::end_tag('div');
@@ -446,7 +446,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $imgattr = array(
             'class' => 'hide',
             'src'   => $CFG->wwwroot.'/pix/i/loading_small.gif',
-            'alt'   => get_string('checking', 'tool_coursestore')
+            'alt'   => get_string('checking', 'tool_coursebank')
         );
 
         $html .= html_writer::empty_tag('img', $imgattr);
@@ -460,47 +460,47 @@ class tool_coursestore_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('input', '', $wwwrootattr);
 
         // Success notification.
-        $urltarget = get_config('tool_coursestore', 'url');
+        $urltarget = get_config('tool_coursebank', 'url');
         $attr = array(
             'type' => 'hidden',
             'name' => 'success',
-            'value' => get_string('speedtestsuccess', 'tool_coursestore', $urltarget),
+            'value' => get_string('speedtestsuccess', 'tool_coursebank', $urltarget),
             'class' => 'speedtestsuccess'
         );
-        $urltarget = get_config('tool_coursestore', 'url');
+        $urltarget = get_config('tool_coursebank', 'url');
         $html .= html_writer::tag('input', '', $attr);
         $attr = array(
             'type' => 'hidden',
             'name' => 'chunk',
-            'value' => get_string('speedtestchunk', 'tool_coursestore', $urltarget),
+            'value' => get_string('speedtestchunk', 'tool_coursebank', $urltarget),
             'class' => 'speedtestchunk'
         );
         $html .= html_writer::tag('input', '', $attr);
-        $html .= $this->course_store_check_notification(
+        $html .= $this->course_bank_check_notification(
                 'speedtest',
                 'success',
-                get_string('speedtestsuccess', 'tool_coursestore', $urltarget)
+                get_string('speedtestsuccess', 'tool_coursebank', $urltarget)
         );
 
         // Failure notification.
-        $html .= $this->course_store_check_notification(
+        $html .= $this->course_bank_check_notification(
                 'speedtest',
                 'fail',
-                get_string('speedtestfail', 'tool_coursestore', $urltarget)
+                get_string('speedtestfail', 'tool_coursebank', $urltarget)
         );
 
         // Slow connection speed notification.
         $attr = array(
             'type' => 'hidden',
             'name' => 'slow',
-            'value' => get_string('speedtestslow', 'tool_coursestore', $urltarget),
+            'value' => get_string('speedtestslow', 'tool_coursebank', $urltarget),
             'class' => 'speedtestslow'
         );
         $html .= html_writer::tag('input', '', $attr);
-        $html .= $this->course_store_check_notification(
+        $html .= $this->course_bank_check_notification(
                 'speedtest',
                 'slow',
-                get_string('speedtestslow', 'tool_coursestore', $urltarget)
+                get_string('speedtestslow', 'tool_coursebank', $urltarget)
         );
 
         $html .= $this->box_end();
@@ -517,7 +517,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
      *
      * @return string          Output html
      */
-    public function course_store_check_notification($check, $msgtype, $content='', $hide=true) {
+    public function course_bank_check_notification($check, $msgtype, $content='', $hide=true) {
         switch($msgtype) {
             case 'fail':
                 $alert = 'alert-error';
@@ -547,11 +547,11 @@ class tool_coursestore_renderer extends plugin_renderer_base {
     /**
      * Render report page.
      *
-     * @param tool_coursestore_renderable $report object of report.
+     * @param tool_coursebank_renderable $report object of report.
      */
-    public function render_tool_coursestore_renderable(tool_coursestore_renderable $report) {
+    public function render_tool_coursebank_renderable(tool_coursebank_renderable $report) {
         if (empty($report->lagacy) and empty($report->selectedlogreader)) {
-            echo $this->output->notification(get_string('nologreaderenabled', 'tool_coursestore'), 'notifyproblem');
+            echo $this->output->notification(get_string('nologreaderenabled', 'tool_coursebank'), 'notifyproblem');
             return;
         }
         if ($report->showselectorform) {
@@ -566,26 +566,26 @@ class tool_coursestore_renderer extends plugin_renderer_base {
     /**
      * Prints/return reader selector
      *
-     * @param tool_coursestore_renderable $report report.
+     * @param tool_coursebank_renderable $report report.
      */
-    public function reader_selector(tool_coursestore_renderable $report) {
+    public function reader_selector(tool_coursebank_renderable $report) {
         $readers = $report->get_readers(true);
         if (empty($readers)) {
-            $readers = array(get_string('nologreaderenabled', 'tool_coursestore'));
+            $readers = array(get_string('nologreaderenabled', 'tool_coursebank'));
         }
         $url = fullclone ($report->url);
         $url->remove_params(array('logreader'));
         $select = new single_select($url, 'logreader', $readers, $report->selectedlogreader, null);
-        $select->set_label(get_string('selectlogreader', 'tool_coursestore'));
+        $select->set_label(get_string('selectlogreader', 'tool_coursebank'));
         echo $this->output->render($select);
     }
 
     /**
      * This function is used to generate and display selector form
      *
-     * @param tool_coursestore_renderable $report report.
+     * @param tool_coursebank_renderable $report report.
      */
-    public function report_selector_form(tool_coursestore_renderable $report) {
+    public function report_selector_form(tool_coursebank_renderable $report) {
         echo html_writer::start_tag('form', array('class' => 'logselecform', 'action' => $report->url, 'method' => 'get'));
         echo html_writer::start_div();
         echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'chooselog', 'value' => '1'));
@@ -610,7 +610,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
             echo html_writer::label(get_string('selctauser'), 'menuuser', false, array('class' => 'accesshide'));
             echo html_writer::select($users, "user", $report->userid, false);
             $a = new stdClass();
-            $a->url = new moodle_url('/admin/tool/coursestore/report.php', array('chooselog' => 0,
+            $a->url = new moodle_url('/admin/tool/coursebank/report.php', array('chooselog' => 0,
                 'user' => $report->userid, 'date' => $report->date, 'type' => $report->type, 'showusers' => 1));
             $a->url = $a->url->out(false);
             print_string('logtoomanyusers', 'moodle', $a);
@@ -629,7 +629,7 @@ class tool_coursestore_renderer extends plugin_renderer_base {
                 $attributes = array('type' => 'hidden', 'name' => 'logreader', 'value' => key($readers));
                 echo html_writer::empty_tag('input', $attributes);
             } else {
-                echo html_writer::label(get_string('selectlogreader', 'tool_coursestore'), 'menureader', false,
+                echo html_writer::label(get_string('selectlogreader', 'tool_coursebank'), 'menureader', false,
                         array('class' => 'accesshide'));
                 echo html_writer::select($readers, 'logreader', $report->selectedlogreader, false);
             }

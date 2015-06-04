@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/coursestore/db" VERSION="20150319" COMMENT="XMLDB file for Moodle admin/tool/coursestore"
+<XMLDB PATH="admin/tool/coursebank/db" VERSION="20150319" COMMENT="XMLDB file for Moodle admin/tool/coursebank"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="tool_coursestore" COMMENT="Keeps details of the backups that have been sent and their status.">
+    <TABLE NAME="tool_coursebank" COMMENT="Keeps details of the backups that have been sent and their status.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="uniqueid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="UUID."/>

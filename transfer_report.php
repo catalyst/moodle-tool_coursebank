@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Main page for user-facing course store interface
+ * Main page for user-facing course bank interface
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,8 +25,8 @@
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/lib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -38,34 +38,34 @@ $perpage      = optional_param('perpage', 50, PARAM_INT);
 $context = context_system::instance();
 
 require_login(null, false);
-require_capability('tool/coursestore:view', $context);
+require_capability('tool/coursebank:view', $context);
 
 // This means that it will not have a side menu bar to the left.
-//admin_externalpage_setup('tool_coursestore');
+//admin_externalpage_setup('tool_coursebank');
 
-//$url = new moodle_url('/admin/tool/coursestore/index.php');
-$url = new moodle_url('/admin/tool/coursestore/transfer_report.php');
+//$url = new moodle_url('/admin/tool/coursebank/index.php');
+$url = new moodle_url('/admin/tool/coursebank/transfer_report.php');
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 
-$header = get_string('backupsummary', 'tool_coursestore');
+$header = get_string('backupsummary', 'tool_coursebank');
 $PAGE->set_title($header);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($header);
 
 // Filters.
-$filtering = new coursestore_filtering('summary', array('status' => 0, 'coursefullname' => 1, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
+$filtering = new coursebank_filtering('summary', array('status' => 0, 'coursefullname' => 1, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
 list($extraselect, $extraparams) = $filtering->get_sql_filter();
 $fieldstosort = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'timetransferstarted', 'timecompleted', 'status');
-$results = tool_coursestore::get_summary_data($sort, $dir, $extraselect, $extraparams, $page, $perpage, $fieldstosort);
+$results = tool_coursebank::get_summary_data($sort, $dir, $extraselect, $extraparams, $page, $perpage, $fieldstosort);
 
 // Display filters.
 $filtering->display_add();
 $filtering->display_active();
 
 // Display table.
-$renderer = $PAGE->get_renderer('tool_coursestore');
-echo $renderer->course_store_main($results['results'], $sort, $dir, $page, $perpage);
+$renderer = $PAGE->get_renderer('tool_coursebank');
+echo $renderer->course_bank_main($results['results'], $sort, $dir, $page, $perpage);
 echo $OUTPUT->paging_bar($results['count'], $page, $perpage, $url);
 // Footer.
 echo $OUTPUT->footer();

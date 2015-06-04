@@ -18,7 +18,7 @@
  * Version information
  *
  * @package    tool
- * @subpackage coursestore
+ * @subpackage coursebank
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
@@ -29,4 +29,4 @@ defined('MOODLE_INTERNAL') || die;
 
 $plugin->version   = 2015042400;
 $plugin->requires  = 2013111800;
-$plugin->component = 'tool_coursestore';
+$plugin->component = 'tool_coursebank';

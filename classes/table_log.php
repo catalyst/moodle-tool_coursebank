@@ -17,7 +17,7 @@
 /**
  * Table log for displaying logs.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die;
  * Table class.
  *
  */
-class tool_coursestore_table_log extends table_sql {
+class tool_coursebank_table_log extends table_sql {
 
     /** @var array list of user fullnames shown in report */
     private $userfullnames = array();
@@ -48,7 +48,7 @@ class tool_coursestore_table_log extends table_sql {
     public function __construct($uniqueid, $filterparams = null) {
         parent::__construct($uniqueid);
 
-        $this->set_attribute('class', 'tool_coursestore_report generaltable generalbox');
+        $this->set_attribute('class', 'tool_coursebank_report generaltable generalbox');
         $this->filterparams = $filterparams;
         // Add course column if logs are displayed for site.
         $cols = array();
@@ -59,9 +59,9 @@ class tool_coursestore_table_log extends table_sql {
         $this->define_headers(array_merge($headers, array(
                 get_string('time'),
                 get_string('fullnameuser'),
-                get_string('eventname', 'tool_coursestore'),
+                get_string('eventname', 'tool_coursebank'),
                 get_string('description'),
-                get_string('eventorigin', 'tool_coursestore'),
+                get_string('eventorigin', 'tool_coursebank'),
                 get_string('ip_address')
                 )
             ));
@@ -100,7 +100,7 @@ class tool_coursestore_table_log extends table_sql {
                 $params['id'] = $event->userid;
                 $a->asusername = html_writer::link(new moodle_url('/user/view.php', $params), $a->asusername);
             }
-            $username = get_string('eventloggedas', 'tool_coursestore', $a);
+            $username = get_string('eventloggedas', 'tool_coursebank', $a);
         } else if (!empty($event->userid) && !empty($this->userfullnames[$event->userid])) {
             $params = array('id' => $event->userid);
             $username = $this->userfullnames[$event->userid];
@@ -192,11 +192,11 @@ class tool_coursestore_table_log extends table_sql {
         $joins = array();
         $params = array();
 
-        // We want logs only for tool_coursestore.
+        // We want logs only for tool_coursebank.
         if (empty($this->filterparams->logreader) or $this->filterparams->logreader instanceof logstore_legacy\log\store) {
-            $joins[] = "module = '".coursestore_logging::LOG_MODULE_COURSE_STORE."'";
+            $joins[] = "module = '".coursebank_logging::LOG_MODULE_COURSE_BANK."'";
         } else {
-            $joins[] = "component = 'tool_coursestore'";
+            $joins[] = "component = 'tool_coursebank'";
         }
 
         $sql = implode(' AND ', $joins);

@@ -17,7 +17,7 @@
 /**
  * This file is used for connection test AJAX callbacks.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Tim Price <tim.price@catalyst-au.net>
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
@@ -28,7 +28,7 @@ define('MOODLE_INTERNAL', 1);
 define('AJAX_SCRIPT', 1);
 
 require_once('../../../config.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 
 $action = required_param('action', PARAM_TEXT);
 $response = null;
@@ -39,7 +39,7 @@ isloggedin() || die;
 $context = context_system::instance();
 
 $PAGE->set_context($context);
-$PAGE->set_url('/admin/tool/coursestore/ajax.php');
+$PAGE->set_url('/admin/tool/coursebank/ajax.php');
 
 
 echo $OUTPUT->header();
@@ -47,27 +47,27 @@ echo $OUTPUT->header();
 switch ($action) {
     case 'conncheck':
         // Get required config variables.
-        $urltarget = get_config('tool_coursestore', 'url');
-        $timeout = get_config('tool_coursestore', 'timeout');
-        $sesskey = tool_coursestore::get_session();
+        $urltarget = get_config('tool_coursebank', 'url');
+        $timeout = get_config('tool_coursebank', 'timeout');
+        $sesskey = tool_coursebank::get_session();
 
         // Initialise, check connection.
-        $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
+        $wsmanager = new coursebank_ws_manager($urltarget, $timeout);
 
-        $response = tool_coursestore::check_connection($wsmanager, $sesskey) ? 1 : 0;
+        $response = tool_coursebank::check_connection($wsmanager, $sesskey) ? 1 : 0;
         $wsmanager->close();
 
         break;
     case 'speedtest':
         // Get required config variables.
-        $urltarget = get_config('tool_coursestore', 'url');
-        $timeout = get_config('tool_coursestore', 'timeout');
-        $sesskey = get_config('tool_coursestore', 'sessionkey');
+        $urltarget = get_config('tool_coursebank', 'url');
+        $timeout = get_config('tool_coursebank', 'timeout');
+        $sesskey = get_config('tool_coursebank', 'sessionkey');
 
         // Initialise, check connection.
-        $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
+        $wsmanager = new coursebank_ws_manager($urltarget, $timeout);
 
-        $response = tool_coursestore::check_connection_speed($wsmanager, 4, $sesskey);
+        $response = tool_coursebank::check_connection_speed($wsmanager, 4, $sesskey);
         $wsmanager->close();
     default:
         break;

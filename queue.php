@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Main page for user-facing course store interface
+ * Main page for user-facing course bank interface
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,8 +25,8 @@
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/lib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -40,11 +40,11 @@ $confirm      = optional_param('confirm', '', PARAM_ALPHANUM);
 
 $context = context_system::instance();
 require_login(null, false);
-require_capability('tool/coursestore:view', $context);
+require_capability('tool/coursebank:view', $context);
 
-admin_externalpage_setup('tool_coursestore_queue');
+admin_externalpage_setup('tool_coursebank_queue');
 
-$header = get_string('backupqueue', 'tool_coursestore');
+$header = get_string('backupqueue', 'tool_coursebank');
 
 $urlparams = array(
     'sort'    => $sort,
@@ -52,28 +52,28 @@ $urlparams = array(
     'page'    => $page,
     'perpage' => $perpage,
 );
-$url = new moodle_url('/admin/tool/coursestore/queue.php', $urlparams);
+$url = new moodle_url('/admin/tool/coursebank/queue.php', $urlparams);
 
 // Get allowed actions.
-$actions = tool_coursestore::get_actions();
+$actions = tool_coursebank::get_actions();
 
 // Do an action.
 if (array_key_exists($action, $actions) and $id > 0) {
 
-    require_capability('tool/coursestore:edit', $context);
-    $coursebackup = $DB->get_record('tool_coursestore', array('id' => $id), '*', MUST_EXIST);
+    require_capability('tool/coursebank:edit', $context);
+    $coursebackup = $DB->get_record('tool_coursebank', array('id' => $id), '*', MUST_EXIST);
 
     if ($confirm != md5($coursebackup->id)) {
         echo $OUTPUT->header();
         echo $OUTPUT->heading($header);
         $optionsyes = array('action' => $action, 'id' => $id, 'confirm' => md5($coursebackup->id), 'sesskey' => sesskey());
-        $confirmstring = get_string('check_'.$action, 'tool_coursestore', $coursebackup->backupfilename);
+        $confirmstring = get_string('check_'.$action, 'tool_coursebank', $coursebackup->backupfilename);
         echo $OUTPUT->confirm($confirmstring, new moodle_url($url, $optionsyes), $url);
         echo $OUTPUT->footer();
         die;
     } else if (data_submitted() and confirm_sesskey()) {
-        if (!tool_coursestore::user_update_status($coursebackup, $actions[$action])) {
-            print_error('errorupdatingstatus', 'tool_coursestore',  new moodle_url('/admin/tool/coursestore/queue.php'));
+        if (!tool_coursebank::user_update_status($coursebackup, $actions[$action])) {
+            print_error('errorupdatingstatus', 'tool_coursebank',  new moodle_url('/admin/tool/coursebank/queue.php'));
         }
     }
 }
@@ -93,22 +93,22 @@ $filterparams = array(
     'filesize' => 1,
     'filetimemodified' => 1
 );
-$filtering = new coursestore_filtering('queue', $filterparams);
+$filtering = new coursebank_filtering('queue', $filterparams);
 $extra = 'status != :status_ext1 AND status != :status_ext2';
 $params = array(
-    'status_ext1' => tool_coursestore::STATUS_FINISHED,
-    'status_ext2' => tool_coursestore::STATUS_CANCELLED
+    'status_ext1' => tool_coursebank::STATUS_FINISHED,
+    'status_ext2' => tool_coursebank::STATUS_CANCELLED
 );
 list($extraselect, $extraparams) = $filtering->get_sql_filter($extra, $params);
 
-$results = tool_coursestore::get_summary_data($sort, $dir, $extraselect, $extraparams, $page, $perpage);
+$results = tool_coursebank::get_summary_data($sort, $dir, $extraselect, $extraparams, $page, $perpage);
 // Display filters.
 $filtering->display_add();
 $filtering->display_active();
 
 // Display table.
-$renderer = $PAGE->get_renderer('tool_coursestore');
-echo $renderer->course_store_queue($results['results'], $sort, $dir, $page, $perpage);
+$renderer = $PAGE->get_renderer('tool_coursebank');
+echo $renderer->course_bank_queue($results['results'], $sort, $dir, $page, $perpage);
 echo $OUTPUT->paging_bar($results['count'], $page, $perpage, $url);
 // Footer.
 echo $OUTPUT->footer();

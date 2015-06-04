@@ -33,7 +33,7 @@ function conn_check( event ) {
             }
         }
     };
-    xhr.open('GET', wwwroot + '/admin/tool/coursestore/ajax.php?action=conncheck', true);
+    xhr.open('GET', wwwroot + '/admin/tool/coursebank/ajax.php?action=conncheck', true);
     xhr.send();
 }
 function speed_test( event ) {
@@ -93,6 +93,6 @@ function speed_test( event ) {
             }
         }
     };
-    xhr.open('GET', wwwroot + '/admin/tool/coursestore/ajax.php?action=speedtest', true);
+    xhr.open('GET', wwwroot + '/admin/tool/coursebank/ajax.php?action=speedtest', true);
     xhr.send();
 }

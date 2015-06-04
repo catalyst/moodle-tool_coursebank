@@ -16,7 +16,7 @@
 
 /**
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 require_once($CFG->dirroot.'/lib/adminlib.php');
 
 define('CRON_MOODLE', 1);
@@ -35,13 +35,13 @@ define('CRON_EXTERNAL', 2);
  *
  * @param string $dir path
  */
-function tool_coursestore_rrmdir($dir) {
+function tool_coursebank_rrmdir($dir) {
     if (is_dir($dir)) {
         $objects = scandir($dir);
         foreach ($objects as $object) {
             if ($object != "." && $object != "..") {
                 if (filetype($dir."/".$object) == "dir") {
-                    coursestore_rrmdir($dir."/".$object);
+                    coursebank_rrmdir($dir."/".$object);
                 } else {
                     unlink($dir."/".$object);
                 }
@@ -54,31 +54,31 @@ function tool_coursestore_rrmdir($dir) {
 /**
  * Legacy cron function
  */
-function tool_coursestore_cron() {
-    tool_coursestore_cron_run();
+function tool_coursebank_cron() {
+    tool_coursebank_cron_run();
 }
 /**
  * Run cron code
  *
  * @return boolean
  */
-function tool_coursestore_cron_run() {
-    $name = 'tool_coursestore_cronlock';
-    $canrun = tool_coursestore_can_run_cron(CRON_MOODLE);
+function tool_coursebank_cron_run() {
+    $name = 'tool_coursebank_cronlock';
+    $canrun = tool_coursebank_can_run_cron(CRON_MOODLE);
 
     if (is_string($canrun)) {
-        mtrace(get_string($canrun, 'tool_coursestore'));
+        mtrace(get_string($canrun, 'tool_coursebank'));
         return true;
     }
 
-    if (tool_coursestore_does_cron_lock_exist($name)) {
-        mtrace(get_string('cron_locked', 'tool_coursestore'));
+    if (tool_coursebank_does_cron_lock_exist($name)) {
+        mtrace(get_string('cron_locked', 'tool_coursebank'));
         return true;
     }
 
-    tool_coursestore_set_cron_lock($name, time());
-    tool_coursestore::fetch_backups();
-    tool_coursestore_delete_cron_lock($name);
+    tool_coursebank_set_cron_lock($name, time());
+    tool_coursebank::fetch_backups();
+    tool_coursebank_delete_cron_lock($name);
 }
 /**
  * Check if we can run cron.
@@ -86,9 +86,9 @@ function tool_coursestore_cron_run() {
  * @param integer $type Type of cron run (moodle or external)
  * @return boolean|string If can't run returns a key of lang string.
  */
-function tool_coursestore_can_run_cron($type) {
-    $enabled = tool_coursestore_get_config('enable');
-    $externalcronenabled = tool_coursestore_get_config('externalcron');
+function tool_coursebank_can_run_cron($type) {
+    $enabled = tool_coursebank_get_config('enable');
+    $externalcronenabled = tool_coursebank_get_config('externalcron');
 
     if ($enabled) {
         if ($type == CRON_MOODLE and $externalcronenabled) {
@@ -103,24 +103,24 @@ function tool_coursestore_can_run_cron($type) {
     return true;
 }
 /**
- * Set config to tool_coursestore plugin
+ * Set config to tool_coursebank plugin
  *
  * @param string $name
  * @param string $value
  * @return bool true or exception
  */
-function tool_coursestore_set_config($name, $value) {
-    $result = set_config($name, $value, 'tool_coursestore');
+function tool_coursebank_set_config($name, $value) {
+    $result = set_config($name, $value, 'tool_coursebank');
     return $result;
 }
 /**
- * Gets config for tool_coursestore plugin
+ * Gets config for tool_coursebank plugin
  *
  * @param string $name
  * @return mixed hash-like object or single value, return false no config found
  */
-function tool_coursestore_get_config($name) {
-    $value = get_config('tool_coursestore', $name);
+function tool_coursebank_get_config($name) {
+    $value = get_config('tool_coursebank', $name);
     return $value;
 }
 /**
@@ -131,7 +131,7 @@ function tool_coursestore_get_config($name) {
  * @param string $value cron lock's value
  * @return bool
  */
-function tool_coursestore_set_cron_lock($name, $value) {
+function tool_coursebank_set_cron_lock($name, $value) {
     global $DB;
     try {
         $lock = new stdClass();
@@ -150,7 +150,7 @@ function tool_coursestore_set_cron_lock($name, $value) {
  * @param string $name cron lock's name
  * @return bool
  */
-function tool_coursestore_does_cron_lock_exist($name) {
+function tool_coursebank_does_cron_lock_exist($name) {
     global $DB;
 
     return $DB->record_exists('config', array('name' => $name));
@@ -161,9 +161,9 @@ function tool_coursestore_does_cron_lock_exist($name) {
   * @global type DB
   * @param string $name cron lock's name
   */
-function tool_coursestore_delete_cron_lock($name) {
+function tool_coursebank_delete_cron_lock($name) {
     global $DB;
-    if (tool_coursestore_does_cron_lock_exist($name)) {
+    if (tool_coursebank_does_cron_lock_exist($name)) {
         $DB->delete_records('config', array('name' => $name));
     }
 }
@@ -172,7 +172,7 @@ function tool_coursestore_delete_cron_lock($name) {
  *
  * @param string $url
  */
-function tool_coursestore_check_url($url) {
+function tool_coursebank_check_url($url) {
     // Validate URL first.
     if (filter_var($url, FILTER_VALIDATE_URL) === false) {
         return false;
@@ -187,7 +187,7 @@ function tool_coursestore_check_url($url) {
  * @param array $invaldheaders A list of invalid responses e.g 404, 500.
  * @return boolean
  */
-function tool_coursestore_is_url_available($url, $invaldheaders=array('404', '403', '500')) {
+function tool_coursebank_is_url_available($url, $invaldheaders=array('404', '403', '500')) {
     $headers = get_headers($url);
     if (empty($headers)) {
         return false;
@@ -201,14 +201,14 @@ function tool_coursestore_is_url_available($url, $invaldheaders=array('404', '40
     return true;
 }
 /**
- * This class is a somewhat hacky way to ensure that the Course Store session
+ * This class is a somewhat hacky way to ensure that the Course Bank session
  * key is discarded whenever settings are changed.
  *
  * (This is important because settings changes may include auth token or the
- * External Course Bank URL. Although Course Store will re-authenticate as
+ * External Course Bank URL. Although Course Bank will re-authenticate as
  * necessary if a session key does not work, it is conceivable that using a
  * session key associated with an old URL or token value might cause External
- * Course Bank to attribute data sent by this Course Store instance to some
+ * Course Bank to attribute data sent by this Course Bank instance to some
  * other instance, resulting in data corruption or overwriting.)
  *
  * This class extends the configempty class and overrides the output_html

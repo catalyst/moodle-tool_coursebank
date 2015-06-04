@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Course store plugin uninstallation.
+ * Course bank plugin uninstallation.
  *
  * @package    tool
- * @subpackage coursestore
+ * @subpackage coursebank
  * @author     Tim Price <timprice@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,19 +26,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/lib.php');
 
-function xmldb_tool_coursestore_uninstall() {
+function xmldb_tool_coursebank_uninstall() {
     global $CFG;
 
     // Check if transfer is in progress.
-    if (tool_coursestore_does_cron_lock_exist('tool_coursestore_cronlock')) {
+    if (tool_coursebank_does_cron_lock_exist('tool_coursebank_cronlock')) {
         throw new transfer_in_progress();
     }
 
     if (is_writable($CFG->dataroot)) {
-        $dir = tool_coursestore::get_coursestore_data_dir();
-        tool_coursestore_rrmdir($dir);
+        $dir = tool_coursebank::get_coursebank_data_dir();
+        tool_coursebank_rrmdir($dir);
     } else {
         throw new invalid_dataroot_permissions();
     }

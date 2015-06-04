@@ -17,7 +17,7 @@
 /**
  * Basic script to test connection to remote server
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,21 +27,21 @@ define('CLI_SCRIPT', true);
 
 require(__DIR__.'../../../../../config.php');
 global $CFG;
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 
 // Get required config variables.
-$urltarget = get_config('tool_coursestore', 'url');
-$timeout = get_config('tool_coursestore', 'timeout');
-$maxatt = get_config('tool_coursestore', 'maxatt');
-$sessionkey = tool_coursestore::get_session();
+$urltarget = get_config('tool_coursebank', 'url');
+$timeout = get_config('tool_coursebank', 'timeout');
+$maxatt = get_config('tool_coursebank', 'maxatt');
+$sessionkey = tool_coursebank::get_session();
 
 // Initialise, check connection.
-$wsmanager = new coursestore_ws_manager($urltarget, $timeout);
+$wsmanager = new coursebank_ws_manager($urltarget, $timeout);
 
 // Initialise, check connection.
-if (!tool_coursestore::check_connection($wsmanager, $sessionkey)) {
+if (!tool_coursebank::check_connection($wsmanager, $sessionkey)) {
     // Connection check failed.
-    mtrace(get_string('conncheckfail', 'tool_coursestore', $urltarget));
+    mtrace(get_string('conncheckfail', 'tool_coursebank', $urltarget));
 } else {
-    mtrace(get_string('connchecksuccess', 'tool_coursestore', $urltarget));
+    mtrace(get_string('connchecksuccess', 'tool_coursebank', $urltarget));
 }

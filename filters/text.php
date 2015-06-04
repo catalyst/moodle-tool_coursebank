@@ -18,7 +18,7 @@
 /**
  * Filter for text fields.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,7 +26,7 @@
 
 require_once($CFG->dirroot.'/user/filters/lib.php');
 
-class coursestore_filter_text extends user_filter_text {
+class coursebank_filter_text extends user_filter_text {
     /**
      * Returns params
      *

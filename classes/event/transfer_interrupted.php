@@ -17,24 +17,24 @@
 /**
  * transfer_interrupted
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace tool_coursestore\event;
+namespace tool_coursebank\event;
 defined('MOODLE_INTERNAL') || die();
 /**
  * transfer_interrupted
  *
  * @property-read array $other {
  *      courseid      => Backup Moodle course ID
- *      coursestoreid => Course store backup ID
+ *      coursebankid => Course bank backup ID (Moodle side)
  *      error         => error code
  *      error_desc    => error description
  * }
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -46,12 +46,12 @@ class transfer_interrupted extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('eventtransferinterrupted', 'tool_coursestore');
+        return get_string('eventtransferinterrupted', 'tool_coursebank');
     }
 
     public function get_description() {
-        $desc = "Transfer of backup with course store id ".
-                $this->data['other']['coursestoreid'] .
+        $desc = "Transfer of backup with Moodle course bank id ".
+                $this->data['other']['coursebankid'] .
                 " interruped due to error. (Original course id: " .
                 $this->data['other']['courseid'] . ")";
 
@@ -66,6 +66,6 @@ class transfer_interrupted extends \core\event\base {
     }
 
     public function get_url() {
-        return new \moodle_url('/admin/tool/coursestore/queue.php');
+        return new \moodle_url('/admin/tool/coursebank/queue.php');
     }
 }

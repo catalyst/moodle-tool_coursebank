@@ -2,7 +2,7 @@
 /**
  * Tests for filters and sorting
  *
- * @package   tool_coursestore
+ * @package   tool_coursebank
  * @copyright 2015 onwards Catalyst IT
  * @author    Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -11,10 +11,10 @@
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/lib.php');
 
-class tool_coursestore_filters_testcase extends advanced_testcase {
+class tool_coursebank_filters_testcase extends advanced_testcase {
 
     protected function setUp() {
         global $DB;
@@ -24,7 +24,7 @@ class tool_coursestore_filters_testcase extends advanced_testcase {
 
     public function test_filter_date() {
         $data = array();
-        $filter = new coursestore_filter_date('filetimemodified', get_string('filetimemodified', 'tool_coursestore'), 1, 'filetimemodified');
+        $filter = new coursebank_filter_date('filetimemodified', get_string('filetimemodified', 'tool_coursebank'), 1, 'filetimemodified');
 
         $data['after'] = 1111;
         $data['before'] = 0;
@@ -48,7 +48,7 @@ class tool_coursestore_filters_testcase extends advanced_testcase {
 
     public function test_filter_filesize() {
         $data = array();
-        $filter = new coursestore_filter_filesize('filesize', get_string('filesize', 'tool_coursestore'), 1, 'filesize');
+        $filter = new coursebank_filter_filesize('filesize', get_string('filesize', 'tool_coursebank'), 1, 'filesize');
 
         $operators = $filter->getoperators();
         $this->assertCount(2, $operators);
@@ -92,15 +92,15 @@ class tool_coursestore_filters_testcase extends advanced_testcase {
     public function test_filter_select() {
         $data = array();
 
-        $filtering = new coursestore_filtering('queue');
+        $filtering = new coursebank_filtering('queue');
         $statuses = $filtering->get_status_choices();
         $this->assertCount(4, $statuses);
 
-        $filtering = new coursestore_filtering('download');
+        $filtering = new coursebank_filtering('download');
         $statuses = $filtering->get_status_choices();
         $this->assertCount(6, $statuses);
 
-        $filter = new coursestore_filter_select('status', get_string('status', 'tool_coursestore'), 1, 'status', $statuses);
+        $filter = new coursebank_filter_select('status', get_string('status', 'tool_coursebank'), 1, 'status', $statuses);
 
         $value = 1111;
         $expected = array(
@@ -126,7 +126,7 @@ class tool_coursestore_filters_testcase extends advanced_testcase {
     public function test_filter_text() {
         $data = array();
 
-        $filter = new coursestore_filter_text('coursefullname', get_string('coursefullname', 'tool_coursestore'), 1, 'coursefullname');
+        $filter = new coursebank_filter_text('coursefullname', get_string('coursefullname', 'tool_coursebank'), 1, 'coursefullname');
 
         $value = 1111;
         $expected = array(

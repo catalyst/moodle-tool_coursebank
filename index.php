@@ -17,7 +17,7 @@
 /**
  * Main page for user-facing download interface
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @author     Dmitrii Metelkin <adamr@catalyst-au.net>*
  * @copyright  2015 Catalyst IT
@@ -26,9 +26,9 @@
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/lib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -41,9 +41,9 @@ $perpage      = optional_param('perpage', 50, PARAM_INT);
 
 $context = context_system::instance();
 require_login(null, false);
-require_capability('tool/coursestore:view', $context);
+require_capability('tool/coursebank:view', $context);
 
-admin_externalpage_setup('tool_coursestore_download');
+admin_externalpage_setup('tool_coursebank_download');
 
 $params = array(
     'download' => $download,
@@ -53,32 +53,32 @@ $params = array(
     'page' => $page,
     'perpage' => $perpage
 );
-//$url = new moodle_url('/admin/tool/coursestore/download.php', $params);
-$url = new moodle_url('/admin/tool/coursestore/index.php', $params);
-$urltarget = get_config('tool_coursestore', 'url');
-$wsman = new coursestore_ws_manager($urltarget);
-$sesskey = tool_coursestore::get_session();
+//$url = new moodle_url('/admin/tool/coursebank/download.php', $params);
+$url = new moodle_url('/admin/tool/coursebank/index.php', $params);
+$urltarget = get_config('tool_coursebank', 'url');
+$wsman = new coursebank_ws_manager($urltarget);
+$sesskey = tool_coursebank::get_session();
 
 // Downloading.
 if ($download == 1 and !empty($file)) {
-    require_capability('tool/coursestore:download', $context);
+    require_capability('tool/coursebank:download', $context);
     $dlresponse = $wsman->get_backup($sesskey, $file, true);
     $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";
 
-    $error = tool_coursestore_error::is_response_backup_download_error($dlresponse);
-    coursestore_logging::log_backup_download($dlresponse, $file);
+    $error = tool_coursebank_error::is_response_backup_download_error($dlresponse);
+    coursebank_logging::log_backup_download($dlresponse, $file);
 
     if (!$error) {
         redirect($dlresponse->body->url, '', 0);
     } else {
-        print_error('errordownloading', 'tool_coursestore', $errorurl);
+        print_error('errordownloading', 'tool_coursebank', $errorurl);
     }
 }
 
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 
-$header = get_string('downloadsummary', 'tool_coursestore');
+$header = get_string('downloadsummary', 'tool_coursebank');
 $PAGE->set_title($header);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($header);
@@ -89,7 +89,7 @@ $filterparams = array(
         'filesize' => 1,
         'filetimemodified' => 1
 );
-$filtering = new coursestore_filtering('download', $filterparams);
+$filtering = new coursebank_filtering('download', $filterparams);
 $extraparams = $filtering->get_param_filter();
 
 $response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
@@ -102,20 +102,20 @@ if ($response->httpcode != $wsman::WS_HTTP_OK or isset($count->body->error)) {
     $error = true;
 }
 
-$renderer = $PAGE->get_renderer('tool_coursestore');
+$renderer = $PAGE->get_renderer('tool_coursebank');
 
 if ($error) {
-    echo $OUTPUT->notification(get_string('errorgetdownloadlist', 'tool_coursestore'), 'notifyproblem');
-    $returnurl = new moodle_url($CFG->wwwroot.'/admin/settings.php', array('section' => 'coursestore_settings'));
+    echo $OUTPUT->notification(get_string('errorgetdownloadlist', 'tool_coursebank'), 'notifyproblem');
+    $returnurl = new moodle_url($CFG->wwwroot.'/admin/settings.php', array('section' => 'coursebank_settings'));
     echo $renderer->single_button(
             $returnurl,
-            get_string('return', 'tool_coursestore'),
+            get_string('return', 'tool_coursebank'),
             'get'
     );
 } else {
     $filtering->display_add();
     $filtering->display_active();
-    echo $renderer->course_store_downloads($response->body, $sort, $dir, $page, $perpage);
+    echo $renderer->course_bank_downloads($response->body, $sort, $dir, $page, $perpage);
     echo $OUTPUT->paging_bar($count->body->backupcount, $page, $perpage, $url);
 }
 

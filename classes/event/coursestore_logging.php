@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * coursestore_logging
+ * coursebank_logging
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace tool_coursestore\event;
+namespace tool_coursebank\event;
 defined('MOODLE_INTERNAL') || die();
 /**
- * coursestore_logging
+ * coursebank_logging
  *
  * @property-read array $other {
  *      courseid   => Moodle course ID
@@ -39,12 +39,12 @@ defined('MOODLE_INTERNAL') || die();
  * }
  *
  *
- * @package    coursestore_logging
+ * @package    coursebank_logging
  * @author     Dmitrii Metelkin <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
-class coursestore_logging extends \core\event\base {
+class coursebank_logging extends \core\event\base {
     static $action;
 
     protected function init() {
@@ -54,7 +54,7 @@ class coursestore_logging extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('coursestorelogging', 'tool_coursestore');
+        return get_string('coursebanklogging', 'tool_coursebank');
     }
 
     public function get_description() {
@@ -74,7 +74,7 @@ class coursestore_logging extends \core\event\base {
         if (!empty($this->data['other']['url'])) {
             return new \moodle_url($this->data['other']['url']);
         } else {
-            return new \moodle_url('/admin/tool/coursestore/queue.php');
+            return new \moodle_url('/admin/tool/coursebank/queue.php');
         }
 
     }

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the capabilities used by the course store admin tool
+ * Defines the capabilities used by the course bank admin tool
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalys IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
-     'tool/coursestore:view' => array(
+     'tool/coursebank:view' => array(
          'riskbitmask' => RISK_CONFIG,
          'captype' => 'read',
          'contextlevel' => CONTEXT_SYSTEM,
@@ -36,7 +36,7 @@ $capabilities = array(
          ),
      ),
 
-     'tool/coursestore:download' => array(
+     'tool/coursebank:download' => array(
          'riskbitmask' => RISK_CONFIG,
          'captype' => 'read',
          'contextlevel' => CONTEXT_SYSTEM,
@@ -45,7 +45,7 @@ $capabilities = array(
          ),
      ),
 
-     'tool/coursestore:edit' => array(
+     'tool/coursebank:edit' => array(
          'riskbitmask' => RISK_CONFIG | RISK_XSS,
          'captype' => 'write',
          'contextlevel' => CONTEXT_SYSTEM,
@@ -54,7 +54,7 @@ $capabilities = array(
          ),
      ),
 
-     'tool/coursestore:viewlogs' => array(
+     'tool/coursebank:viewlogs' => array(
          'riskbitmask' => RISK_CONFIG,
          'captype' => 'read',
          'contextlevel' => CONTEXT_SYSTEM,

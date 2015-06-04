@@ -17,7 +17,7 @@
 /**
  * Report renderable class.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,13 +25,13 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot.'/admin/tool/coursestore/classes/table_log_lagacy.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/classes/table_log.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/classes/table_log_lagacy.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/classes/table_log.php');
 /**
  * Report renderable class.
  *
  */
-class tool_coursestore_renderable implements renderable {
+class tool_coursebank_renderable implements renderable {
     /** @var manager log manager */
     protected $logmanager;
 
@@ -238,7 +238,7 @@ class tool_coursestore_renderable implements renderable {
      */
     public function get_type_list() {
         $activities = array();
-        $activities["errors"] = get_string("errorsonly", 'tool_coursestore');
+        $activities["errors"] = get_string("errorsonly", 'tool_coursebank');
 
         return $activities;
     }
@@ -264,10 +264,10 @@ class tool_coursestore_renderable implements renderable {
 
         if (empty($this->lagacy)) {
             $filter->logreader = $readers[$this->selectedlogreader];
-            $this->tablelog = new tool_coursestore_table_log('coursestore_report', $filter);
+            $this->tablelog = new tool_coursebank_table_log('coursebank_report', $filter);
         } else {
             $filter->logreader = null;
-            $this->tablelog = new tool_coursestore_table_log_legacy('coursestore_report', $filter);
+            $this->tablelog = new tool_coursebank_table_log_legacy('coursebank_report', $filter);
         }
 
         $this->tablelog->define_baseurl($this->url);
@@ -278,7 +278,7 @@ class tool_coursestore_renderable implements renderable {
      * Download logs in specified format.
      */
     public function download() {
-        $filename = 'coursestore_report_' . userdate(time(), get_string('backupnameformat', 'langconfig'), 99, false);
+        $filename = 'coursebank_report_' . userdate(time(), get_string('backupnameformat', 'langconfig'), 99, false);
         $this->tablelog->is_downloading($this->logformat, $filename);
         $this->tablelog->out($this->perpage, false);
     }

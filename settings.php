@@ -17,7 +17,7 @@
 /**
  * Adds settings links to admin tree.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
@@ -28,19 +28,19 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/lib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 
-$PAGE->requires->js('/admin/tool/coursestore/javascript/jquery-1.11.0.min.js');
-$PAGE->requires->js('/admin/tool/coursestore/javascript/coursestore.js');
+$PAGE->requires->js('/admin/tool/coursebank/javascript/jquery-1.11.0.min.js');
+$PAGE->requires->js('/admin/tool/coursebank/javascript/coursebank.js');
 
-$displaypages = tool_coursestore_get_config('displaypages');
+$displaypages = tool_coursebank_get_config('displaypages');
 
 if ($displaypages) {
     if (PHPUNIT_TEST) {
         // When unit tests are run,  the menu item 'courses/backups' has not been created yet
         // in Moodle 2.7+.  It has been created for Moodle 2.6 and below.
-        // We need to check if it has not been created and actually 
+        // We need to check if it has not been created and actually
         // add it so we don't get the error that the parent doesn't exist.
         // This is not required in the real-world though as these plugins are loaded
         // after the course menu has been set up.
@@ -49,64 +49,64 @@ if ($displaypages) {
         }
     }
 
-    $ADMIN->add('backups', new admin_category('coursestore_pages',
-            get_string('pluginname', 'tool_coursestore')));
+    $ADMIN->add('backups', new admin_category('coursebank_pages',
+            get_string('pluginname', 'tool_coursebank')));
 
-    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_queue',
-            get_string('nav_queue', 'tool_coursestore'),
-            "$CFG->wwwroot/$CFG->admin/tool/coursestore/queue.php", 'tool/coursestore:view'));
+    $ADMIN->add('coursebank_pages', new admin_externalpage('tool_coursebank_queue',
+            get_string('nav_queue', 'tool_coursebank'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursebank/queue.php", 'tool/coursebank:view'));
 
-    $ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore_download',
-            get_string('nav_download', 'tool_coursestore'),
-            "$CFG->wwwroot/$CFG->admin/tool/coursestore/index.php", 'tool/coursestore:view'));
+    $ADMIN->add('coursebank_pages', new admin_externalpage('tool_coursebank_download',
+            get_string('nav_download', 'tool_coursebank'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursebank/index.php", 'tool/coursebank:view'));
 
     // Do not include this page in the menu.
-    //$ADMIN->add('coursestore_pages', new admin_externalpage('tool_coursestore',
-    //        get_string('nav_summary', 'tool_coursestore'),
-    //        "$CFG->wwwroot/$CFG->admin/tool/coursestore/transfer_report.php", 'tool/coursestore:view'));
+    //$ADMIN->add('coursebank_pages', new admin_externalpage('tool_coursebank',
+    //        get_string('nav_summary', 'tool_coursebank'),
+    //        "$CFG->wwwroot/$CFG->admin/tool/coursebank/transfer_report.php", 'tool/coursebank:view'));
 
-    $ADMIN->add('reports', new admin_externalpage('tool_coursestore_report',
-            get_string('nav_report', 'tool_coursestore'),
-            "$CFG->wwwroot/$CFG->admin/tool/coursestore/report.php", 'tool/coursestore:viewlogs'));
+    $ADMIN->add('reports', new admin_externalpage('tool_coursebank_report',
+            get_string('nav_report', 'tool_coursebank'),
+            "$CFG->wwwroot/$CFG->admin/tool/coursebank/report.php", 'tool/coursebank:viewlogs'));
 }
 
 if ($hassiteconfig) {
 
-    $settings = new admin_settingpage('coursestore_settings',
-            get_string('pluginname', 'tool_coursestore')
+    $settings = new admin_settingpage('coursebank_settings',
+            get_string('pluginname', 'tool_coursebank')
     );
 
-    $renderer = $PAGE->get_renderer('tool_coursestore');
+    $renderer = $PAGE->get_renderer('tool_coursebank');
 
-    $text = $renderer->course_store_conncheck();
-    $text .= $renderer->course_store_speedtest();
+    $text = $renderer->course_bank_conncheck();
+    $text .= $renderer->course_bank_speedtest();
 
-    $settings->add(new admin_setting_heading('coursestore_settings_conncheck', '', $text));
+    $settings->add(new admin_setting_heading('coursebank_settings_conncheck', '', $text));
 
-    $settings->add(new admin_setting_heading('coursestore_header',
-            get_string('settings_header', 'tool_coursestore'),
+    $settings->add(new admin_setting_heading('coursebank_header',
+            get_string('settings_header', 'tool_coursebank'),
             '')
     );
     $enableoptions = array(
-        0 => get_string('settings_disablestring', 'tool_coursestore'),
-        1 => get_string('settings_enablestring', 'tool_coursestore')
+        0 => get_string('settings_disablestring', 'tool_coursebank'),
+        1 => get_string('settings_enablestring', 'tool_coursebank')
     );
-    $enable = new admin_setting_configselect('tool_coursestore/enable',
-            ' '.get_string('settings_enable', 'tool_coursestore'),
-            ' '.get_string('settings_enable_desc', 'tool_coursestore'),
+    $enable = new admin_setting_configselect('tool_coursebank/enable',
+            ' '.get_string('settings_enable', 'tool_coursebank'),
+            ' '.get_string('settings_enable_desc', 'tool_coursebank'),
             1,
             $enableoptions
     );
     $settings->add($enable);
-    $settings->add(new admin_setting_configtext('tool_coursestore/url',
-            get_string('settings_url', 'tool_coursestore'),
-            get_string('settings_url_desc', 'tool_coursestore'),
+    $settings->add(new admin_setting_configtext('tool_coursebank/url',
+            get_string('settings_url', 'tool_coursebank'),
+            get_string('settings_url_desc', 'tool_coursebank'),
             '',
             PARAM_URL)
     );
-    $settings->add(new admin_setting_configtext('tool_coursestore/authtoken',
-            get_string('settings_authtoken', 'tool_coursestore'),
-            get_string('settings_authtoken_desc', 'tool_coursestore'),
+    $settings->add(new admin_setting_configtext('tool_coursebank/authtoken',
+            get_string('settings_authtoken', 'tool_coursebank'),
+            get_string('settings_authtoken_desc', 'tool_coursebank'),
             '',
             PARAM_TEXT)
     );
@@ -119,50 +119,50 @@ if ($hassiteconfig) {
        1500 => '1.5MB',
        2000 => '2MB'
     );
-    $settings->add(new admin_setting_configselect('tool_coursestore/chunksize',
-            get_string('settings_chunksize', 'tool_coursestore'),
-            get_string('settings_chunksize_desc', 'tool_coursestore'),
+    $settings->add(new admin_setting_configselect('tool_coursebank/chunksize',
+            get_string('settings_chunksize', 'tool_coursebank'),
+            get_string('settings_chunksize_desc', 'tool_coursebank'),
             500,
             $chunksizeopts)
     );
-    $settings->add(new admin_setting_configcheckbox('tool_coursestore/externalcron',
-            get_string('settings_externalcron', 'tool_coursestore'),
-            get_string('settings_externalcron_desc', 'tool_coursestore'), 0));
+    $settings->add(new admin_setting_configcheckbox('tool_coursebank/externalcron',
+            get_string('settings_externalcron', 'tool_coursebank'),
+            get_string('settings_externalcron_desc', 'tool_coursebank'), 0));
 
-    $settings->add(new admin_setting_configcheckbox('tool_coursestore/displaypages',
-            get_string('settings_displaypages', 'tool_coursestore'),
-            get_string('settings_displaypages_desc', 'tool_coursestore'), 1));
+    $settings->add(new admin_setting_configcheckbox('tool_coursebank/displaypages',
+            get_string('settings_displaypages', 'tool_coursebank'),
+            get_string('settings_displaypages_desc', 'tool_coursebank'), 1));
     $settings->add(new admin_setting_configsessionkey(
-            'tool_coursestore/sessionkey',
-            get_string('settings_sessionkey', 'tool_coursestore'),
-            get_string('settings_sessionkey_desc', 'tool_coursestore')
+            'tool_coursebank/sessionkey',
+            get_string('settings_sessionkey', 'tool_coursebank'),
+            get_string('settings_sessionkey_desc', 'tool_coursebank')
             )
     );
-    $settings->add(new admin_setting_heading('coursestore_proxy_header',
-            get_string('settings_proxyheader', 'tool_coursestore'),
+    $settings->add(new admin_setting_heading('coursebank_proxy_header',
+            get_string('settings_proxyheader', 'tool_coursebank'),
             '')
     );
-    $settings->add(new admin_setting_configtext('tool_coursestore/proxyurl',
-            get_string('settings_proxyurl', 'tool_coursestore'),
-            get_string('settings_proxyurl_desc', 'tool_coursestore'),
+    $settings->add(new admin_setting_configtext('tool_coursebank/proxyurl',
+            get_string('settings_proxyurl', 'tool_coursebank'),
+            get_string('settings_proxyurl_desc', 'tool_coursebank'),
             '',
             PARAM_URL)
     );
-    $settings->add(new admin_setting_configtext('tool_coursestore/proxyuser',
-            get_string('settings_proxyuser', 'tool_coursestore'),
-            get_string('settings_proxyuser_desc', 'tool_coursestore'),
+    $settings->add(new admin_setting_configtext('tool_coursebank/proxyuser',
+            get_string('settings_proxyuser', 'tool_coursebank'),
+            get_string('settings_proxyuser_desc', 'tool_coursebank'),
             '',
             PARAM_TEXT)
     );
-    $settings->add(new admin_setting_configpasswordunmask('tool_coursestore/proxypass',
-            get_string('settings_proxypass', 'tool_coursestore'),
-            get_string('settings_proxypass_desc', 'tool_coursestore'),
+    $settings->add(new admin_setting_configpasswordunmask('tool_coursebank/proxypass',
+            get_string('settings_proxypass', 'tool_coursebank'),
+            get_string('settings_proxypass_desc', 'tool_coursebank'),
             ''
             )
     );
-    $settings->add(new admin_setting_configtext('tool_coursestore/proxyport',
-            get_string('settings_proxyport', 'tool_coursestore'),
-            get_string('settings_proxyport_desc', 'tool_coursestore'),
+    $settings->add(new admin_setting_configtext('tool_coursebank/proxyport',
+            get_string('settings_proxyport', 'tool_coursebank'),
+            get_string('settings_proxyport_desc', 'tool_coursebank'),
             '',
             PARAM_INT)
     );

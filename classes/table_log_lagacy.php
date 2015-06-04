@@ -17,7 +17,7 @@
 /**
  * Table for displaying legacy logs.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die;
  * Table class for moodle less then 2.7.
  *
  */
-class tool_coursestore_table_log_legacy extends tool_coursestore_table_log {
+class tool_coursebank_table_log_legacy extends tool_coursebank_table_log {
     /**
      * Sets up the table_log parameters.
      *
@@ -40,7 +40,7 @@ class tool_coursestore_table_log_legacy extends tool_coursestore_table_log {
     public function __construct($uniqueid, $filterparams = null) {
         parent::__construct($uniqueid);
 
-        $this->set_attribute('class', 'tool_coursestore_report generaltable generalbox');
+        $this->set_attribute('class', 'tool_coursebank_report generaltable generalbox');
         $this->filterparams = $filterparams;
         // Add course column if logs are displayed for site.
         $cols = array();

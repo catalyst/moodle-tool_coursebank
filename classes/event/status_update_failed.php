@@ -17,19 +17,19 @@
 /**
  * connection_checked
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace tool_coursestore\event;
+namespace tool_coursebank\event;
 defined('MOODLE_INTERNAL') || die();
 /**
  * status_update_failed
  *
  * This event is to be triggered whenever status update is failed.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -41,7 +41,7 @@ class status_update_failed extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('eventstatusupdatefailed', 'tool_coursestore');
+        return get_string('eventstatusupdatefailed', 'tool_coursebank');
     }
 
     public function get_description() {
@@ -50,6 +50,6 @@ class status_update_failed extends \core\event\base {
     }
 
     public function get_url() {
-        return new \moodle_url('/admin/tool/coursestore/queue.php');
+        return new \moodle_url('/admin/tool/coursebank/queue.php');
     }
 }

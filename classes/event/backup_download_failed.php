@@ -17,12 +17,12 @@
 /**
  * backup_download_failed
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace tool_coursestore\event;
+namespace tool_coursebank\event;
 defined('MOODLE_INTERNAL') || die();
 /**
  * backup_download_failed
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * This event is to be triggered whenever backup download failed.
  *
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -42,7 +42,7 @@ class backup_download_failed extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('eventbackupdownloadfailed', 'tool_coursestore');
+        return get_string('eventbackupdownloadfailed', 'tool_coursebank');
     }
 
     public function get_description() {
@@ -59,6 +59,6 @@ class backup_download_failed extends \core\event\base {
     }
 
     public function get_url() {
-        return new \moodle_url('/admin/tool/coursestore/index.php');
+        return new \moodle_url('/admin/tool/coursebank/index.php');
     }
 }

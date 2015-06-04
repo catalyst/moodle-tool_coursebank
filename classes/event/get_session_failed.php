@@ -17,12 +17,12 @@
 /**
  * get_session_failed
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace tool_coursestore\event;
+namespace tool_coursebank\event;
 defined('MOODLE_INTERNAL') || die();
 /**
  * get_session_failed
@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  *      error_desc => error description
  * }
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -44,7 +44,7 @@ class get_session_failed extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('eventgetsessionfailed', 'tool_coursestore');
+        return get_string('eventgetsessionfailed', 'tool_coursebank');
     }
 
     public function get_description() {
@@ -61,6 +61,6 @@ class get_session_failed extends \core\event\base {
     }
 
     public function get_url() {
-        return new \moodle_url('/admin/tool/coursestore/queue.php');
+        return new \moodle_url('/admin/tool/coursebank/queue.php');
     }
 }

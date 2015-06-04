@@ -17,7 +17,7 @@
 /**
  * Report page
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,8 +25,8 @@
 
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/lib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/lib.php');
 require_once($CFG->dirroot.'/lib/tablelib.php');
 
 defined('MOODLE_INTERNAL') || die;
@@ -78,14 +78,14 @@ if ($logreader !== '') {
 $context = context_system::instance();
 
 require_login(null, false);
-require_capability('tool/coursestore:viewlogs', $context);
+require_capability('tool/coursebank:viewlogs', $context);
 
-admin_externalpage_setup('tool_coursestore_report');
+admin_externalpage_setup('tool_coursebank_report');
 
-$url = new moodle_url('/admin/tool/coursestore/report.php', $params);
+$url = new moodle_url('/admin/tool/coursebank/report.php', $params);
 $PAGE->set_url($url);
 $PAGE->set_context($context);
-$output = $PAGE->get_renderer('tool_coursestore');
+$output = $PAGE->get_renderer('tool_coursebank');
 
 // Check if moodle is older then 2.7.x.
 if ((float)$CFG->version < 2014051200) {
@@ -96,7 +96,7 @@ if ((float)$CFG->version < 2014051200) {
     $order = 'timecreated DESC';
 }
 
-$reportlog = new tool_coursestore_renderable($legacy, $logreader, $user, $chooselog, true, $url, $date, $type,
+$reportlog = new tool_coursebank_renderable($legacy, $logreader, $user, $chooselog, true, $url, $date, $type,
         $logformat, $page, $perpage, $order);
 
 if (!empty($chooselog)) {

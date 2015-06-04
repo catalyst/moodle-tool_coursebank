@@ -17,12 +17,12 @@
 /**
  * connection_checked
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace tool_coursestore\event;
+namespace tool_coursebank\event;
 defined('MOODLE_INTERNAL') || die();
 /**
  * connection_checked
@@ -37,7 +37,7 @@ defined('MOODLE_INTERNAL') || die();
  *      error_desc      => error description
  * }
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -49,7 +49,7 @@ class connection_check_failed extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('eventconnectioncheckfailed', 'tool_coursestore');
+        return get_string('eventconnectioncheckfailed', 'tool_coursebank');
     }
 
     public function get_description() {
@@ -88,6 +88,6 @@ class connection_check_failed extends \core\event\base {
         } else {
             $params = array('action' => 'conncheck');
         }
-        return new \moodle_url('/admin/tool/coursestore/check_connection.php', $params);
+        return new \moodle_url('/admin/tool/coursebank/check_connection.php', $params);
     }
 }

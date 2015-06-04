@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for tool_coursestore
+ * Strings for tool_coursebank
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalys IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Course Store';
+$string['pluginname'] = 'Course Bank';
 $string['backupfailed'] = 'Failed sending backup {$a}.';
 $string['deletefailed'] = 'Failed deleting backup {$a}.';
 $string['sendcoursebackups'] = 'External course backups';
 $string['noaccesstofeature'] = 'Sorry, only admin or CLI has access to this feature.';
 $string['settingspage'] = 'Configuration';
-$string['settings_header'] = 'Course Store configuration options';
+$string['settings_header'] = 'Course Bank configuration options';
 $string['settings_url'] = 'Target URL';
 $string['settings_url_desc'] = 'Location of the target backup server.';
 $string['settings_chunksize'] = 'Chunk size';
@@ -43,9 +43,9 @@ $string['settings_disablestring'] = 'Disable';
 $string['settings_externalcron'] = 'Use external cron';
 $string['settings_externalcron_desc'] = 'If checked the process will be triggered by external cron.
     <br />Server administrators have to set up external cron.
-    <br />The simple example: <PRE>2-57/5 * * * * www-data php /path/to/your/moodle/admin/tool/coursestore/cli/backup.php >> /var/log/backup.log</PRE>';
+    <br />The simple example: <PRE>2-57/5 * * * * www-data php /path/to/your/moodle/admin/tool/coursebank/cli/backup.php >> /var/log/backup.log</PRE>';
 $string['settings_displaypages'] = 'Display pages';
-$string['settings_displaypages_desc'] = 'Hide/Display Course Store pages in the navigation menu under Site administration > Courses > Backups > Course Store';
+$string['settings_displaypages_desc'] = 'Hide/Display Course Bank pages in the navigation menu under Site administration > Courses > Backups > Course Bank';
 $string['conncheckfail'] = 'Connection to {$a} failed. Please confirm that your external course bank settings and network configuration are correct.';
 $string['connchecksuccess'] = 'Connection check to {$a} passed!';
 $string['speedtestsuccess'] = 'Connection speed test to {$a} passed! The test transfer speed was approximately ';
@@ -58,8 +58,8 @@ $string['connchecktitle'] = 'Connection check';
 $string['speedtesttitle'] = 'Connection speed test';
 $string['conncheckbutton'] = 'Check connection';
 $string['speedtestbutton'] = 'Test transfer speed';
-$string['backupsummary'] = 'Course Store backups transfer report';
-$string['backupqueue'] = 'Course Store backups transfer queue';
+$string['backupsummary'] = 'Course Bank backups transfer report';
+$string['backupqueue'] = 'Course Bank backups transfer queue';
 $string['backupfiles'] = '{$a} file(s)';
 $string['statuserror'] = 'Error';
 $string['statusinprogress'] = 'Transfer in progress';
@@ -82,7 +82,7 @@ $string['cron_removinglock'] = 'Removing cron lock in the database...';
 $string['nav_summary'] = 'Backups transfer report';
 $string['nav_download'] = 'Download backups';
 $string['nav_queue'] = 'Transfer queue';
-$string['nav_report'] = 'Course Store logs';
+$string['nav_report'] = 'Course Bank logs';
 $string['downloadsummary'] = 'External Course Bank download backups';
 $string['eventconnectionchecked'] = 'Connection checked';
 $string['eventconnectioncheckfailed'] = 'Connection check failed';
@@ -113,11 +113,11 @@ $string['filterlessthan'] = 'less than';
 $string['filterisequalto'] = 'is equal to';
 $string['errordownloading'] = 'Error downloading the backup file.';
 $string['errorgetdownloadlist'] = 'Can\'t get a list of backups from external course bank. Please confirm that your external course bank settings and network configuration are correct.';
-$string['coursestorelogging'] = 'Course Store Logging';
-$string['coursestore:view'] = 'View a list of course store backup files';
-$string['coursestore:download'] = 'Download course store backup files';
-$string['coursestore:edit'] = 'Edit course store backup files';
-$string['coursestore:viewlogs'] = 'View Course Store logs';
+$string['coursebanklogging'] = 'Course Bank Logging';
+$string['coursebank:view'] = 'View a list of course bank backup files';
+$string['coursebank:download'] = 'Download course bank backup files';
+$string['coursebank:edit'] = 'Edit course bank backup files';
+$string['coursebank:viewlogs'] = 'View Course Bank logs';
 $string['errorupdatingstatus'] = 'Error updating status';
 $string['check_delete'] = 'Are you sure you want to delete {$a} from the transfer queue?';
 $string['check_stop'] = 'Are you sure you want to put transferring of {$a} on hold?';
@@ -127,7 +127,7 @@ $string['delete'] = 'Delete from the queue';
 $string['stop'] = 'Put on hold';
 $string['go'] = 'Resume transferring';
 $string['download'] = 'Download backup file';
-$string['reportpageheader'] = 'Course Store logs';
+$string['reportpageheader'] = 'Course Bank logs';
 $string['nologreaderenabled'] = 'No log reader enabled';
 $string['eventhttprequest'] = 'Http request';
 $string['eventhttprequestfailed'] = 'Http request failed';
@@ -143,7 +143,7 @@ $string['eventname'] = 'Event name';
 $string['crontimeout'] = 'Cron execution time limit reached! Deferring transfer of remaining courses to next run.';
 $string['eventtimeoutreached_desc'] = 'Cron execition time limit reached during transfer of course {$a}.';
 $string['settings_sessionkey'] = 'Session key';
-$string['settings_sessionkey_desc'] = 'Session key used by Course Store to authenticate with External Course Bank.';
+$string['settings_sessionkey_desc'] = 'Session key used by Course Bank (Moodle) to authenticate with External Course Bank.';
 $string['settings_proxyheader'] = 'Proxy configuration';
 $string['settings_proxyurl'] = 'Proxy URL';
 $string['settings_proxyurl_desc'] = 'Proxy provider URL';

@@ -17,12 +17,12 @@
 /**
  * transfer_starte_failed
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace tool_coursestore\event;
+namespace tool_coursebank\event;
 defined('MOODLE_INTERNAL') || die();
 /**
  * transfer_starte_failed
@@ -30,12 +30,12 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read array $other {
  *      info          => Text description of the event.
  *      courseid      => Backup Moodle course ID
- *      coursestoreid => Course store backup ID
+ *      coursebankid => Course bank backup ID (Moodle side)
  *      error         => error code
  *      error_desc    => error description
  * }
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -47,7 +47,7 @@ class transfer_start_failed extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('eventtransferstartfailed', 'tool_coursestore');
+        return get_string('eventtransferstartfailed', 'tool_coursebank');
     }
 
     public function get_description() {
@@ -64,6 +64,6 @@ class transfer_start_failed extends \core\event\base {
     }
 
     public function get_url() {
-        return new \moodle_url('/admin/tool/coursestore/queue.php');
+        return new \moodle_url('/admin/tool/coursebank/queue.php');
     }
 }

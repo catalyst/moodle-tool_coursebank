@@ -17,21 +17,21 @@
 /**
  * This file contains the Filter API.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/coursestore_filter_forms.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/filesize.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/text.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/date.php');
-require_once($CFG->dirroot.'/admin/tool/coursestore/filters/select.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/coursebank_filter_forms.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/filesize.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/text.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/date.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/filters/select.php');
 
 
 
-class coursestore_filtering {
+class coursebank_filtering {
     private $prefix;
     public $_fields;
     public $_addform;
@@ -50,8 +50,8 @@ class coursestore_filtering {
              $this->prefix = $prefix;
         }
 
-        if (!isset($SESSION->coursestore_filtering[$this->prefix])) {
-            $SESSION->coursestore_filtering[$this->prefix] = array();
+        if (!isset($SESSION->coursebank_filtering[$this->prefix])) {
+            $SESSION->coursebank_filtering[$this->prefix] = array();
         }
 
         if (empty($fieldnames)) {
@@ -67,28 +67,28 @@ class coursestore_filtering {
         }
 
         // Fist the new filter form.
-        $this->_addform = new coursestore_add_filter_form($baseurl, array('fields' => $this->_fields, 'extraparams' => $extraparams, 'prefix' => $this->prefix));
+        $this->_addform = new coursebank_add_filter_form($baseurl, array('fields' => $this->_fields, 'extraparams' => $extraparams, 'prefix' => $this->prefix));
         if ($adddata = $this->_addform->get_data()) {
             foreach ($this->_fields as $fname => $field) {
                 $data = $field->check_data($adddata);
                 if ($data === false) {
                     continue; // Nothing new.
                 }
-                if (!array_key_exists($fname, $SESSION->coursestore_filtering[$this->prefix])) {
-                    $SESSION->coursestore_filtering[$this->prefix][$fname] = array();
+                if (!array_key_exists($fname, $SESSION->coursebank_filtering[$this->prefix])) {
+                    $SESSION->coursebank_filtering[$this->prefix][$fname] = array();
                 }
-                $SESSION->coursestore_filtering[$this->prefix][$fname][] = $data;
+                $SESSION->coursebank_filtering[$this->prefix][$fname][] = $data;
             }
             // Clear the form.
             $_POST = array();
-            $this->_addform = new coursestore_add_filter_form($baseurl, array('fields' => $this->_fields, 'extraparams' => $extraparams, 'prefix' => $this->prefix));
+            $this->_addform = new coursebank_add_filter_form($baseurl, array('fields' => $this->_fields, 'extraparams' => $extraparams, 'prefix' => $this->prefix));
         }
 
         // Now the active filters.
-        $this->_activeform = new coursestore_active_filter_form($baseurl, array('fields' => $this->_fields, 'extraparams' => $extraparams, 'prefix' => $this->prefix));
+        $this->_activeform = new coursebank_active_filter_form($baseurl, array('fields' => $this->_fields, 'extraparams' => $extraparams, 'prefix' => $this->prefix));
         if ($adddata = $this->_activeform->get_data()) {
             if (!empty($adddata->removeall)) {
-                $SESSION->coursestore_filtering[$this->prefix] = array();
+                $SESSION->coursebank_filtering[$this->prefix] = array();
 
             } else if (!empty($adddata->removeselected) and !empty($adddata->filter)) {
                 foreach ($adddata->filter as $fname => $instances) {
@@ -96,16 +96,16 @@ class coursestore_filtering {
                         if (empty($val)) {
                             continue;
                         }
-                        unset($SESSION->coursestore_filtering[$this->prefix][$fname][$i]);
+                        unset($SESSION->coursebank_filtering[$this->prefix][$fname][$i]);
                     }
-                    if (empty($SESSION->coursestore_filtering[$this->prefix][$fname])) {
-                        unset($SESSION->coursestore_filtering[$this->prefix][$fname]);
+                    if (empty($SESSION->coursebank_filtering[$this->prefix][$fname])) {
+                        unset($SESSION->coursebank_filtering[$this->prefix][$fname]);
                     }
                 }
             }
             // Clear+reload the form.
             $_POST = array();
-            $this->_activeform = new coursestore_active_filter_form($baseurl, array('fields' => $this->_fields, 'extraparams' => $extraparams, 'prefix' => $this->prefix));
+            $this->_activeform = new coursebank_active_filter_form($baseurl, array('fields' => $this->_fields, 'extraparams' => $extraparams, 'prefix' => $this->prefix));
         }
         // Now the active filters.
     }
@@ -119,15 +119,15 @@ class coursestore_filtering {
     public function get_field($fieldname, $advanced) {
         switch ($fieldname) {
             case 'coursefullname':
-                return new coursestore_filter_text('coursefullname', get_string('coursefullname', 'tool_coursestore'), $advanced, 'coursefullname');
+                return new coursebank_filter_text('coursefullname', get_string('coursefullname', 'tool_coursebank'), $advanced, 'coursefullname');
             case 'backupfilename':
-                return new coursestore_filter_text('backupfilename', get_string('backupfilename', 'tool_coursestore'), $advanced, 'backupfilename');
+                return new coursebank_filter_text('backupfilename', get_string('backupfilename', 'tool_coursebank'), $advanced, 'backupfilename');
             case 'filesize':
-                return new coursestore_filter_filesize('filesize', get_string('filesize', 'tool_coursestore'), $advanced, 'filesize');
+                return new coursebank_filter_filesize('filesize', get_string('filesize', 'tool_coursebank'), $advanced, 'filesize');
             case 'filetimemodified':
-                return new coursestore_filter_date('filetimemodified', get_string('filetimemodified', 'tool_coursestore'), $advanced, 'filetimemodified');
+                return new coursebank_filter_date('filetimemodified', get_string('filetimemodified', 'tool_coursebank'), $advanced, 'filetimemodified');
             case 'status':
-                return new coursestore_filter_select('status', get_string('status', 'tool_coursestore'), $advanced, 'status', $this->get_status_choices());
+                return new coursebank_filter_select('status', get_string('status', 'tool_coursebank'), $advanced, 'status', $this->get_status_choices());
             default:
                 return null;
         }
@@ -148,8 +148,8 @@ class coursestore_filtering {
         }
         $params = (array)$params;
 
-        if (!empty($SESSION->coursestore_filtering[$this->prefix])) {
-            foreach ($SESSION->coursestore_filtering[$this->prefix] as $fname => $datas) {
+        if (!empty($SESSION->coursebank_filtering[$this->prefix])) {
+            foreach ($SESSION->coursebank_filtering[$this->prefix] as $fname => $datas) {
                 if (!array_key_exists($fname, $this->_fields)) {
                     continue; // Filter not used.
                 }
@@ -181,8 +181,8 @@ class coursestore_filtering {
 
         $params = (array)$params;
 
-        if (!empty($SESSION->coursestore_filtering[$this->prefix])) {
-            foreach ($SESSION->coursestore_filtering[$this->prefix] as $fname => $datas) {
+        if (!empty($SESSION->coursebank_filtering[$this->prefix])) {
+            foreach ($SESSION->coursebank_filtering[$this->prefix] as $fname => $datas) {
                 if (!array_key_exists($fname, $this->_fields)) {
                     continue; // Filter not used.
                 }
@@ -212,20 +212,20 @@ class coursestore_filtering {
     }
 
     /**
-     * Generates a list of statuses for coursestore_filter_select
+     * Generates a list of statuses for coursebank_filter_select
      * @return array A list of statuses
      */
     public function get_status_choices() {
-        $statuses = tool_coursestore::get_statuses();
+        $statuses = tool_coursebank::get_statuses();
 
         if ($this->prefix == 'queue') {
             // Remove STATUS_FINISHED from a filter on the queue page.
-            if (isset($statuses[tool_coursestore::STATUS_FINISHED])) {
-                unset($statuses[tool_coursestore::STATUS_FINISHED]);
+            if (isset($statuses[tool_coursebank::STATUS_FINISHED])) {
+                unset($statuses[tool_coursebank::STATUS_FINISHED]);
             }
             // Remove STATUS_CANCELLED from a filter on the queue page.
-            if (isset($statuses[tool_coursestore::STATUS_CANCELLED])) {
-                unset($statuses[tool_coursestore::STATUS_CANCELLED]);
+            if (isset($statuses[tool_coursebank::STATUS_CANCELLED])) {
+                unset($statuses[tool_coursebank::STATUS_CANCELLED]);
             }
         }
 

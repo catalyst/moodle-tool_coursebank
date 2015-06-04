@@ -17,7 +17,7 @@
 /**
  * This file contains forms used for filtering.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,7 +25,7 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
-class coursestore_add_filter_form extends moodleform {
+class coursebank_add_filter_form extends moodleform {
 
     /**
      * Form definition.
@@ -54,7 +54,7 @@ class coursestore_add_filter_form extends moodleform {
     }
 }
 
-class coursestore_active_filter_form extends moodleform {
+class coursebank_active_filter_form extends moodleform {
 
     /**
      * Form definition.
@@ -67,11 +67,11 @@ class coursestore_active_filter_form extends moodleform {
         $extraparams = $this->_customdata['extraparams'];
         $prefix = $this->_customdata['prefix'];
 
-        if (!empty($SESSION->coursestore_filtering[$prefix])) {
+        if (!empty($SESSION->coursebank_filtering[$prefix])) {
             // Add controls for each active filter in the active filters group.
             $mform->addElement('header', 'actfilterhdr', get_string('actfilterhdr', 'filters'));
 
-            foreach ($SESSION->coursestore_filtering[$prefix] as $fname => $datas) {
+            foreach ($SESSION->coursebank_filtering[$prefix] as $fname => $datas) {
                 if (!array_key_exists($fname, $fields)) {
                     continue; // Filter not used.
                 }

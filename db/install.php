@@ -18,7 +18,7 @@
  * Post installation and migration code.
  *
  * @package    tool
- * @subpackage coursestore
+ * @subpackage coursebank
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,13 +26,13 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot.'/admin/tool/coursestore/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 
-function xmldb_tool_coursestore_install() {
+function xmldb_tool_coursebank_install() {
     global $CFG, $OUTPUT, $DB;
 
     if (is_writable($CFG->dataroot)) {
-        $dir = tool_coursestore::get_coursestore_data_dir();
+        $dir = tool_coursebank::get_coursebank_data_dir();
         mkdir($dir);
     } else {
         throw new invalid_dataroot_permissions();

@@ -17,7 +17,7 @@
 /**
  * Filter for filesize fields.
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,15 +25,15 @@
 
 require_once($CFG->dirroot.'/user/filters/lib.php');
 
-class coursestore_filter_filesize extends user_filter_text {
+class coursebank_filter_filesize extends user_filter_text {
 
     /**
      * Returns an array of comparison operators
      * @return array of comparison operators
      */
     public function getoperators() {
-        return array(0 => get_string('filtermorethan', 'tool_coursestore'),
-                     1 => get_string('filterlessthan', 'tool_coursestore'),
+        return array(0 => get_string('filtermorethan', 'tool_coursebank'),
+                     1 => get_string('filterlessthan', 'tool_coursebank'),
         );
     }
     /**
@@ -81,8 +81,8 @@ class coursestore_filter_filesize extends user_filter_text {
         $objs = array();
         $objs['select'] = $mform->createElement('select', $this->_name.'_op', null, $this->getOperators());
         $objs['text'] = $mform->createElement('text', $this->_name, null);
-        $objs['select']->setLabel(get_string('limiterfor', 'tool_coursestore', $this->_label));
-        $objs['text']->setLabel(get_string('valuefor', 'tool_coursestore', $this->_label));
+        $objs['select']->setLabel(get_string('limiterfor', 'tool_coursebank', $this->_label));
+        $objs['text']->setLabel(get_string('valuefor', 'tool_coursebank', $this->_label));
         $objs['selectscale'] = $mform->createElement('select', $this->_name.'_scale', null, $this->get_size());
         $grp =& $mform->addElement('group', $this->_name.'_grp', $this->_label, $objs, '', false);
         $mform->setType($this->_name, PARAM_RAW);

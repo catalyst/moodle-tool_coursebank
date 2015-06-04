@@ -17,12 +17,12 @@
 /**
  * timeout_reached
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace tool_coursestore\event;
+namespace tool_coursebank\event;
 defined('MOODLE_INTERNAL') || die();
 /**
  * timeout_reached
@@ -30,12 +30,12 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read array $other {
  *      info          => Text description of the event.
  *      courseid      => Backup Moodle course ID
- *      coursestoreid => Course store backup ID
+ *      coursebankid => Course bank backup ID (Moodle side)
  *      error         => error code
  *      error_desc    => error description
  * }
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -47,7 +47,7 @@ class timeout_reached extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('eventtimeoutreached', 'tool_coursestore');
+        return get_string('eventtimeoutreached', 'tool_coursebank');
     }
 
     public function get_description() {
@@ -56,17 +56,17 @@ class timeout_reached extends \core\event\base {
             $courseid = $this->data['other']['course'];
             $desc = get_string(
                     'eventtimeoutreached_desc',
-                    'tool_coursestore',
+                    'tool_coursebank',
                     $courseid
             );
         } else {
-            $desc = get_string('crontimeout', 'tool_coursestore');
+            $desc = get_string('crontimeout', 'tool_coursebank');
         }
 
         return $desc;
     }
 
     public function get_url() {
-        return new \moodle_url('/admin/tool/coursestore/queue.php');
+        return new \moodle_url('/admin/tool/coursebank/queue.php');
     }
 }

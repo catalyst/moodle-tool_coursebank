@@ -16,7 +16,7 @@
 
 /**
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
  * @copyright  2015 Catalyst IT
@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-abstract class tool_coursestore {
+abstract class tool_coursebank {
 
     // Status.
     const STATUS_NOTSTARTED = 0;
@@ -47,12 +47,12 @@ abstract class tool_coursestore {
      * @return array of availble statuses
      */
     public static function get_statuses() {
-        $notstarted   = get_string('statusnotstarted', 'tool_coursestore');
-        $inprogress   = get_string('statusinprogress', 'tool_coursestore');
-        $statuserror  = get_string('statuserror', 'tool_coursestore');
-        $finished     = get_string('statusfinished', 'tool_coursestore');
-        $onhold       = get_string('statusonhold', 'tool_coursestore');
-        $cancelled    = get_string('statuscancelled', 'tool_coursestore');
+        $notstarted   = get_string('statusnotstarted', 'tool_coursebank');
+        $inprogress   = get_string('statusinprogress', 'tool_coursebank');
+        $statuserror  = get_string('statuserror', 'tool_coursebank');
+        $finished     = get_string('statusfinished', 'tool_coursebank');
+        $onhold       = get_string('statusonhold', 'tool_coursebank');
+        $cancelled    = get_string('statuscancelled', 'tool_coursebank');
 
         $statuses = array(
             self::STATUS_NOTSTARTED => $notstarted,
@@ -73,7 +73,7 @@ abstract class tool_coursestore {
      * @return string or bool false  Session key
      */
     public static function get_session() {
-        $sessionkey = get_config('tool_coursestore', 'sessionkey');
+        $sessionkey = get_config('tool_coursebank', 'sessionkey');
         if (!empty($sessionkey)) {
             return $sessionkey;
         }
@@ -86,7 +86,7 @@ abstract class tool_coursestore {
      * @return bool  Success/failure
      */
     public static function set_session($sessionkey) {
-        if (set_config('sessionkey', $sessionkey, 'tool_coursestore')) {
+        if (set_config('sessionkey', $sessionkey, 'tool_coursebank')) {
             return true;
         }
         return false;
@@ -96,17 +96,17 @@ abstract class tool_coursestore {
      * Test that a connection to the configured web service consumer can be
      * made successfully.
      *
-     * @param  coursestore_ws_manager $wsman  Web service manager object.
+     * @param  coursebank_ws_manager $wsman  Web service manager object.
      * @param  string               $sesskey  External course bank session key.
      *
      * @return bool                           True for success, false otherwise.
      */
-    public static function check_connection(coursestore_ws_manager $wsman, $sesskey=false) {
+    public static function check_connection(coursebank_ws_manager $wsman, $sesskey=false) {
         global $USER;
 
         $result = $wsman->get_test($sesskey);
         if (isset($result->httpcode)) {
-            if ($result->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+            if ($result->httpcode == coursebank_ws_manager::WS_HTTP_OK) {
                 return true;
             }
         }
@@ -118,7 +118,7 @@ abstract class tool_coursestore {
      * Return an array containing both the tested transfer speed in kbps and
      * the optimal chunk size for the site.
      *
-     * @param coursestore_ws_manager $wsman  Web service manager object.
+     * @param coursebank_ws_manager $wsman  Web service manager object.
      * @param int                    $retry  Number of retry attempts.
      * @param string               $sesskey  Session key.
      *
@@ -128,7 +128,7 @@ abstract class tool_coursestore {
      *                                       array('speed' => $speed,
      *                                             'chunksize' => $chunksize)
      */
-    public static function check_connection_speed(coursestore_ws_manager $wsman,
+    public static function check_connection_speed(coursebank_ws_manager $wsman,
             $retry, $sesskey) {
         $chunksizes = array(10, 100, 200, 500, 1000, 1500, 2000);
         return self::get_optimal_chunksize($wsman, $sesskey, $chunksizes, $retry);
@@ -145,7 +145,7 @@ abstract class tool_coursestore {
      * transfer speed by at least 10%. Stop either when this is no longer the
      * case, or a transfer takes longer than 5 seconds.
      *
-     * @param coursestore_ws_manager $wsman  Web service manager object.
+     * @param coursebank_ws_manager $wsman  Web service manager object.
      * @param string               $sesskey  Session key.
      * @param array int              $sizes  Array of chunk sizes, sorted
      *                                       in ascending order, in kB.
@@ -153,7 +153,7 @@ abstract class tool_coursestore {
      *
      * @return int                           Ideal chunk size in kB.
      */
-    protected static function get_optimal_chunksize(coursestore_ws_manager $wsman,
+    protected static function get_optimal_chunksize(coursebank_ws_manager $wsman,
             $sesskey, $sizes=array(10, 100, 1000), $retry=1) {
         $timeout = 5;
         $threshold = 1.1;
@@ -181,7 +181,7 @@ abstract class tool_coursestore {
      * rough connection speed (in kbps) based on these transfers. If a request
      * fails, return 0.
      *
-     * @param coursestore_ws_manager $wsman    ws_manager object.
+     * @param coursebank_ws_manager $wsman    ws_manager object.
      * @param int                 $testsize    Size of test data to transfer.
      * @param int                    $retry    Number of retry attempts.
      * @param string               $sesskey    Session key string.
@@ -189,7 +189,7 @@ abstract class tool_coursestore {
      *
      * @return int                   $speed
      */
-    public static function test_chunk_speed(coursestore_ws_manager $wsman,
+    public static function test_chunk_speed(coursebank_ws_manager $wsman,
             $testsize, $retry, $sesskey, $count=1) {
 
         $starttime = microtime(true);
@@ -197,11 +197,11 @@ abstract class tool_coursestore {
             $check = str_pad('', $testsize * 1000, '0');
             $response = $wsman->get_test(
                     $sesskey, $check, $count, $testsize, $starttime, $endtime);
-            if ($response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+            if ($response->httpcode == coursebank_ws_manager::WS_HTTP_OK) {
                 break;
             }
         }
-        if ($response->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+        if ($response->httpcode == coursebank_ws_manager::WS_HTTP_OK) {
             $elapsed = $endtime - $starttime;
             // Convert 'total kB transferred'/'total time' into kb/s.
             $speed = self::calculate_speed(1, $testsize, $starttime, $endtime);
@@ -233,7 +233,7 @@ abstract class tool_coursestore {
      * @return int $chunksize
      */
     public static function get_config_chunk_size() {
-        return get_config('tool_coursestore', 'chunksize');
+        return get_config('tool_coursebank', 'chunksize');
     }
     /**
      * Calculate total number of chunks, given individual chunks size in kB and
@@ -246,7 +246,7 @@ abstract class tool_coursestore {
         return ceil($filesize / ($chunksize * 1000));
     }
     /**
-     * Function to fetch course store records for display on the summary
+     * Function to fetch course bank records for display on the summary
      * page. Returns an array of the form:
      *
      *              array('results' => array(...),
@@ -272,15 +272,15 @@ abstract class tool_coursestore {
             $sort = '';
         }
 
-        $results = $DB->get_records_select('tool_coursestore', $extraselect, $extraparams, $sort, '*', $page, $recordsperpage);
-        $count = $DB->count_records_select('tool_coursestore', $extraselect, $extraparams);
+        $results = $DB->get_records_select('tool_coursebank', $extraselect, $extraparams, $sort, '*', $page, $recordsperpage);
+        $count = $DB->count_records_select('tool_coursebank', $extraselect, $extraparams);
 
         return array('results' => $results, 'count' => $count);
     }
     /**
      *
-     * @param coursestore_ws_manager $wsmanager
-     * @param object $backup         Course store database record object
+     * @param coursebank_ws_manager $wsmanager
+     * @param object $backup         Course bank database record object
      * @param array  $data           Data array to post/put.
      * @param string $sessionkey     Session token
      * @param int    $retries        Number of retries to attempt sending
@@ -291,10 +291,10 @@ abstract class tool_coursestore {
      *                                         -> i.e. External Course Bank already has the backup.
      *                   boolean deletechunks - whether or not chunks should be deleted.
      *                   int     highestiterator - highest iterator Cours Bank has received for this backup.
-     *                   coursestore_http_response putresponse - the response from the put request.
+     *                   coursebank_http_response putresponse - the response from the put request.
      *
      */
-    private static function update_backup(coursestore_ws_manager $wsmanager, $data, $backup, $sessionkey, $retries) {
+    private static function update_backup(coursebank_ws_manager $wsmanager, $data, $backup, $sessionkey, $retries) {
         global $DB;
 
         $result = null;
@@ -302,13 +302,13 @@ abstract class tool_coursestore {
         $highestiterator = 0;
         $putresponse = $wsmanager->put_backup($sessionkey, $data, $backup->uniqueid, $retries);
         if ($putresponse !== true) {
-            if ($putresponse->httpcode == coursestore_ws_manager::WS_HTTP_BAD_REQUEST) {
+            if ($putresponse->httpcode == coursebank_ws_manager::WS_HTTP_BAD_REQUEST) {
                 if (isset($putresponse->body->chunksreceived)) {
                     // We've sent chunks to External Course Bank already?
                     if ($putresponse->body->chunksreceived == 0) {
                         // Possible network error. Should retry again later.
                         $backup->status = self::STATUS_ERROR;
-                        $DB->update_record('tool_coursestore', $backup);
+                        $DB->update_record('tool_coursebank', $backup);
                         // Log a transfer interruption event.
                         $putresponse->log_http_error($backup->courseid, $backup->id);
                         return array('result'          => -1,
@@ -326,7 +326,7 @@ abstract class tool_coursestore {
                         // Another process (?!?) may have completed this in the meantime.
                         $backup->status = self::STATUS_FINISHED;
                         $backup->timecompleted = time();
-                        $DB->update_record('tool_coursestore', $backup);
+                        $DB->update_record('tool_coursebank', $backup);
                         // Don't let the send_backup() continue.
                         return array('result'          => 1,
                                      'deletechunks'    => $deletechunks,
@@ -347,13 +347,13 @@ abstract class tool_coursestore {
     /**
      * Send the initial post_backup.
      * @param object $wsmanager Webservice class manager.
-     * @param object $backup    Course store database record object
+     * @param object $backup    Course bank database record object
      *
      * @return int  0 = all good, continue.
      *             -1 = some error, don't continue.
      *              1 = all good but don't continue -> i.e. External Course Bank already has the backup.
      */
-    private static function initialise_backup(coursestore_ws_manager $wsmanager, $backup, $sessionkey, $retries) {
+    private static function initialise_backup(coursebank_ws_manager $wsmanager, $backup, $sessionkey, $retries) {
         global $DB;
 
         $coursedate = '';
@@ -385,14 +385,14 @@ abstract class tool_coursestore {
             $deletechunks = false;
             $highestiterator = 0;
             $putresponse = null;
-            if ($postresponse->httpcode == coursestore_ws_manager::WS_HTTP_CONFLICT) {
+            if ($postresponse->httpcode == coursebank_ws_manager::WS_HTTP_CONFLICT) {
                 // External Course Bank already has some data for this backup.
                 if ($postresponse->body->is_completed) {
                     // Can skip this one as it's already been sent to External Course Bank and is complete.
                     // Data may not match due to chunk size settings changing.
                     $backup->status = self::STATUS_FINISHED;
                     $backup->timecompleted = time();
-                    $DB->update_record('tool_coursestore', $backup);
+                    $DB->update_record('tool_coursebank', $backup);
                     // Don't let the send_backup() continue.
                     return 1;
                 } else if ($postresponse->body->chunksreceived == 0) {
@@ -432,7 +432,7 @@ abstract class tool_coursestore {
                 if ($deletechunks || $highestiterator > 0) {
                     // Something is wrong. Try again later.
                     $backup->status = self::STATUS_ERROR;
-                    $DB->update_record('tool_coursestore', $backup);
+                    $DB->update_record('tool_coursebank', $backup);
                     // Log a transfer interruption event.
                     $putresponse->log_http_error($backup->courseid, $backup->id);
                     return -1;
@@ -440,21 +440,21 @@ abstract class tool_coursestore {
                 // Continue.
             } else {
                 $backup->status = self::STATUS_ERROR;
-                $DB->update_record('tool_coursestore', $backup);
+                $DB->update_record('tool_coursebank', $backup);
                 // Log a transfer interruption event.
                 $postresponse->log_http_error($backup->courseid, $backup->id);
                 return -1;
             }
         }
         $backup->status = self::STATUS_INPROGRESS;
-        $DB->update_record('tool_coursestore', $backup);
+        $DB->update_record('tool_coursebank', $backup);
         return 0;
     }
     /**
      * Convenience function to handle sending a file along with the relevant
      * metadata.
      *
-     * @param object $backup      Course store database record object
+     * @param object $backup      Course bank database record object
      * @param int    $starttime   Timestamp corresponding to the the time when
      *                            the transfer task was started. Used to
      *                            determine if a transfer should be halted due
@@ -483,17 +483,17 @@ abstract class tool_coursestore {
         }
 
         // Get required config variables.
-        $urltarget = get_config('tool_coursestore', 'url');
+        $urltarget = get_config('tool_coursebank', 'url');
         $timeout = self::DEFAULT_TIMEOUT;
         $retries = self::DEFAULT_RETRIES;
-        $token = get_config('tool_coursestore', 'authtoken');
+        $token = get_config('tool_coursebank', 'authtoken');
         $sessionkey = self::get_session();
 
         // Initialise, check connection.
-        $wsmanager = new coursestore_ws_manager($urltarget, $timeout);
+        $wsmanager = new coursebank_ws_manager($urltarget, $timeout);
         if (!self::check_connection($wsmanager, $sessionkey)) {
             $backup->status = self::STATUS_ERROR;
-            $DB->update_record('tool_coursestore', $backup);
+            $DB->update_record('tool_coursebank', $backup);
             $wsmanager->close();
             return self::SEND_ERROR;
         }
@@ -505,13 +505,13 @@ abstract class tool_coursestore {
         $chunksize = $backup->chunksize * 1000;
 
         // Open input file.
-        $coursestorefilepath = self::get_coursestore_filepath($backup);
-        $file = fopen($coursestorefilepath, 'rb');
+        $coursebankfilepath = self::get_coursebank_filepath($backup);
+        $file = fopen($coursebankfilepath, 'rb');
 
         // Log transfer_resumed event.
         if ($backup->chunknumber > 0) {
             // Don't need to log the start. It will be logged in the post_backup call.
-            coursestore_logging::log_transfer_resumed($backup, null, 'course');
+            coursebank_logging::log_transfer_resumed($backup, null, 'course');
         }
 
         // Set offset based on chunk number.
@@ -559,14 +559,14 @@ abstract class tool_coursestore {
                     $backup->chunkretries = 0;
                     $backup->status = self::STATUS_INPROGRESS;
                 }
-                $DB->update_record('tool_coursestore', $backup);
+                $DB->update_record('tool_coursebank', $backup);
             } else {
                 if ($backup->status == self::STATUS_ERROR) {
                     $backup->chunkretries++;
                 } else {
                     $backup->status = self::STATUS_ERROR;
                 }
-                $DB->update_record('tool_coursestore', $backup);
+                $DB->update_record('tool_coursebank', $backup);
                 // Log a transfer interruption event.
                 $response->log_http_error($backup->courseid, $backup->id);
                 return self::SEND_ERROR;
@@ -589,12 +589,12 @@ abstract class tool_coursestore {
             );
             // Confirm the backup file as complete.
             $completion = $wsmanager->put_backup_complete($sessionkey, $data, $backup);
-            if ($completion->httpcode != coursestore_ws_manager::WS_HTTP_OK) {
+            if ($completion->httpcode != coursebank_ws_manager::WS_HTTP_OK) {
                 $backup->status = self::STATUS_ERROR;
                 // Start from the beginning next time.
                 $backup->chunknumber = 0;
                 $backup->timechunkcompleted = 0;
-                $DB->update_record('tool_coursestore', $backup);
+                $DB->update_record('tool_coursebank', $backup);
 
                 // Log a transfer interruption event.
                 $completion->log_http_error($backup->courseid, $backup->id);
@@ -602,7 +602,7 @@ abstract class tool_coursestore {
             }
             $backup->status = self::STATUS_FINISHED;
             $backup->timecompleted = time();
-            $DB->update_record('tool_coursestore', $backup);
+            $DB->update_record('tool_coursebank', $backup);
         }
 
         $wsmanager->close();
@@ -610,19 +610,19 @@ abstract class tool_coursestore {
         return self::SEND_SUCCESS;
     }
 
-    public static function get_coursestore_data_dir() {
+    public static function get_coursebank_data_dir() {
         global $CFG;
-        return $CFG->dataroot . "/coursestore";
+        return $CFG->dataroot . "/coursebank";
     }
 
-    public static function get_coursestore_filepath($backup) {
-        return self::get_coursestore_data_dir() . "/" . $backup->contenthash;
+    public static function get_coursebank_filepath($backup) {
+        return self::get_coursebank_data_dir() . "/" . $backup->contenthash;
     }
 
     /**
      * Convenience function to handle copying the backup file to the designated storage area.
      *
-     * @param object $backup    Course store database record object
+     * @param object $backup    Course bank database record object
      *
      */
     public static function copy_backup($backup) {
@@ -636,18 +636,18 @@ abstract class tool_coursestore {
         if (!is_readable($moodlefilepath)) {
             throw new file_serving_exception();
         }
-        if (!is_writable(self::get_coursestore_data_dir())) {
+        if (!is_writable(self::get_coursebank_data_dir())) {
             throw new invalid_dataroot_permissions();
         }
 
         // Remove any old backups that may have failed and later cancelled.
-        self::clean_coursestore_data_dir();
+        self::clean_coursebank_data_dir();
 
-        $coursestorefilepath = self::get_coursestore_filepath($backup);
-        copy($moodlefilepath, $coursestorefilepath);
+        $coursebankfilepath = self::get_coursebank_filepath($backup);
+        copy($moodlefilepath, $coursebankfilepath);
 
         $backup->isbackedup = 1; // We have created a copy.
-        $DB->update_record('tool_coursestore', $backup);
+        $DB->update_record('tool_coursebank', $backup);
 
         return $backup;
     }
@@ -655,18 +655,18 @@ abstract class tool_coursestore {
      * Convenience function to clear out any old copied backup files.
      *
      */
-    public static function clean_coursestore_data_dir() {
-        $coursestore_data_dir = self::get_coursestore_data_dir();
-        if (!is_writable($coursestore_data_dir)) {
+    public static function clean_coursebank_data_dir() {
+        $coursebank_data_dir = self::get_coursebank_data_dir();
+        if (!is_writable($coursebank_data_dir)) {
             return false;
         }
 
-        if (is_dir($coursestore_data_dir)) {
+        if (is_dir($coursebank_data_dir)) {
             $maxbackuptime = time() - (self::MAX_BACKUP_DAYS * DAYSECS);
-            $objects = scandir($coursestore_data_dir);
+            $objects = scandir($coursebank_data_dir);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    $filename = $coursestore_data_dir."/".$object;
+                    $filename = $coursebank_data_dir."/".$object;
                     if (filetype($filename) == "file") {
                         $filemtime = filemtime($filename);
                         if ($filemtime < $maxbackuptime) {
@@ -682,27 +682,27 @@ abstract class tool_coursestore {
     /**
      * Convenience function to handle copying the backup file to the designated storage area.
      *
-     * @param object $backup           Course store database record object
+     * @param object $backup           Course bank database record object
      * @param boolean $update_record   Update the database record to relect that the backup is no longer copied.
      *
      */
     public static function delete_backup($backup, $update_record) {
         global $DB;
 
-        $coursestorefilepath = self::get_coursestore_filepath($backup);
+        $coursebankfilepath = self::get_coursebank_filepath($backup);
 
-        if (!is_readable($coursestorefilepath)) {
+        if (!is_readable($coursebankfilepath)) {
             return false;
         }
-        if (!is_writable(self::get_coursestore_data_dir())) {
+        if (!is_writable(self::get_coursebank_data_dir())) {
             return false;
         }
 
-        unlink($coursestorefilepath);
+        unlink($coursebankfilepath);
 
         if ($update_record == true) {
             $backup->isbackedup = 0; // We have deleted the copy.
-            $DB->update_record('tool_coursestore', $backup);
+            $DB->update_record('tool_coursebank', $backup);
         }
 
         return true;
@@ -772,7 +772,7 @@ abstract class tool_coursestore {
                        tcs.status,
                        tcs.isbackedup,
                        tcs.contenthash
-                FROM {tool_coursestore} tcs
+                FROM {tool_coursebank} tcs
                 WHERE tcs.status IN (:statusnotstarted, :statusinprogress, :statuserror)
                 AND   tcs.filetimecreated < :maxbackuptime";
 
@@ -789,13 +789,13 @@ abstract class tool_coursestore {
             }
             $coursebackup->isbackedup = 0;
             $coursebackup->status = self::STATUS_CANCELLED;
-            $DB->update_record('tool_coursestore', $coursebackup);
+            $DB->update_record('tool_coursebank', $coursebackup);
         }
         $rs->close();
     }
     /**
      * Function to fetch course backup records from the Moodle DB, add them
-     * to the course store table, and then process the files before sending
+     * to the course bank table, and then process the files before sending
      * via web service to the configured external course bank instance.
      *
      * - The query consists of three parts which are combined with a UNION
@@ -806,7 +806,7 @@ abstract class tool_coursestore {
 
         $starttime = time();
 
-        // Cancel any old backups that are in the coursestore table
+        // Cancel any old backups that are in the coursebank table
         // which have not been completely transferred.
         self::cancel_old_backups();
 
@@ -882,21 +882,21 @@ abstract class tool_coursestore {
                 INNER JOIN {course_categories} cc on cr.category = cc.id";
 
         $sql = $sqlcommon . "
-                LEFT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
+                LEFT JOIN {tool_coursebank} tcs on tcs.fileid = f.id
                 WHERE tcs.id IS NULL
                 AND ct.contextlevel = :contextcourse1
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
                 AND   f.timecreated >= :maxbackuptime1
                 UNION
                 " . $sqlselect . "
-                INNER JOIN {tool_coursestore} tcs on tcs.fileid = f.id
+                INNER JOIN {tool_coursebank} tcs on tcs.fileid = f.id
                 WHERE ct.contextlevel = :contextcourse2
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
                 AND   tcs.status IN (:statusnotstarted2, :statusinprogress2, :statuserror2)
                 AND   f.timecreated >= :maxbackuptime2
                 UNION
                 " . $sqlselect . "
-                RIGHT JOIN {tool_coursestore} tcs on tcs.fileid = f.id
+                RIGHT JOIN {tool_coursebank} tcs on tcs.fileid = f.id
                 WHERE f.id IS NULL
                 AND tcs.isbackedup = 1
                 AND tcs.status IN (:statusnotstarted3, :statusinprogress3, :statuserror3)
@@ -929,7 +929,7 @@ abstract class tool_coursestore {
         );
         foreach ($rs as $coursebackup) {
             if (!isset($coursebackup->status)) {
-                // The record hasn't been input in the course store table yet.
+                // The record hasn't been input in the course bank table yet.
                 $cs = new stdClass();
                 $cs->uniqueid = self::generate_uuid();
                 $cs->backupfilename = $coursebackup->filename;
@@ -942,7 +942,7 @@ abstract class tool_coursestore {
                 foreach ($insertfields as $field) {
                     $cs->$field = $coursebackup->$field;
                 }
-                $backupid = $DB->insert_record('tool_coursestore', $cs);
+                $backupid = $DB->insert_record('tool_coursebank', $cs);
 
                 $coursebackup->id = $backupid;
                 $coursebackup->uniqueid = $cs->uniqueid;
@@ -976,7 +976,7 @@ abstract class tool_coursestore {
         $rs->close();
 
         // Get all backups that are pending transfer, attempt to transfer them.
-        $sql = 'SELECT * FROM {tool_coursestore}
+        $sql = 'SELECT * FROM {tool_coursebank}
                         WHERE status IN (:notstarted, :inprogress, :error)
                         AND filetimecreated >= :maxbackuptime';
         $contstatus = array(
@@ -990,14 +990,14 @@ abstract class tool_coursestore {
         foreach ($transferrs as $coursebackup) {
             $idparam = array('id' => $coursebackup->id);
             $status = $DB->get_field(
-                    'tool_coursestore',
+                    'tool_coursebank',
                     'status',
                     $idparam,
                     MUST_EXIST
             );
             // Skip this course if its status is on-hold or cancelled.
             if (!in_array($status, $contstatus)) {
-                mtrace("Skipping transfer of backup with Course Store ID " .
+                mtrace("Skipping transfer of backup with Course Bank ID " .
                         "$coursebackup->id and status code $status" .
                         " (Course ID: $coursebackup->courseid).");
                 continue;
@@ -1008,19 +1008,19 @@ abstract class tool_coursestore {
                 if (!$delete) {
                     $delfail = get_string(
                             'deletefailed',
-                            'tool_coursestore',
+                            'tool_coursebank',
                             $coursebackup->backupfilename
                     );
                     // Log it.
-                    coursestore_logging::log_delete_backup($delfail);
+                    coursebank_logging::log_delete_backup($delfail);
                     mtrace($delfail . "\n");
                 }
             } else if ($result == self::SEND_CRON_TIMEOUT) {
                 $crontimeout = get_string(
                         'crontimeout',
-                        'tool_coursestore'
+                        'tool_coursebank'
                 );
-                coursestore_logging::log_cron_timeout(
+                coursebank_logging::log_cron_timeout(
                         $crontimeout,
                         $coursebackup->courseid
                 );
@@ -1028,11 +1028,11 @@ abstract class tool_coursestore {
             } else {
                 $bufail = get_string(
                         'backupfailed',
-                        'tool_coursestore',
+                        'tool_coursebank',
                         $coursebackup->backupfilename
                 );
                 // Log it.
-                coursestore_logging::log_send_backup($bufail);
+                coursebank_logging::log_send_backup($bufail);
                 mtrace($bufail . "\n");
                 // Stop sending backups until this one is resolved.
                 break;
@@ -1056,7 +1056,7 @@ abstract class tool_coursestore {
             if (PHPUNIT_TEST) {
                 return false;
             }
-            $logtable = coursestore_logging::get_log_table_name();
+            $logtable = coursebank_logging::get_log_table_name();
             // If no log table, then it's legacy log table.
             if (empty($logtable)) {
                 return true;
@@ -1078,15 +1078,15 @@ abstract class tool_coursestore {
         $noactionstatuses = self::get_noaction_statuses();
         // Check if a new status exists.
         if (!array_key_exists($status, $statuses)) {
-            coursestore_logging::log_status_update(
+            coursebank_logging::log_status_update(
                     "Failed updating: status code \"$status\" does not exist."
             );
             return false;
         }
         // Check if record exists.
-        if (!$DB->record_exists('tool_coursestore', array('id' => $coursebackup->id))) {
-            coursestore_logging::log_status_update(
-                    "Failed updating: course store record with ID: " .
+        if (!$DB->record_exists('tool_coursebank', array('id' => $coursebackup->id))) {
+            coursebank_logging::log_status_update(
+                    "Failed updating: course bank record with ID: " .
                     "\"$coursebackup->id\" does not exist"
             );
             return false;
@@ -1094,9 +1094,9 @@ abstract class tool_coursestore {
         // If status is a "no action" status we can't update it.
         // This prevents us from changing the status mid-way through a transfer.
         if (in_array($coursebackup->status, $noactionstatuses)) {
-            coursestore_logging::log_status_update(
+            coursebank_logging::log_status_update(
                     "Failed updating: current status is " .
-                    "$coursebackup->status for course store backup with " .
+                    "$coursebackup->status for course bank backup with " .
                     "ID $coursebackup->id. This status is in the " .
                     "\"no action\" list."
             );
@@ -1108,8 +1108,8 @@ abstract class tool_coursestore {
         $oldstatus = $coursebackup->status;
         $coursebackup->status = $status;
         $coursebackup->isbackedup = 0;
-        $DB->update_record('tool_coursestore', $coursebackup);
-        coursestore_logging::log_status_update(
+        $DB->update_record('tool_coursebank', $coursebackup);
+        coursebank_logging::log_status_update(
                 "Updating status: successfully " .
                 "updated status from $oldstatus to $status for backup with" .
                 " ID $coursebackup->id.",
@@ -1173,7 +1173,7 @@ abstract class tool_coursestore {
  * Class to keep errors specific to this plugin.
  *
  */
-abstract class tool_coursestore_error {
+abstract class tool_coursebank_error {
     // Errors.
     const ERROR_TIMEOUT              = 100;
     const ERROR_MAX_ATTEMPTS_REACHED = 101;
@@ -1206,10 +1206,10 @@ abstract class tool_coursestore_error {
         if (!isset($httpresponse->body->url)) {
             return true;
         }
-        if (!tool_coursestore_check_url($httpresponse->body->url)) {
+        if (!tool_coursebank_check_url($httpresponse->body->url)) {
             return true;
         }
-        if (!tool_coursestore_is_url_available($httpresponse->body->url)) {
+        if (!tool_coursebank_is_url_available($httpresponse->body->url)) {
             return true;
         }
 
@@ -1221,7 +1221,7 @@ abstract class tool_coursestore_error {
  * Class that handles outgoing web service requests.
  *
  */
-class coursestore_ws_manager {
+class coursebank_ws_manager {
     private $curlhandle;
     private $baseurl;
     private $proxyurl;
@@ -1272,11 +1272,11 @@ class coursestore_ws_manager {
         curl_setopt_array($this->curlhandle, $curlopts);
 
         // Set up proxy configuration.
-        $this->proxyurl = get_config('tool_coursestore', 'proxyurl');
+        $this->proxyurl = get_config('tool_coursebank', 'proxyurl');
         if (!empty($this->proxyurl)) {
-            $this->proxyuser = get_config('tool_coursestore', 'proxyuser');
-            $this->proxypass = get_config('tool_coursestore', 'proxypass');
-            $this->proxyport = get_config('tool_coursestore', 'proxyport');
+            $this->proxyuser = get_config('tool_coursebank', 'proxyuser');
+            $this->proxypass = get_config('tool_coursebank', 'proxypass');
+            $this->proxyport = get_config('tool_coursebank', 'proxyport');
         }
     }
     /**
@@ -1336,10 +1336,10 @@ class coursestore_ws_manager {
             $info = curl_getinfo($this->curlhandle);
             if ($result) {
                 $body = json_decode($result);
-                return new coursestore_http_response($body, $info, $curlopts);
+                return new coursebank_http_response($body, $info, $curlopts);
             }
         }
-        return new coursestore_http_response(false, false, $curlopts);
+        return new coursebank_http_response(false, false, $curlopts);
     }
 
     /**
@@ -1371,9 +1371,9 @@ class coursestore_ws_manager {
             $result = $this->send($resource, $data, $method, $auth, $retries);
         }
         if (!$result || $result->httpcode == self::WS_HTTP_UNAUTHORIZED) {
-            $token = get_config('tool_coursestore', 'authtoken');
+            $token = get_config('tool_coursebank', 'authtoken');
             if ($this->post_session($token) === true) {
-                $sesskey = tool_coursestore::get_session();
+                $sesskey = tool_coursebank::get_session();
                 return $this->send($resource, $data, $method, $sesskey, $retries);
             }
         }
@@ -1389,13 +1389,13 @@ class coursestore_ws_manager {
             'hash' => $hash,
         );
         $response = $this->send('session', $authdata, 'POST');
-        coursestore_logging::log_post_session($response);
+        coursebank_logging::log_post_session($response);
 
         if ($response->httpcode == self::WS_HTTP_CREATED) {
             $tagsesskey = self::WS_AUTH_SESSION_KEY;
             if (isset($response->body->$tagsesskey)) {
                 $sesskey = trim((string) $response->body->$tagsesskey);
-                return tool_coursestore::set_session($sesskey);
+                return tool_coursebank::set_session($sesskey);
             }
         } else {
             // Unexpected response.
@@ -1423,12 +1423,12 @@ class coursestore_ws_manager {
         );
         $result = $this->send_authenticated('test', $json, 'GET', $headers);
         if ($data == '') {
-            coursestore_logging::log_check_connection($result);
+            coursebank_logging::log_check_connection($result);
         } else {
             // It's the speed test.
             $endtime = microtime(true);
-            $speed = tool_coursestore::calculate_speed($count, $testsize, $starttime, $endtime);
-            coursestore_logging::log_check_connection_speed($result, $speed);
+            $speed = tool_coursebank::calculate_speed($count, $testsize, $starttime, $endtime);
+            coursebank_logging::log_check_connection_speed($result, $speed);
         }
         return $result;
     }
@@ -1446,13 +1446,13 @@ class coursestore_ws_manager {
         }
 
         $result = $this->send_authenticated('backup/'. $uniqueid, array(), 'GET', $headers);
-        coursestore_logging::log_get_backup($result);
+        coursebank_logging::log_get_backup($result);
         return $result;
     }
     public static function get_backup_validated_hash($data) {
         return md5($data['fileid'] . ',' .$data['uuid'] . ',' . $data['filename'] . ',' . $data['filesize']);
     }
-    public static function check_post_backup_data_is_same(coursestore_http_response $httpresponse, $data) {
+    public static function check_post_backup_data_is_same(coursebank_http_response $httpresponse, $data) {
 
         $fields = array(
                 'uuid' => 'uuid',
@@ -1509,7 +1509,7 @@ class coursestore_ws_manager {
     public function post_backup($data, $sessionkey, $retries=4) {
 
         $response = $this->send_authenticated('backup', $data, 'POST', $sessionkey, $retries);
-        coursestore_logging::log_transfer_started($data, $response, 'course');
+        coursebank_logging::log_transfer_started($data, $response, 'course');
 
         if ($response->httpcode == self::WS_HTTP_CREATED) {
             // Make sure the hash is good.
@@ -1540,7 +1540,7 @@ class coursestore_ws_manager {
      *
      * @param string $sessionkey      Session token
      * @param array  $data            Array of data to update.
-     * @param string $uniqueid        UUID of coursestore record.
+     * @param string $uniqueid        UUID of coursebank record.
      * @param int    $retries         Number of retries to attempt sending
      *                                when an error occurs.
      *
@@ -1549,7 +1549,7 @@ class coursestore_ws_manager {
 
         //debugging(__FUNCTION__ . ": data=" . print_r($data, true), DEBUG_DEVELOPER);
         $response = $this->send_authenticated('backup/' . $uniqueid, $data, 'PUT', $sessionkey);
-        coursestore_logging::log_backup_updated($data, $response);
+        coursebank_logging::log_backup_updated($data, $response);
 
         if ($response->httpcode == self::WS_HTTP_OK) {
             // Make sure the hash is good.
@@ -1575,13 +1575,13 @@ class coursestore_ws_manager {
      * Update a backup resource that it's complete.
      *
      * @param string $auth    Authorization string.
-     * @param obj    $backup  tool_coursestore record object, including uniqueid.
+     * @param obj    $backup  tool_coursebank record object, including uniqueid.
      * @param int    $retries Number of retry attempts to make.
      *
      */
     public function put_backup_complete($sessionkey, $data, $backup, $retries=4) {
         // Log transfer_completed event.
-        coursestore_logging::log_transfer_completed($backup);
+        coursebank_logging::log_transfer_completed($backup);
         $uniqueid = $backup->uniqueid;
         return $this->send_authenticated('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey);
     }
@@ -1594,7 +1594,7 @@ class coursestore_ws_manager {
      */
     public function get_chunk($auth, $uniqueid) {
         $result = $this->send_authenticated('chunks/' . $uniqueid, array(), 'GET', $auth);
-        coursestore_logging::log_get_chunk($result);
+        coursebank_logging::log_get_chunk($result);
         return $result;
     }
     /**
@@ -1635,7 +1635,7 @@ class coursestore_ws_manager {
      */
     public function delete_chunk($sessionkey, $uniqueid, $chunkiterator, $retries=4) {
         $result = $this->send_authenticated('chunks/' . $uniqueid . '/' . $chunkiterator, array(), 'DELETE', $sessionkey, $retries);
-        coursestore_logging::log_delete_chunk($result);
+        coursebank_logging::log_delete_chunk($result);
         return $result;
     }
     /**
@@ -1702,7 +1702,7 @@ class coursestore_ws_manager {
         $nonemptyarray = is_array($params) && !empty($params);
         $query = $nonemptyarray ? array('query' => $params) : array();
         $result = $this->send_authenticated($url, $query, 'GET', $sesskey);
-        coursestore_logging::log_get_downloads($result);
+        coursebank_logging::log_get_downloads($result);
         return $result;
     }
     /**
@@ -1710,7 +1710,7 @@ class coursestore_ws_manager {
      */
     public function get_downloadcount($sesskey, array $params = null) {
         $result = $this->send_authenticated('downloadcount', array(), 'GET', $sesskey);
-        coursestore_logging::log_get_downloadcount($result);
+        coursebank_logging::log_get_downloadcount($result);
         return $result;
     }
 }
@@ -1718,7 +1718,7 @@ class coursestore_ws_manager {
  * HTTP response class, used to pass around request responses
  *
  */
-class coursestore_http_response {
+class coursebank_http_response {
      public $body;
      public $info;
      public $httpcode;
@@ -1754,10 +1754,10 @@ class coursestore_http_response {
      * debugging.
      *
      * @param int    $courseid        Moodle course ID.
-     * @param int    $coursestoreid   Course store ID.
+     * @param int    $coursebankid   Course bank ID.
      * @param string $info            Additional information.
      */
-    public function log_http_error($courseid, $coursestoreid, $info='') {
+    public function log_http_error($courseid, $coursebankid, $info='') {
         global $CFG;
 
         // First log information for debugging purposes.
@@ -1765,8 +1765,8 @@ class coursestore_http_response {
             error_log($info);
         }
 
-        if (tool_coursestore::legacy_logging()) {
-            return $this->log_http_error_legacy($courseid, $coursestoreid);
+        if (tool_coursebank::legacy_logging()) {
+            return $this->log_http_error_legacy($courseid, $coursebankid);
         }
         $info = $this->info;
         $body = (array)$this->body;
@@ -1781,7 +1781,7 @@ class coursestore_http_response {
 
         $otherdata = array(
             'courseid'      => $courseid,
-            'coursestoreid' => $coursestoreid,
+            'coursebankid' => $coursebankid,
             'body'          => $body,
             'info'          => $info,
             'httpcode'      => $this->httpcode,
@@ -1797,14 +1797,14 @@ class coursestore_http_response {
             'other'     => $otherdata,
             'context'   => context_system::instance(),
         );
-        $event = \tool_coursestore\event\transfer_interrupted::create($eventdata);
+        $event = \tool_coursebank\event\transfer_interrupted::create($eventdata);
         $event->trigger();
         return true;
     }
-    private function log_http_error_legacy($courseid, $coursestoreid) {
+    private function log_http_error_legacy($courseid, $coursebankid) {
         global $USER;
 
-        $info = "Transfer of backup with course store id $coursestoreid " .
+        $info = "Transfer of backup with moodle course bank id $coursebankid " .
                 "interrupted: URL: " . $this->request[CURLOPT_URL] .
                 "METHOD: " . $this->request[CURLOPT_CUSTOMREQUEST] . " ";
 
@@ -1821,7 +1821,7 @@ class coursestore_http_response {
             $info .= " ERROR DESC: " . $this->error_desc;
         }
 
-        add_to_log(SITEID, 'Course store', 'Transfer error', '', $info, 0, $USER->id);
+        add_to_log(SITEID, 'Course bank', 'Transfer error', '', $info, 0, $USER->id);
         return true;
     }
 }
@@ -1830,11 +1830,11 @@ class coursestore_http_response {
  * Basic logging class
  *
  */
-class coursestore_logging {
-    const LOG_MODULE_COURSE_STORE = 'Course store';
+class coursebank_logging {
+    const LOG_MODULE_COURSE_BANK = 'Course bank';
 
     /**
-     * Method to log course store events, using either the modern events 2
+     * Method to log course bank events, using either the modern events 2
      * functionality for Moodle 2.7+, or legacy ("add_to_log") logging for
      * earlier Moodle versions.
      *
@@ -1850,8 +1850,8 @@ class coursestore_logging {
      * @param array $other Other data we may want to use
      * @return boolean
      */
-    protected static function log_event($info='', $eventname='coursestore_logging', $action='',
-            $module=self::LOG_MODULE_COURSE_STORE, $courseid=SITEID, $url='', $userid=0, $other = array()) {
+    protected static function log_event($info='', $eventname='coursebank_logging', $action='',
+            $module=self::LOG_MODULE_COURSE_BANK, $courseid=SITEID, $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
 
         // First log information for debugging purposes.
@@ -1865,7 +1865,7 @@ class coursestore_logging {
 
         $url = str_replace($CFG->wwwroot, "/", $url);
 
-        if (!tool_coursestore::legacy_logging()) {
+        if (!tool_coursebank::legacy_logging()) {
             $otherdata = array_merge(
                 array(
                     'courseid' => $courseid,
@@ -1883,7 +1883,7 @@ class coursestore_logging {
                 'context' => context_system::instance()
             );
 
-            $classname = '\tool_coursestore\event\\' .  $eventname;
+            $classname = '\tool_coursebank\event\\' .  $eventname;
 
             if (class_exists($classname)) {
                 $event = $classname::create($eventdata);
@@ -1899,7 +1899,7 @@ class coursestore_logging {
     }
     /** Log simple generic event for an http request.
      *
-     * @param coursestore_http_responsehttpresponse Response object.
+     * @param coursebank_http_responsehttpresponse Response object.
      * @param string                   eventname    Event class name.
      * @param string                   eventdesc    Event description.
      * @param string                   action       Action description.
@@ -1907,7 +1907,7 @@ class coursestore_logging {
     protected static function log_generic_request($httpresponse, $eventname, $eventdesc, $action) {
         global $USER;
 
-        if ($httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+        if ($httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_OK) {
             $otherdata = array('status' => true);
         } else {
             $otherdata = array(
@@ -1927,7 +1927,7 @@ class coursestore_logging {
             $info,
             $eventname,
             $action,
-            self::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_BANK,
             SITEID,
             '',
             $USER->id,
@@ -1945,12 +1945,12 @@ class coursestore_logging {
                 $info,
                 'timeout_reached',
                 'Cron timeout reached',
-                self::LOG_MODULE_COURSE_STORE,
+                self::LOG_MODULE_COURSE_BANK,
                 $courseid
         );
     }
     /**
-     * Log an event for a coursestore backup status update.
+     * Log an event for a coursebank backup status update.
      *
      * @param string $info  Information about update
      */
@@ -1964,14 +1964,14 @@ class coursestore_logging {
     }
     /** Log a connection check event.
      *
-     * @param coursestore_http_response $httpresponse Response object.
+     * @param coursebank_http_response $httpresponse Response object.
      */
     public static function log_check_connection($httpresponse) {
         global $USER;
 
         $otherdata = array('conncheckaction' => 'conncheck');
-        if (($httpresponse instanceof coursestore_http_response)
-            && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK) {
+        if (($httpresponse instanceof coursebank_http_response)
+            && $httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_OK) {
             $event = 'connection_checked';
             $info = "Connection check passed.";
             $otherdata['status'] = true;
@@ -1979,7 +1979,7 @@ class coursestore_logging {
             $event = 'connection_check_failed';
             $info = "Connection check failed.";
             $otherdata['status'] = false;
-            if ($httpresponse instanceof coursestore_http_response) {
+            if ($httpresponse instanceof coursebank_http_response) {
                 // Log the failure.
                 if (isset($httpresponse->error)) {
                     $otherdata['error'] = $httpresponse->error;
@@ -1993,7 +1993,7 @@ class coursestore_logging {
             $info,
             $event,
             'Connection check',
-            self::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_BANK,
             SITEID,
             '',
             $USER->id,
@@ -2008,8 +2008,8 @@ class coursestore_logging {
             'conncheckaction' => 'speedtest',
         );
 
-        if (($httpresponse instanceof coursestore_http_response)
-            && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_OK
+        if (($httpresponse instanceof coursebank_http_response)
+            && $httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_OK
             && $speed != 0) {
             $event = 'connection_checked';
             $status = ($speed > 256) ? 'passed' : 'very slow';
@@ -2019,7 +2019,7 @@ class coursestore_logging {
             $event = 'connection_check_failed';
             $info = "Connection speed test failed.";
             $otherdata['speed'] = 0;
-            if ($httpresponse instanceof coursestore_http_response) {
+            if ($httpresponse instanceof coursebank_http_response) {
                 // Log the failure.
                 if (isset($httpresponse->error)) {
                     $otherdata['error'] = $httpresponse->error;
@@ -2033,7 +2033,7 @@ class coursestore_logging {
             $info,
             $event,
             'Connection check',
-            self::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_BANK,
             SITEID,
             '',
             $USER->id,
@@ -2044,14 +2044,14 @@ class coursestore_logging {
     /**
      * Log session creation event.
      *
-     * @param coursestore_http_response $httpresponse  HTTP response object.
+     * @param coursebank_http_response $httpresponse  HTTP response object.
      */
     public static function log_post_session($httpresponse) {
         global $USER;
 
         $otherdata = array();
-        if (($httpresponse instanceof coursestore_http_response)
-             && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
+        if (($httpresponse instanceof coursebank_http_response)
+             && $httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_CREATED) {
             // We got a new session key. Log the event.
             $event = 'get_session';
             $info = "Get new session key succeeded.";
@@ -2059,7 +2059,7 @@ class coursestore_logging {
             // Couldn't get a session key.
             $event = 'get_session_failed';
             $info = "Get new session key failed.";
-            if ($httpresponse instanceof coursestore_http_response) {
+            if ($httpresponse instanceof coursebank_http_response) {
                 // Log the session key failure.
                 if (isset($httpresponse->error)) {
                     $otherdata['error'] = $httpresponse->error;
@@ -2073,7 +2073,7 @@ class coursestore_logging {
             $info,
             $event,
             'Get session key',
-            self::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_BANK,
             SITEID,
             '',
             $USER->id,
@@ -2082,7 +2082,7 @@ class coursestore_logging {
     }
     /** Log event for get_backup request.
      *
-     * @param coursestore_http_response $httpresponse Response object.
+     * @param coursebank_http_response $httpresponse Response object.
      */
     public static function log_get_backup($httpresponse) {
         global $USER;
@@ -2094,7 +2094,7 @@ class coursestore_logging {
     }
     /** Log event for get_chunk request.
      *
-     * @param coursestore_http_responsehttpresponse Response object.
+     * @param coursebank_http_responsehttpresponse Response object.
      */
     public static function log_get_chunk($httpresponse) {
         global $USER;
@@ -2106,7 +2106,7 @@ class coursestore_logging {
     }
     /** Log event for delete_chunk request.
      *
-     * @param coursestore_http_responsehttpresponse Response object.
+     * @param coursebank_http_responsehttpresponse Response object.
      */
     public static function log_delete_chunk($httpresponse) {
         global $USER;
@@ -2118,7 +2118,7 @@ class coursestore_logging {
     }
     /** Log event for get_download request.
      *
-     * @param coursestore_http_responsehttpresponse Response object.
+     * @param coursebank_http_responsehttpresponse Response object.
      */
     public static function log_get_downloads($httpresponse) {
         global $USER;
@@ -2130,7 +2130,7 @@ class coursestore_logging {
     }
     /** Log event for get_downloadcount request.
      *
-     * @param coursestore_http_responsehttpresponse Response object.
+     * @param coursebank_http_responsehttpresponse Response object.
      */
     public static function log_get_downloadcount($httpresponse) {
         global $USER;
@@ -2143,7 +2143,7 @@ class coursestore_logging {
     /**
      * Log the fact that transfers for a course backup or chunk have started.
      *
-     * @param mixed $backup    if object: Course store database record object
+     * @param mixed $backup    if object: Course bank database record object
      *                         if array: data getting sent to webservice.
      * @param object $httpresponse
      * @param string $level    either 'course' or 'chunk'.
@@ -2153,42 +2153,42 @@ class coursestore_logging {
 
         if (is_object($backup)) {
             // This is the backup object.
-            $coursestoreid = $backup->id;
+            $coursebankid = $backup->id;
             $courseid = $backup->courseid;
         } else if (is_array($backup)) {
             // This is the data that is getting sent to the webservice.
-            $coursestoreid = $backup['fileid'];
+            $coursebankid = $backup['fileid'];
             $courseid = $backup['courseid'];
         }
 
         $otherdata = array(
             'level'         => $level,
-            'coursestoreid' => $coursestoreid,
+            'coursebankid' => $coursebankid,
         );
-        if (($httpresponse instanceof coursestore_http_response)
-            && $httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_CREATED) {
+        if (($httpresponse instanceof coursebank_http_response)
+            && $httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_CREATED) {
             // At this stage, $backup is an array.
-            $validatehash = coursestore_ws_manager::get_backup_validated_hash($backup);
+            $validatehash = coursebank_ws_manager::get_backup_validated_hash($backup);
             if ($validatehash != $httpresponse->body->hash) {
                 $event = 'transfer_start_failed';
-                $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
+                $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course bank id $coursebankid " .
                         "failed. (Course ID: $courseid)";
                 $otherdata['error_desc'] = "Returned hash ({$httpresponse->body->hash}) " .
                                            "does not match validated hash ($validatehash).";
             } else {
                 $event = 'transfer_started';
-                $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
+                $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course bank id $coursebankid " .
                         "started. (Course ID: $courseid)";
             }
         } else {
             $event = 'transfer_start_failed';
-            $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course store id $coursestoreid " .
+            $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course bank id $coursebankid " .
                     "failed. (Course ID: $courseid)";
-            if ($httpresponse instanceof coursestore_http_response) {
-                if ($httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_CONFLICT && $level == 'course') {
+            if ($httpresponse instanceof coursebank_http_response) {
+                if ($httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_CONFLICT && $level == 'course') {
                     // The course was already created.
                     // Check if External Course Bank has the same data as us.
-                    if (!coursestore_ws_manager::check_post_backup_data_is_same($httpresponse, $backup)) {
+                    if (!coursebank_ws_manager::check_post_backup_data_is_same($httpresponse, $backup)) {
                         $info .= " The backup already exists.";
                         if ($httpresponse->body->is_completed) {
                             // External Course Bank already has a complete copy of this backup.
@@ -2199,7 +2199,7 @@ class coursestore_logging {
                         $event = 'transfer_started';
                         $info = "Transfer of " .
                                 ($level == 'course' ? 'backup' : 'chunk') .
-                                " for course store id $coursestoreid " .
+                                " for course bank id $coursebankid " .
                         "started. (Course ID: $courseid) It already exists " .
                         "in External Course Bank.  Will continue.";
                     }
@@ -2218,7 +2218,7 @@ class coursestore_logging {
             $info,
             $event,
             'Transfer started',
-            self::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_BANK,
             $courseid,
             '',
             $USER->id,
@@ -2228,21 +2228,21 @@ class coursestore_logging {
     /**
      * Log the fact that transfers for a backup have resumed.
      *
-     * @param object $backup    Course store database record object
+     * @param object $backup    Course bank database record object
      */
     public static function log_transfer_resumed($backup) {
         global $USER;
 
-        $info = "Transfer of backup with course store id $backup->id " .
+        $info = "Transfer of backup with course bank id $backup->id " .
                 "resumed. (Course ID: $backup->courseid)";
         $otherdata = array(
-            'coursestoreid' => $backup->id
+            'coursebankid' => $backup->id
         );
         self::log_event(
             $info,
             'transfer_resumed',
             'Transfer resumed',
-            self::LOG_MODULE_COURSE_STORE,
+            self::LOG_MODULE_COURSE_BANK,
             $backup->courseid,
             '',
             $USER->id,
@@ -2252,22 +2252,22 @@ class coursestore_logging {
     /**
      * Log transfer completion event.
      *
-     * @param object $backup    Course store database record object
+     * @param object $backup    Course bank database record object
      */
     public static function log_transfer_completed($backup) {
         global $USER;
 
         // Log transfer_completed event.
-        $info = "Transfer of backup with course store id $backup->id " .
+        $info = "Transfer of backup with course bank id $backup->id " .
                 "completed. (Course ID: $backup->courseid)";
         $otherdata = array(
-            'coursestoreid' => $backup->id
+            'coursebankid' => $backup->id
             );
         self::log_event(
                 $info,
                 'transfer_completed',
                 'Transfer completed',
-                self::LOG_MODULE_COURSE_STORE,
+                self::LOG_MODULE_COURSE_BANK,
                 $backup->courseid,
                 '',
                 $USER->id,
@@ -2305,15 +2305,15 @@ class coursestore_logging {
      * Log transfer backup download event.
      *
      * @param http_response $httpresponse   HTTP response object generated.
-     * @param int           $coursestoreid  Course store ID
+     * @param int           $coursebankid  Course bank ID
      *
      * @return bool                         Success/failure of download.
      */
-    public static function log_backup_download($httpresponse, $coursestoreid) {
+    public static function log_backup_download($httpresponse, $coursebankid) {
         global $USER;
 
         $error = false;
-        $info = "Downloading backup file coursestoreid $coursestoreid userid $USER->id: ";
+        $info = "Downloading backup file coursebankid $coursebankid userid $USER->id: ";
 
         if (isset($httpresponse->body->error) and isset($httpresponse->body->error_desc)) {
             // Log it.
@@ -2325,11 +2325,11 @@ class coursestore_logging {
             $infoadd = "ERROR: url is empty";
             $error = true;
         }
-        if (!tool_coursestore_check_url($httpresponse->body->url)) {
+        if (!tool_coursebank_check_url($httpresponse->body->url)) {
             $infoadd = "ERROR: url {$httpresponse->body->url} invalid";
             $error = true;
         }
-        if (!tool_coursestore_is_url_available($httpresponse->body->url)) {
+        if (!tool_coursebank_is_url_available($httpresponse->body->url)) {
             $infoadd = "ERROR: url {$httpresponse->body->url} in not available";
             $error = true;
         }
@@ -2349,7 +2349,7 @@ class coursestore_logging {
                 $info,
                 $event,
                 'Backup file download',
-                self::LOG_MODULE_COURSE_STORE,
+                self::LOG_MODULE_COURSE_BANK,
                 $courseid,
                 '');
     }
@@ -2384,7 +2384,7 @@ class coursestore_logging {
     }
 }
 /**
- * An exception when tool_coursestore_cronlock exists in the database.
+ * An exception when tool_coursebank_cronlock exists in the database.
  *
  */
 class transfer_in_progress extends moodle_exception {
@@ -2393,6 +2393,6 @@ class transfer_in_progress extends moodle_exception {
      * @param string $debuginfo optional more detailed information
      */
     public function __construct($debuginfo = null) {
-        parent::__construct('transferinprogress', 'tool_coursestore', '', null, $debuginfo);
+        parent::__construct('transferinprogress', 'tool_coursebank', '', null, $debuginfo);
     }
 }

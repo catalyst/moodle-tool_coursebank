@@ -17,12 +17,12 @@
 /**
  * get_session
  *
- * @package    tool_coursestore
+ * @package    tool_coursebank
  * @author     Adam Riddel <adamr@catlyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace tool_coursestore\event;
+namespace tool_coursebank\event;
 defined('MOODLE_INTERNAL') || die();
 /**
  * http_request
@@ -40,7 +40,7 @@ class http_request_failed extends \core\event\base {
     }
 
     public static function get_name() {
-        return get_string('eventhttprequestfailed', 'tool_coursestore');
+        return get_string('eventhttprequestfailed', 'tool_coursebank');
     }
 
     public function get_description() {
@@ -57,6 +57,6 @@ class http_request_failed extends \core\event\base {
     }
 
     public function get_url() {
-        return new \moodle_url('/admin/tool/coursestore/queue.php');
+        return new \moodle_url('/admin/tool/coursebank/queue.php');
     }
 }
