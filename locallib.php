@@ -67,8 +67,8 @@ abstract class tool_coursestore {
     }
 
     /**
-     * Get the stored session key for use with the course bank REST API if one
-     * exists.
+     * Get the stored session key for use with the external course bank
+     * REST API if one exists.
      *
      * @return string or bool false  Session key
      */
@@ -81,7 +81,7 @@ abstract class tool_coursestore {
     }
 
     /**
-     * Set the session key for use with the course bank REST API
+     * Set the session key for use with the external course bank REST API.
      *
      * @return bool  Success/failure
      */
@@ -97,7 +97,7 @@ abstract class tool_coursestore {
      * made successfully.
      *
      * @param  coursestore_ws_manager $wsman  Web service manager object.
-     * @param  string               $sesskey  Course bank session key.
+     * @param  string               $sesskey  External course bank session key.
      *
      * @return bool                           True for success, false otherwise.
      */
@@ -288,7 +288,7 @@ abstract class tool_coursestore {
      * @return array of: int     result null = needs further investigation.
      *                                    -1 = some error, don't continue.
      *                                     1 = all good but don't continue
-     *                                         -> i.e. Course Bank already has the backup.
+     *                                         -> i.e. External Course Bank already has the backup.
      *                   boolean deletechunks - whether or not chunks should be deleted.
      *                   int     highestiterator - highest iterator Cours Bank has received for this backup.
      *                   coursestore_http_response putresponse - the response from the put request.
@@ -304,7 +304,7 @@ abstract class tool_coursestore {
         if ($putresponse !== true) {
             if ($putresponse->httpcode == coursestore_ws_manager::WS_HTTP_BAD_REQUEST) {
                 if (isset($putresponse->body->chunksreceived)) {
-                    // We've sent chunks to Course Bank already?
+                    // We've sent chunks to External Course Bank already?
                     if ($putresponse->body->chunksreceived == 0) {
                         // Possible network error. Should retry again later.
                         $backup->status = self::STATUS_ERROR;
@@ -320,9 +320,9 @@ abstract class tool_coursestore {
                     $deletechunks = true;
                     $highestiterator = $putresponse->body->highestchunkiterator;
                 } else if (isset($putresponse->body->is_completed)) {
-                    // We've sent chunks to Course Bank already?
+                    // We've sent chunks to External Course Bank already?
                     if ($putresponse->body->is_completed) {
-                        // Can skip this one as it's already been sent to Course Bank and is complete.
+                        // Can skip this one as it's already been sent to External Course Bank and is complete.
                         // Another process (?!?) may have completed this in the meantime.
                         $backup->status = self::STATUS_FINISHED;
                         $backup->timecompleted = time();
@@ -351,7 +351,7 @@ abstract class tool_coursestore {
      *
      * @return int  0 = all good, continue.
      *             -1 = some error, don't continue.
-     *              1 = all good but don't continue -> i.e. Course Bank already has the backup.
+     *              1 = all good but don't continue -> i.e. External Course Bank already has the backup.
      */
     private static function initialise_backup(coursestore_ws_manager $wsmanager, $backup, $sessionkey, $retries) {
         global $DB;
@@ -386,9 +386,9 @@ abstract class tool_coursestore {
             $highestiterator = 0;
             $putresponse = null;
             if ($postresponse->httpcode == coursestore_ws_manager::WS_HTTP_CONFLICT) {
-                // Course Bank already has some data for this backup.
+                // External Course Bank already has some data for this backup.
                 if ($postresponse->body->is_completed) {
-                    // Can skip this one as it's already been sent to Course Bank and is complete.
+                    // Can skip this one as it's already been sent to External Course Bank and is complete.
                     // Data may not match due to chunk size settings changing.
                     $backup->status = self::STATUS_FINISHED;
                     $backup->timecompleted = time();
@@ -396,7 +396,7 @@ abstract class tool_coursestore {
                     // Don't let the send_backup() continue.
                     return 1;
                 } else if ($postresponse->body->chunksreceived == 0) {
-                    /* Course Bank has some other data for this backup.
+                    /* External Course Bank has some other data for this backup.
                      * But no chunks have been sent yet.
                      * Try to update it.
                      * Don't unset the fileid or the uuid fields.*/
@@ -407,7 +407,7 @@ abstract class tool_coursestore {
                     }
                 } else {
                     /* Post_backup informs us that there's already data for this backup
-                     * in Course Bank.  And, that it's already started receiving
+                     * in External Course Bank.  And, that it's already started receiving
                      * chunks.
                      * We need to delete the chunks, then update the backup, then continue.*/
                     if (isset($postresponse->body->chunksreceived)) {
@@ -757,7 +757,7 @@ abstract class tool_coursestore {
     }
     /**
      * Function to cancel old course backup records in the coursetore table
-     * which have not been completely transferred to Course Bank.
+     * which have not been completely transferred to External Course Bank.
      *
      * It should ignore any errors and continue.
      *
@@ -796,7 +796,7 @@ abstract class tool_coursestore {
     /**
      * Function to fetch course backup records from the Moodle DB, add them
      * to the course store table, and then process the files before sending
-     * via web service to the configured course bank instance.
+     * via web service to the configured external course bank instance.
      *
      * - The query consists of three parts which are combined with a UNION
      *
@@ -1436,7 +1436,7 @@ class coursestore_ws_manager {
      * Get a backup resource.
      *
      * @param string $auth      Authorization string.
-     * @param string $uniqueid  UUID referencing course bank backup resource.
+     * @param string $uniqueid  UUID referencing external course bank backup resource.
      * @param bool   $download  Whether or not to generate a download link.
      */
     public function get_backup($sesskey, $uniqueid, $download=false) {
@@ -1470,7 +1470,7 @@ class coursestore_ws_manager {
         // Check that each of the above fields matches, log an error if not.
         foreach ($fields as $datafield => $responsefield) {
             if (!isset($httpresponse->body->$responsefield) || $httpresponse->body->$responsefield != $data[$datafield]) {
-                $info = "Local value for $datafield does not match coursebank value.";
+                $info = "Local value for $datafield does not match external coursebank value.";
                 $httpresponse->log_http_error(
                         $data['courseid'],
                         $data['fileid'],
@@ -1589,7 +1589,7 @@ class coursestore_ws_manager {
      * Get most recent chunk transferred for specific backup.
      *
      * @param string $auth      Authorization string
-     * @param string $uniqueid  UUID referencing course bank backup resource
+     * @param string $uniqueid  UUID referencing external course bank backup resource
      *
      */
     public function get_chunk($auth, $uniqueid) {
@@ -1601,7 +1601,7 @@ class coursestore_ws_manager {
      * Transfer chunk
      *
      * @param string $auth      Authorization string
-     * @param string $uniqueid  UUID referencing course bank backup resource
+     * @param string $uniqueid  UUID referencing external course bank backup resource
      * @param int    $chunk     Chunk number
      * @param array  $data      Data for transfer
      *
@@ -1629,7 +1629,7 @@ class coursestore_ws_manager {
      * Remove chunk
      *
      * @param string $auth           Authorization string
-     * @param string $uniqueid       UUID referencing course bank backup resource
+     * @param string $uniqueid       UUID referencing external course bank backup resource
      * @param int    $chunkiterator  Chunk number
      *
      */
@@ -1639,8 +1639,8 @@ class coursestore_ws_manager {
         return $result;
     }
     /**
-     * Get list of backup files available for download from course bank
-     * instance.
+     * Get list of backup files available for download from external
+     * course bank instance.
      *
      * One of the parameters is an Associative array $params
      * A simple example:
@@ -1706,7 +1706,7 @@ class coursestore_ws_manager {
         return $result;
     }
     /**
-     * Get count of backup files available from course bank instance.
+     * Get count of backup files available from external course bank instance.
      */
     public function get_downloadcount($sesskey, array $params = null) {
         $result = $this->send_authenticated('downloadcount', array(), 'GET', $sesskey);
@@ -2125,7 +2125,7 @@ class coursestore_logging {
 
         self::log_generic_request(
                 $httpresponse, 'http_request', 'GET download request',
-                'Get Course Bank backups available for download.'
+                'Get External Course Bank backups available for download.'
         );
     }
     /** Log event for get_downloadcount request.
@@ -2137,7 +2137,7 @@ class coursestore_logging {
 
         self::log_generic_request(
                 $httpresponse, 'http_request', 'GET download count request',
-                'Get count of available Course Bank backups.'
+                'Get count of available External Course Bank backups.'
         );
     }
     /**
@@ -2187,12 +2187,12 @@ class coursestore_logging {
             if ($httpresponse instanceof coursestore_http_response) {
                 if ($httpresponse->httpcode == coursestore_ws_manager::WS_HTTP_CONFLICT && $level == 'course') {
                     // The course was already created.
-                    // Check if Course Bank has the same data as us.
+                    // Check if External Course Bank has the same data as us.
                     if (!coursestore_ws_manager::check_post_backup_data_is_same($httpresponse, $backup)) {
                         $info .= " The backup already exists.";
                         if ($httpresponse->body->is_completed) {
-                            // Course Bank already has a complete copy of this backup.
-                            $info .= " The backup is complete in Course Bank.";
+                            // External Course Bank already has a complete copy of this backup.
+                            $info .= " The backup is complete in External Course Bank.";
                         }
                     } else {
                         // It's ok, will continue.
@@ -2201,7 +2201,7 @@ class coursestore_logging {
                                 ($level == 'course' ? 'backup' : 'chunk') .
                                 " for course store id $coursestoreid " .
                         "started. (Course ID: $courseid) It already exists " .
-                        "in Course Bank.  Will continue.";
+                        "in External Course Bank.  Will continue.";
                     }
                 }
                 // Log the session key failure.

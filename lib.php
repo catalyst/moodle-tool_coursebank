@@ -205,11 +205,11 @@ function tool_coursestore_is_url_available($url, $invaldheaders=array('404', '40
  * key is discarded whenever settings are changed.
  *
  * (This is important because settings changes may include auth token or the
- * Course Bank URL. Although Course Store will re-authenticate as necessary if
- * a session key does not work, it is conceivable that using a session key
- * associated with an old URL or token value might cause Course Bank to
- * attribute data sent by this Course Store instance to some other instance,
- * resulting in data corruption or overwriting.)
+ * External Course Bank URL. Although Course Store will re-authenticate as
+ * necessary if a session key does not work, it is conceivable that using a
+ * session key associated with an old URL or token value might cause External
+ * Course Bank to attribute data sent by this Course Store instance to some
+ * other instance, resulting in data corruption or overwriting.)
  *
  * This class extends the configempty class and overrides the output_html
  * method in order to output a completely empty, hidden setting item. When a
