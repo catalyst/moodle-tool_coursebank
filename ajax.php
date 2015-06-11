@@ -33,8 +33,14 @@ require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 $action = required_param('action', PARAM_TEXT);
 $response = null;
 
-// Prevent checks from returning NaN if the user has since logged out.
-isloggedin() || die;
+// If users session has expired, redirect them to the login page.
+if (!isloggedin()) {
+    $redirect = true;
+    $redirecturl = $CFG->wwwroot . '/login/index.php';
+} else {
+    $redirect = false;
+    $redirecturl = null;
+}
 
 $context = context_system::instance();
 
@@ -54,7 +60,8 @@ switch ($action) {
         // Initialise, check connection.
         $wsmanager = new coursebank_ws_manager($urltarget, $timeout);
 
-        $response = tool_coursebank::check_connection($wsmanager, $sesskey) ? 1 : 0;
+        $response = array();
+        $response[] = tool_coursebank::check_connection($wsmanager, $sesskey) ? 1 : 0;
         $wsmanager->close();
 
         break;
@@ -67,9 +74,12 @@ switch ($action) {
         // Initialise, check connection.
         $wsmanager = new coursebank_ws_manager($urltarget, $timeout);
 
-        $response = tool_coursebank::check_connection_speed($wsmanager, 4, $sesskey);
+        $response = array();
+        $response[] = tool_coursebank::check_connection_speed($wsmanager, 4, $sesskey);
         $wsmanager->close();
     default:
         break;
 }
+$response[] = $redirect;
+$response[] = $redirecturl;
 echo json_encode($response);
