@@ -340,7 +340,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         $buttonattr = array(
             'id' => 'conncheck',
             'type' => 'button',
-            'class' => 'conncheckbutton hide',
+            'class' => 'conncheckbutton',
             'value' => get_string('conncheckbutton', 'tool_coursebank')
         );
         $html .= html_writer::tag('input', '', $buttonattr);
