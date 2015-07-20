@@ -115,7 +115,7 @@ if ($error) {
 } else {
     $filtering->display_add();
     $filtering->display_active();
-    echo $renderer->course_bank_downloads($response->body, $sort, $dir, $page, $perpage);
+    echo $renderer->course_bank_downloads($response->body, $count->body->backupcount, $sort, $dir, $page, $perpage);
     echo $OUTPUT->paging_bar($count->body->backupcount, $page, $perpage, $url);
 }
 

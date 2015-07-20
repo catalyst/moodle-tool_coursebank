@@ -98,7 +98,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
      *
      * @return string $html          Body HTML output
      */
-    public function course_bank_downloads($downloads, $sort='', $dir='', $page='', $perpage='') {
+    public function course_bank_downloads($downloads, $count, $sort='', $dir='', $page='', $perpage='') {
         if (!is_array($downloads)) {
             $downloads = (array)$downloads;
         }
@@ -107,11 +107,11 @@ class tool_coursebank_renderer extends plugin_renderer_base {
 
         $html = $this->box_start();
         $html .= $this->heading(
-                get_string('backupfiles', 'tool_coursebank', count((array)$downloads)),
+                get_string('backupfiles', 'tool_coursebank', $count),
                 3
         );
         // Don't output the table if there are no results.
-        if (count($downloads) <= 0) {
+        if ($count <= 0) {
             $html .= $this->box_end();
             return $html;
         }
