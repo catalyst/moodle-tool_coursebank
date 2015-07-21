@@ -26,6 +26,27 @@
 defined('MOODLE_INTERNAL') || die;
 
 class tool_coursebank_renderer extends plugin_renderer_base {
+    /**
+     * Config object for tool_coursebank
+     *
+     * @var object
+     */
+    private $config;
+
+    /**
+     * Returns config object for tool_coursebank.
+     *
+     * @return object
+     */
+    private function get_config() {
+        if (isset($this->config)) {
+            return $this->config;
+        }
+
+        $this->config = get_config('tool_coursebank');
+
+        return $this->config;
+    }
 
     /**
      * Output main body of course bank interface
@@ -381,7 +402,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         $html .= html_writer::end_tag('div');
 
         // Success notification.
-        $urltarget = get_config('tool_coursebank', 'url');
+        $urltarget = $this->get_config()->url;
         $html .= $this->course_bank_check_notification(
                 'conncheck',
                 'success',
@@ -460,14 +481,14 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('input', '', $wwwrootattr);
 
         // Success notification.
-        $urltarget = get_config('tool_coursebank', 'url');
+        $urltarget = $this->get_config()->url;
         $attr = array(
             'type' => 'hidden',
             'name' => 'success',
             'value' => get_string('speedtestsuccess', 'tool_coursebank', $urltarget),
             'class' => 'speedtestsuccess'
         );
-        $urltarget = get_config('tool_coursebank', 'url');
+
         $html .= html_writer::tag('input', '', $attr);
         $attr = array(
             'type' => 'hidden',
