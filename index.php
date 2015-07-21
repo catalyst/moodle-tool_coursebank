@@ -32,7 +32,6 @@ require_once($CFG->dirroot.'/admin/tool/coursebank/lib.php');
 
 defined('MOODLE_INTERNAL') || die;
 
-$download     = optional_param('download', 0, PARAM_INT);
 $file         = optional_param('file', 0, PARAM_ALPHANUMEXT);
 $sort         = optional_param('sort', 'coursefullname', PARAM_ALPHANUM);
 $dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
@@ -53,27 +52,11 @@ $params = array(
     'page' => $page,
     'perpage' => $perpage
 );
-//$url = new moodle_url('/admin/tool/coursebank/download.php', $params);
+
 $url = new moodle_url('/admin/tool/coursebank/index.php', $params);
 $urltarget = get_config('tool_coursebank', 'url');
 $wsman = new coursebank_ws_manager($urltarget);
 $sesskey = tool_coursebank::get_session();
-
-// Downloading.
-if ($download == 1 and !empty($file)) {
-    require_capability('tool/coursebank:download', $context);
-    $dlresponse = $wsman->get_backup($sesskey, $file, true);
-    $errorurl = $url . "?sort=$sort&amp;dir=$dir&amp;page=$page&amp;perpage=$perpage";
-
-    $error = tool_coursebank_error::is_response_backup_download_error($dlresponse);
-    coursebank_logging::log_backup_download($dlresponse, $file);
-
-    if (!$error) {
-        redirect($dlresponse->body->url, '', 0);
-    } else {
-        print_error('errordownloading', 'tool_coursebank', $errorurl);
-    }
-}
 
 $PAGE->set_url($url);
 $PAGE->set_context($context);

@@ -249,10 +249,57 @@ class tool_coursebank_renderer extends plugin_renderer_base {
                 array('src' => $this->pix_url('t/download')->out(false),
                     'alt' => $text
                 ));
-        $url = new moodle_url($this->page->url, array('download' => 1, 'file' => $result->uniqueid));
-        $links = html_writer::link($url, $icon, array('title' => $text));
+
+        $url = $this->course_bank_get_download_url($result);
+
+        if (!empty($url)) {
+            $links = html_writer::link($url, $icon, array('title' => $text));
+        } else {
+            $links = get_string('notavailable', 'tool_coursebank');
+        }
 
         return $links;
+    }
+
+    /**
+     * Returns download URL
+     *
+     * @param object $result
+     * @return \moodle_url
+     */
+    private function course_bank_get_download_url($result) {
+        // Defaults.
+        $url = '';
+        $scheme = 'http://';
+        $host = rtrim(trim($this->get_config()->url), '/');
+        $port = '';
+        $path = '';
+
+        // Parse URL from the config.
+        $parsedurl = parse_url($this->get_config()->url);
+
+        // Get scheme: http or https.
+        if (isset($parsedurl['scheme'])) {
+            $scheme = $parsedurl['scheme'] . '://';
+        }
+        // Get host.
+        if (isset($parsedurl['host'])) {
+            $host = $parsedurl['host'];
+        }
+        // Get port.
+        if (isset($parsedurl['port'])) {
+            $port = ':' . $parsedurl['port'];
+        }
+        // Get path only if host is exist.
+        if (isset($parsedurl['path']) and isset($parsedurl['host'])) {
+            $path = $path['path'];
+        }
+
+        if (isset($result->id) && isset($result->downloadtoken)) {
+            $url = new moodle_url($scheme . $host . $port . $path .  '/backup/' . $result->id . '/download/' . $result->downloadtoken);
+        }
+
+        return $url;
     }
     /**
      * Generates action links for queue page
