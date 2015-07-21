@@ -34,6 +34,13 @@ class tool_coursebank_renderer extends plugin_renderer_base {
     private $config;
 
     /**
+     * Target URL of the backup server
+     *
+     * @var string
+     */
+    private $hosturl;
+
+    /**
      * Returns config object for tool_coursebank.
      *
      * @return object
@@ -262,14 +269,17 @@ class tool_coursebank_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Returns download URL
+     * Returns hosturl based on Target URL configuration.
      *
-     * @param object $result
-     * @return \moodle_url
+     * @return string
      */
-    private function course_bank_get_download_url($result) {
+    private function course_bank_get_hosturl() {
+
+        if (isset($this->hosturl)) {
+            return $this->hosturl;
+        }
+
         // Defaults.
-        $url = '';
         $scheme = 'http://';
         $host = rtrim(trim($this->get_config()->url), '/');
         $port = '';
@@ -290,13 +300,27 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         if (isset($parsedurl['port'])) {
             $port = ':' . $parsedurl['port'];
         }
-        // Get path only if host is exist.
+        // Get path only if host is set.
         if (isset($parsedurl['path']) and isset($parsedurl['host'])) {
             $path = $path['path'];
         }
 
+        $this->hosturl = $scheme . $host . $port . $path;
+
+        return $this->hosturl;
+    }
+    /**
+     * Returns download URL
+     *
+     * @param object $result
+     * @return \moodle_url
+     */
+    private function course_bank_get_download_url($result) {
+        $url = '';
+
         if (isset($result->id) && isset($result->downloadtoken)) {
-            $url = new moodle_url($scheme . $host . $port . $path .  '/backup/' . $result->id . '/download/' . $result->downloadtoken);
+            $hosturl = $this->course_bank_get_hosturl();
+            $url = new moodle_url($hosturl .  '/backup/' . $result->id . '/download/' . $result->downloadtoken);
         }
 
         return $url;
