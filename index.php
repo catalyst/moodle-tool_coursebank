@@ -45,7 +45,6 @@ require_capability('tool/coursebank:view', $context);
 admin_externalpage_setup('tool_coursebank_download');
 
 $params = array(
-    'download' => $download,
     'file' => $file,
     'sort' => $sort,
     'dir' => $dir,
@@ -75,7 +74,9 @@ $filterparams = array(
 $filtering = new coursebank_filtering('download', $filterparams);
 $extraparams = $filtering->get_param_filter();
 
+$error = false;
 $response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
+
 if ($response->httpcode != $wsman::WS_HTTP_OK or isset($response->body->error)) {
     $error = true;
 }
@@ -87,7 +88,7 @@ if ($response->httpcode != $wsman::WS_HTTP_OK or isset($count->body->error)) {
 
 $renderer = $PAGE->get_renderer('tool_coursebank');
 
-if ($error) {
+if (!empty($error)) {
     echo $OUTPUT->notification(get_string('errorgetdownloadlist', 'tool_coursebank'), 'notifyproblem');
     $returnurl = new moodle_url($CFG->wwwroot.'/admin/settings.php', array('section' => 'coursebank_settings'));
     echo $renderer->single_button(
