@@ -1460,10 +1460,15 @@ class coursebank_ws_manager {
             $info = curl_getinfo($this->curlhandle);
             if ($result) {
                 $body = json_decode($result);
-                return new coursebank_http_response($body, $info, $curlopts);
+                $response = new coursebank_http_response($body, $info, $curlopts);
+                break;
             }
         }
-        return new coursebank_http_response(false, false, $curlopts);
+        if (!isset($response)) {
+            $response = new coursebank_http_response(false, false, $curlopts);
+        }
+        $response->log_http_response();
+        return $response;
     }
 
     /**
@@ -1940,6 +1945,57 @@ class coursebank_http_response {
         }
 
         add_to_log(SITEID, 'Course bank', 'Transfer error', '', $info, 0, $USER->id);
+        return true;
+    }
+    public function log_http_response() {
+        global $CFG;
+        // First do legacy log handling.
+        // TODO: Set up legacy logging here.
+
+        // We don't want to include the binary data in our logging.
+        $request = (array) $this->request;
+        $body = json_encode((array) $this->body);
+        $request[CURLOPT_POSTFIELDS] = (array) json_decode($request[CURLOPT_POSTFIELDS]);
+        unset($request[CURLOPT_POSTFIELDS]['data']);
+
+        // Handle response time-out.
+        if ($this->info === false) {
+            if ($this->request[CURLOPT_URL]) {
+                $description = 'Request to "' . s($this->request[CURLOPT_URL]) .
+                    '" timed out.';
+            } else {
+                $description = 'HTTP request timed out';
+            }
+            $otherdata = array(
+                'info' => $description,
+                'request'     => $request
+            );
+        } else {
+            $description = $this->httpcode . ' response received from "' .
+                    s($this->request[CURLOPT_URL]) . '"';
+            $otherdata = array(
+                'courseid'      => SITEID,
+                'body'          => $body,
+                'responseinfo'  => $this->info,
+                'httpcode'      => $this->httpcode,
+                'request'       => $request,
+                'info'          => $description
+                );
+            if (isset($this->error)) {
+                $otherdata['error'] = $this->error;
+            }
+            if (isset($this->error_desc)) {
+                $otherdata['error_desc'] = $this->error_desc;
+                $otherdata['info'] .= ' - '. $this->error_desc;
+            }
+        }
+
+        $eventdata = array(
+            'other'     => $otherdata,
+            'context'   => context_system::instance()
+        );
+        $event = \tool_coursebank\event\http_request::create($eventdata);
+        $event->trigger();
         return true;
     }
 }
