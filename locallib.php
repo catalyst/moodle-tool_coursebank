@@ -1762,7 +1762,7 @@ class coursebank_http_response {
 
         // First log information for debugging purposes.
         if ($CFG->debug >= DEBUG_ALL && !empty($info)) {
-            error_log($info);
+            debugging($info);
         }
 
         if (tool_coursebank::legacy_logging()) {
@@ -1856,7 +1856,7 @@ class coursebank_logging {
 
         // First log information for debugging purposes.
         if ($CFG->debug >= DEBUG_ALL) {
-            error_log($info);
+            debugging($info);
         }
 
         if ($userid == 0) {
