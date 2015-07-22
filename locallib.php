@@ -1547,7 +1547,6 @@ class coursebank_ws_manager {
      */
     public function put_backup($sessionkey, $data, $uniqueid, $retries=4) {
 
-        //debugging(__FUNCTION__ . ": data=" . print_r($data, true), DEBUG_DEVELOPER);
         $response = $this->send_authenticated('backup/' . $uniqueid, $data, 'PUT', $sessionkey);
         coursebank_logging::log_backup_updated($data, $response);
 
@@ -1760,11 +1759,6 @@ class coursebank_http_response {
     public function log_http_error($courseid, $coursebankid, $info='') {
         global $CFG;
 
-        // First log information for debugging purposes.
-        if ($CFG->debug >= DEBUG_ALL && !empty($info)) {
-            debugging($info);
-        }
-
         if (tool_coursebank::legacy_logging()) {
             return $this->log_http_error_legacy($courseid, $coursebankid);
         }
@@ -1853,11 +1847,6 @@ class coursebank_logging {
     protected static function log_event($info='', $eventname='coursebank_logging', $action='',
             $module=self::LOG_MODULE_COURSE_BANK, $courseid=SITEID, $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
-
-        // First log information for debugging purposes.
-        if ($CFG->debug >= DEBUG_ALL) {
-            debugging($info);
-        }
 
         if ($userid == 0) {
             $userid = $USER->id;
