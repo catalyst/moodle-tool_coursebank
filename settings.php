@@ -132,12 +132,19 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configcheckbox('tool_coursebank/displaypages',
             get_string('settings_displaypages', 'tool_coursebank'),
             get_string('settings_displaypages_desc', 'tool_coursebank'), 1));
+
+    $settings->add(new admin_setting_configcheckbox('tool_coursebank/deletelocalbackup',
+            get_string('settings_deletelocalbackup', 'tool_coursebank'),
+            get_string('settings_deletelocalbackup_desc', 'tool_coursebank'), 0));
+
     $settings->add(new admin_setting_configsessionkey(
             'tool_coursebank/sessionkey',
             get_string('settings_sessionkey', 'tool_coursebank'),
             get_string('settings_sessionkey_desc', 'tool_coursebank')
             )
     );
+
+    // Proxy stuff.
     $settings->add(new admin_setting_heading('coursebank_proxy_header',
             get_string('settings_proxyheader', 'tool_coursebank'),
             '')

@@ -46,6 +46,8 @@ $string['settings_externalcron_desc'] = 'If checked the process will be triggere
     <br />The simple example: <PRE>2-57/5 * * * * www-data php /path/to/your/moodle/admin/tool/coursebank/cli/backup.php >> /var/log/backup.log</PRE>';
 $string['settings_displaypages'] = 'Display pages';
 $string['settings_displaypages_desc'] = 'Hide/Display Course Bank pages in the navigation menu under Site administration > Courses > Backups > Course Bank';
+$string['settings_deletelocalbackup'] = 'Delete local backups';
+$string['settings_deletelocalbackup_desc'] = 'If enabled a local backup file will be deleted once it has been sent to coursebank.';
 $string['conncheckfail'] = 'Connection to {$a} failed. Please confirm that your external course bank settings and network configuration are correct.';
 $string['connchecksuccess'] = 'Connection check to {$a} passed!';
 $string['speedtestsuccess'] = 'Connection speed test to {$a} passed! The test transfer speed was approximately ';

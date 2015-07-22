@@ -680,7 +680,7 @@ abstract class tool_coursebank {
         return true;
     }
     /**
-     * Convenience function to handle copying the backup file to the designated storage area.
+     * Function to handle deleteing the backup file from the designated storage area.
      *
      * @param object $backup           Course bank database record object
      * @param boolean $update_record   Update the database record to relect that the backup is no longer copied.
@@ -703,6 +703,99 @@ abstract class tool_coursebank {
         if ($update_record == true) {
             $backup->isbackedup = 0; // We have deleted the copy.
             $DB->update_record('tool_coursebank', $backup);
+        }
+
+        return true;
+    }
+    /**
+     *  Function to handle deleting the moodle backup file from the storage area.
+     *
+     * @param object $backup Course bank database record object
+     *
+     */
+    public static function delete_moodle_backup($backup) {
+        global $CFG;
+
+        require_once($CFG->dirroot . '/backup/util/helper/backup_cron_helper.class.php');
+
+        $deletelocalbackup = get_config('tool_coursebank', 'deletelocalbackup');
+
+        // We don't want to delete moodle backup file.
+        if (empty($deletelocalbackup)) {
+            return true;
+        }
+
+        $config = get_config('backup');
+        $storage = $config->backup_auto_storage;
+        $dir = $config->backup_auto_destination;
+
+        if (!file_exists($dir) || !is_dir($dir) || !is_writable($dir)) {
+            $dir = null;
+        }
+
+        // Clean up excess backups in the course backup filearea.
+        if ($storage == 0 || $storage == 2) {
+            $fs = get_file_storage();
+            $context = context_course::instance($backup->courseid);
+            $component = 'backup';
+            $filearea = 'automated';
+            $itemid = 0;
+            $files = array();
+            // Store all the matching files into timemodified => stored_file array.
+            foreach ($fs->get_area_files($context->id, $component, $filearea, $itemid) as $file) {
+                $files[$file->get_timemodified()] = $file;
+            }
+
+            // Sort by keys descending (newer to older filemodified).
+            krsort($files);
+            foreach ($files as $file) {
+                if ($backup->fileid == $file->get_id()) {
+                    $file->delete();
+                    mtrace('Removed backup file from the automated filearea');
+                }
+            }
+        }
+
+        // Clean up excess backups in the specified external directory.
+        if (!empty($dir) && ($storage == 1 || $storage == 2)) {
+            // Calculate backup filename regex, ignoring the date/time/info parts that can be
+            // variable, depending of languages, formats and automated backup settings.
+            $filename = backup::FORMAT_MOODLE . '-' . backup::TYPE_1COURSE . '-' . $backup->courseid . '-';
+            $regex = '#' . preg_quote($filename, '#') . '.*\.mbz$#';
+
+            // Store all the matching files into filename => timemodified array.
+            $files = array();
+            foreach (scandir($dir) as $file) {
+                // Skip files not matching the naming convention.
+                if (!preg_match($regex, $file, $matches)) {
+                    continue;
+                }
+
+                // Read the information contained in the backup itself.
+                try {
+                    $bcinfo = backup_general_helper::get_backup_information_from_mbz($dir . '/' . $file);
+                } catch (backup_helper_exception $e) {
+                    mtrace('Error: ' . $file . ' does not appear to be a valid backup (' . $e->errorcode . ')');
+                    continue;
+                }
+
+                // Make sure this backup concerns the course and site we are looking for.
+                if ($bcinfo->format === backup::FORMAT_MOODLE &&
+                        $bcinfo->type === backup::TYPE_1COURSE &&
+                        $bcinfo->original_course_id == $backup->courseid &&
+                        backup_general_helper::backup_is_samesite($bcinfo)) {
+                    $files[$file] = $bcinfo->backup_date;
+                }
+            }
+
+            // Sort by values descending (newer to older filemodified).
+            arsort($files);
+            foreach (array_keys($files) as $file) {
+                if ($file == $backup->backupfilename) {
+                    unlink($dir . '/' . $file);
+                    mtrace('Removed backup file from the automated filearea');
+                }
+            }
         }
 
         return true;
@@ -1004,10 +1097,23 @@ abstract class tool_coursebank {
             }
             $result = self::send_backup($coursebackup, $starttime);
             if ($result == self::SEND_SUCCESS) {
+                // Delete file from the designated storage area.
                 $delete = self::delete_backup($coursebackup, true);
                 if (!$delete) {
                     $delfail = get_string(
                             'deletefailed',
+                            'tool_coursebank',
+                            $coursebackup->backupfilename
+                    );
+                    // Log it.
+                    coursebank_logging::log_delete_backup($delfail);
+                    mtrace($delfail . "\n");
+                }
+                // Delete file from the automated backups storage area.
+                $localdelete = self::delete_moodle_backup($coursebackup, true);
+                if (!$localdelete) {
+                    $delfail = get_string(
+                            'localdeletefailed',
                             'tool_coursebank',
                             $coursebackup->backupfilename
                     );
