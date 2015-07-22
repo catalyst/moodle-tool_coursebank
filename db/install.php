@@ -33,7 +33,9 @@ function xmldb_tool_coursebank_install() {
 
     if (is_writable($CFG->dataroot)) {
         $dir = tool_coursebank::get_coursebank_data_dir();
-        mkdir($dir);
+        if (!file_exists($dir)) {
+            mkdir($dir);
+        }
     } else {
         throw new invalid_dataroot_permissions();
     }

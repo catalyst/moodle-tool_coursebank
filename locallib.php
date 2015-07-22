@@ -612,7 +612,13 @@ abstract class tool_coursebank {
 
     public static function get_coursebank_data_dir() {
         global $CFG;
-        return $CFG->dataroot . "/coursebank";
+
+        $dir = $CFG->dataroot . "/coursebank";
+        if (!file_exists($dir)) {
+            mkdir($dir);
+        }
+
+        return $dir;
     }
 
     public static function get_coursebank_filepath($backup) {
