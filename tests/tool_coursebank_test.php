@@ -285,4 +285,23 @@ class tool_coursebank_testcase extends advanced_testcase {
         $this->assertCount(1, $statuses);
         $this->assertEquals(3, array_sum($statuses));
     }
+    /**
+     * @group tool_coursebank
+     */
+    public function test_delete_moodle_backup() {
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course();
+
+        $backup = new stdClass();
+        $backup->courseid =$course->id;
+        $backup->backupfilename = 'test.mbz';
+
+        set_config('deletelocalbackup', false, 'tool_coursebank');
+        $result = tool_coursebank::delete_moodle_backup($backup);
+        $this->assertTrue($result);
+
+        set_config('deletelocalbackup', true, 'tool_coursebank');
+        $result = tool_coursebank::delete_moodle_backup($backup);
+        $this->assertTrue($result);
+    }
 }
