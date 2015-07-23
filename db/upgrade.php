@@ -40,7 +40,7 @@ function xmldb_tool_coursebank_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // coursebank savepoint reached.
+        // Coursebank savepoint reached.
         upgrade_plugin_savepoint(true, 2015031900, 'tool', 'coursebank');
     }
 
@@ -143,7 +143,7 @@ function xmldb_tool_coursebank_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // coursebank savepoint reached.
+        // Coursebank savepoint reached.
         upgrade_plugin_savepoint(true, 2015032000, 'tool', 'coursebank');
     }
 
@@ -156,7 +156,7 @@ function xmldb_tool_coursebank_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        // coursebank savepoint reached.
+        // Coursebank savepoint reached.
         upgrade_plugin_savepoint(true, 2015041300, 'tool', 'coursebank');
     }
 
@@ -170,15 +170,15 @@ function xmldb_tool_coursebank_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // drop the coursebank log table.
+        // Drop the coursebank log table.
         $table = new xmldb_table('tool_coursebank_log');
 
-        // Conditionally launch drop table
+        // Conditionally launch drop table.
         if ($dbman->table_exists($table)) {
             $dbman->drop_table($table);
         }
 
-        // coursebank savepoint reached.
+        // Coursebank savepoint reached.
         upgrade_plugin_savepoint(true, 2015041601, 'tool', 'coursebank');
     }
     return true;

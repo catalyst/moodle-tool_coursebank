@@ -32,49 +32,79 @@ require_once($CFG->dirroot.'/admin/tool/coursebank/classes/table_log.php');
  *
  */
 class tool_coursebank_renderable implements renderable {
-    /** @var manager log manager */
+    /**
+     * @var manager log manager
+     */
     protected $logmanager;
 
-    /** @var string selected log reader pluginname */
+    /**
+     * @var string selected log reader pluginname
+     */
     public $selectedlogreader = null;
 
-    /** @var int page number */
+    /**
+     * @var int page number
+     */
     public $page;
 
-    /** @var int perpage records to show */
+    /**
+     * @var int perpage records to show
+     */
     public $perpage;
 
-    /** @var moodle_url url of report page */
+    /**
+     * @var moodle_url url of report page
+     */
     public $url;
 
-    /** @var int selected date from which records should be displayed */
+    /**
+     * @var int selected date from which records should be displayed
+     */
     public $date;
 
-    /** @var int selected user id for which logs are displayed */
+    /**
+     * @var int selected user id for which logs are displayed
+     */
     public $userid;
 
-    /** @var string selected type of logs to be displayed */
+    /**
+     * @var string selected type of logs to be displayed
+     */
     public $type;
 
-    /** @var bool show users */
+    /**
+     * @var bool show users
+     */
     public $showusers;
 
-    /** @var bool show report */
+    /**
+     * @var bool show report
+     */
     public $showreport;
 
-    /** @var bool show selector form */
+    /**
+     * @var bool show selector form
+     */
     public $showselectorform;
 
-    /** @var string selected log format */
+    /**
+     * @var string selected log format
+     */
     public $logformat;
 
-    /** @var string order to sort */
+    /**
+     * @var string order to sort
+     */
     public $order;
 
-    /** @var table_log table log which will be used for rendering logs */
+    /**
+     * @var table_log table log which will be used for rendering logs
+     */
     public $tablelog;
 
-    /** @var bool shows if we want to use table_log_lagacy as a table class */
+    /**
+     * @var bool shows if we want to use table_log_lagacy as a table class
+     */
     public $legacy;
 
     /**
@@ -91,8 +121,8 @@ class tool_coursebank_renderable implements renderable {
      * @param int $perpage (optional) number of records to show per page.
      * @param string $order (optional) sortorder of fetched records
      */
-    public function __construct($lagacy, $logreader = "", $userid = 0, $showreport = true, $showselectorform = true, $url = "", $date = 0,
-            $type = "", $logformat='showashtml', $page = 0, $perpage = 100, $order = "timecreated ASC") {
+    public function __construct($lagacy, $logreader = "", $userid = 0, $showreport = true, $showselectorform = true, $url = "",
+            $date = 0, $type = "", $logformat='showashtml', $page = 0, $perpage = 100, $order = "timecreated ASC") {
 
         global $PAGE;
 

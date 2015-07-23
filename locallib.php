@@ -358,8 +358,8 @@ abstract class tool_coursebank {
 
         $coursedate = '';
         if ($backup->coursestartdate > 0) {
-            $dt = new DateTime("@" . $backup->coursestartdate);
-            $coursedate = $dt->format('Y-m-d H:i:s');
+            $datetime = new DateTime("@" . $backup->coursestartdate);
+            $coursedate = $datetime->format('Y-m-d H:i:s');
         }
         $data = array(
             'uuid'         => $backup->uniqueid,
@@ -400,8 +400,8 @@ abstract class tool_coursebank {
                      * But no chunks have been sent yet.
                      * Try to update it.
                      * Don't unset the fileid or the uuid fields.*/
-                    list($result, $deletechunks, $highestiterator, $putresponse) =
-                        self::update_backup($wsmanager, $data, $backup, $sessionkey, $retries);
+                    list($result, $deletechunks, $highestiterator, $putresponse) = self::update_backup(
+                            $wsmanager, $data, $backup, $sessionkey, $retries);
                     if (!is_null($result)) {
                         return $result;
                     }
@@ -424,8 +424,8 @@ abstract class tool_coursebank {
                      * that's why we're getting an error.
                      * Anyway, the update below should catch any errors.*/
                 }
-                list($result, $deletechunks, $highestiterator, $putresponse) =
-                    self::update_backup($wsmanager, $data, $backup, $sessionkey, $retries);
+                list($result, $deletechunks, $highestiterator, $putresponse) = self::update_backup(
+                        $wsmanager, $data, $backup, $sessionkey, $retries);
                 if (!is_null($result)) {
                     return $result;
                 }
@@ -662,17 +662,17 @@ abstract class tool_coursebank {
      *
      */
     public static function clean_coursebank_data_dir() {
-        $coursebank_data_dir = self::get_coursebank_data_dir();
-        if (!is_writable($coursebank_data_dir)) {
+        $coursebankdatadir = self::get_coursebank_data_dir();
+        if (!is_writable($coursebankdatadir)) {
             return false;
         }
 
-        if (is_dir($coursebank_data_dir)) {
+        if (is_dir($coursebankdatadir)) {
             $maxbackuptime = time() - (self::MAX_BACKUP_DAYS * DAYSECS);
-            $objects = scandir($coursebank_data_dir);
+            $objects = scandir($coursebankdatadir);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    $filename = $coursebank_data_dir."/".$object;
+                    $filename = $coursebankdatadir."/".$object;
                     if (filetype($filename) == "file") {
                         $filemtime = filemtime($filename);
                         if ($filemtime < $maxbackuptime) {
@@ -689,10 +689,10 @@ abstract class tool_coursebank {
      * Function to handle deleteing the backup file from the designated storage area.
      *
      * @param object $backup           Course bank database record object
-     * @param boolean $update_record   Update the database record to relect that the backup is no longer copied.
+     * @param boolean $updaterecord   Update the database record to relect that the backup is no longer copied.
      *
      */
-    public static function delete_backup($backup, $update_record) {
+    public static function delete_backup($backup, $updaterecord) {
         global $DB;
 
         $coursebankfilepath = self::get_coursebank_filepath($backup);
@@ -706,7 +706,7 @@ abstract class tool_coursebank {
 
         unlink($coursebankfilepath);
 
-        if ($update_record == true) {
+        if ($updaterecord == true) {
             $backup->isbackedup = 0; // We have deleted the copy.
             $DB->update_record('tool_coursebank', $backup);
         }
@@ -741,14 +741,14 @@ abstract class tool_coursebank {
 
         // Clean up excess backups in the course backup filearea.
         if ($storage == 0 || $storage == 2) {
-            $fs = get_file_storage();
+            $filestorage = get_file_storage();
             $context = context_course::instance($backup->courseid);
             $component = 'backup';
             $filearea = 'automated';
             $itemid = 0;
             $files = array();
             // Store all the matching files into timemodified => stored_file array.
-            foreach ($fs->get_area_files($context->id, $component, $filearea, $itemid) as $file) {
+            foreach ($filestorage->get_area_files($context->id, $component, $filearea, $itemid) as $file) {
                 $files[$file->get_timemodified()] = $file;
             }
 
@@ -892,9 +892,9 @@ abstract class tool_coursebank {
                         'statuserror'       => self::STATUS_ERROR,
                         'maxbackuptime'     => $maxbackuptime,
                         );
-        $rs = $DB->get_recordset_sql($sql, $params);
+        $recordset = $DB->get_recordset_sql($sql, $params);
 
-        foreach ($rs as $coursebackup) {
+        foreach ($recordset as $coursebackup) {
             if ($coursebackup->isbackedup) {
                 self::delete_backup($coursebackup, false);
             }
@@ -902,7 +902,7 @@ abstract class tool_coursebank {
             $coursebackup->status = self::STATUS_CANCELLED;
             $DB->update_record('tool_coursebank', $coursebackup);
         }
-        $rs->close();
+        $recordset->close();
     }
     /**
      * Function to fetch course backup records from the Moodle DB, add them
@@ -1030,7 +1030,7 @@ abstract class tool_coursebank {
                         'maxbackuptime2'    => $maxbackuptime,
                         'maxbackuptime3'    => $maxbackuptime,
                         );
-        $rs = $DB->get_recordset_sql($sql, $params);
+        $recordset = $DB->get_recordset_sql($sql, $params);
 
         $insertfields = array('filesize', 'filetimecreated',
                 'filetimemodified', 'courseid', 'contenthash',
@@ -1038,7 +1038,7 @@ abstract class tool_coursebank {
                 'courseshortname', 'coursestartdate', 'categoryid',
                 'categoryname'
         );
-        foreach ($rs as $coursebackup) {
+        foreach ($recordset as $coursebackup) {
             if (!isset($coursebackup->status)) {
                 // The record hasn't been input in the course bank table yet.
                 $cs = new stdClass();
@@ -1084,7 +1084,7 @@ abstract class tool_coursebank {
                 $coursebackup->categoryname = $cs->categoryname;
             }
         }
-        $rs->close();
+        $recordset->close();
 
         // Get all backups that are pending transfer, attempt to transfer them.
         $sql = 'SELECT * FROM {tool_coursebank}
@@ -1847,7 +1847,7 @@ class coursebank_http_response {
      public $httpcode;
      public $request;
      public $error;
-     public $error_desc;
+     public $errordesc;
     /**
      * Constructor method for http_response object.
      *
@@ -1866,7 +1866,7 @@ class coursebank_http_response {
             $this->error = $body->error;
         }
         if (isset($body->error_desc)) {
-            $this->error_desc = $body->error_desc;
+            $this->errordesc = $body->error_desc;
         }
 
     }
@@ -1908,8 +1908,8 @@ class coursebank_http_response {
         if (isset($this->error)) {
             $otherdata['error'] = $this->error;
         }
-        if (isset($this->error_desc)) {
-            $otherdata['error_desc'] = $this->error_desc;
+        if (isset($this->errordesc)) {
+            $otherdata['error_desc'] = $this->errordesc;
         }
         $eventdata = array(
             'other'     => $otherdata,
@@ -1935,8 +1935,8 @@ class coursebank_http_response {
         if (isset($this->error)) {
             $info .= " ERROR: " . $this->error;
         }
-        if (isset($this->error_desc)) {
-            $info .= " ERROR DESC: " . $this->error_desc;
+        if (isset($this->errordesc)) {
+            $info .= " ERROR DESC: " . $this->errordesc;
         }
 
         add_to_log(SITEID, 'Course bank', 'Transfer error', '', $info, 0, $USER->id);

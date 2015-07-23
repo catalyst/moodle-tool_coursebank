@@ -45,7 +45,7 @@ if ($displaypages) {
         // This is not required in the real-world though as these plugins are loaded
         // after the course menu has been set up.
         if (!$ADMIN->locate('backups')) {
-            $ADMIN->add('courses', new admin_category('backups', new lang_string('backups','admin')));
+            $ADMIN->add('courses', new admin_category('backups', new lang_string('backups', 'admin')));
         }
     }
 
@@ -59,11 +59,6 @@ if ($displaypages) {
     $ADMIN->add('coursebank_pages', new admin_externalpage('tool_coursebank_download',
             get_string('nav_download', 'tool_coursebank'),
             "$CFG->wwwroot/$CFG->admin/tool/coursebank/index.php", 'tool/coursebank:view'));
-
-    // Do not include this page in the menu.
-    //$ADMIN->add('coursebank_pages', new admin_externalpage('tool_coursebank',
-    //        get_string('nav_summary', 'tool_coursebank'),
-    //        "$CFG->wwwroot/$CFG->admin/tool/coursebank/transfer_report.php", 'tool/coursebank:view'));
 
     $ADMIN->add('reports', new admin_externalpage('tool_coursebank_report',
             get_string('nav_report', 'tool_coursebank'),

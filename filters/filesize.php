@@ -189,15 +189,15 @@ class coursebank_filter_filesize extends user_filter_text {
 
         $operators = $this->getOperators();
 
-        $a = new stdClass();
-        $a->label    = $this->_label;
-        $a->value    = '"' . s(display_size($value)) . '"';
-        $a->operator = $operators[$operator];
+        $temp = new stdClass();
+        $temp->label    = $this->_label;
+        $temp->value    = '"' . s(display_size($value)) . '"';
+        $temp->operator = $operators[$operator];
 
         switch ($operator) {
             case 0: // More than.
             case 1: // Less than.
-                return get_string('textlabel', 'filters', $a);
+                return get_string('textlabel', 'filters', $temp);
         }
 
         return '';

@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  *      coursebankid => Course bank backup ID (Moodle side)
  *      error         => error code
  *      error_desc    => error description
-* }
+ * }
  *
  * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>

@@ -117,13 +117,13 @@ class tool_coursebank_table_log_legacy extends tool_coursebank_table_log {
      * @return string HTML for the ip column
      */
     public function col_ip($raw) {
-        $ip = $raw->ip;
+        $ipaddress = $raw->ip;
 
         if (empty($this->download)) {
-            $url = new moodle_url("/iplookup/index.php?ip={$ip}&user={$raw->userid}");
-            $ip = $this->action_link($url, $ip, 'ip');
+            $url = new moodle_url("/iplookup/index.php?ip={$ipaddress}&user={$raw->userid}");
+            $ipaddress = $this->action_link($url, $ipaddress, 'ip');
         }
-        return $ip;
+        return $ipaddress;
     }
     /**
      * Method to create a link with popup action.

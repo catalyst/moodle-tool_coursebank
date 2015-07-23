@@ -701,11 +701,11 @@ class tool_coursebank_renderer extends plugin_renderer_base {
             }
             echo html_writer::label(get_string('selctauser'), 'menuuser', false, array('class' => 'accesshide'));
             echo html_writer::select($users, "user", $report->userid, false);
-            $a = new stdClass();
-            $a->url = new moodle_url('/admin/tool/coursebank/report.php', array('chooselog' => 0,
+            $str = new stdClass();
+            $str->url = new moodle_url('/admin/tool/coursebank/report.php', array('chooselog' => 0,
                 'user' => $report->userid, 'date' => $report->date, 'type' => $report->type, 'showusers' => 1));
-            $a->url = $a->url->out(false);
-            print_string('logtoomanyusers', 'moodle', $a);
+            $str->url = $str->url->out(false);
+            print_string('logtoomanyusers', 'moodle', $str);
         }
 
         // Add activity selector.

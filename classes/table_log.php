@@ -31,10 +31,14 @@ defined('MOODLE_INTERNAL') || die;
  */
 class tool_coursebank_table_log extends table_sql {
 
-    /** @var array list of user fullnames shown in report */
+    /**
+     * @var array list of user fullnames shown in report
+     */
     private $userfullnames = array();
 
-    /** @var stdClass filters parameters */
+    /**
+     * @var stdClass filters parameters
+     */
     private $filterparams;
 
     /**
@@ -91,16 +95,16 @@ class tool_coursebank_table_log extends table_sql {
 
         // Add username who did the action.
         if (!empty($logextra['realuserid'])) {
-            $a = new stdClass();
+            $user = new stdClass();
             $params = array('id' => $logextra['realuserid']);
-            $a->realusername = $this->userfullnames[$logextra['realuserid']];
-            $a->asusername = $this->userfullnames[$event->userid];
+            $user->realusername = $this->userfullnames[$logextra['realuserid']];
+            $user->asusername = $this->userfullnames[$event->userid];
             if (empty($this->download)) {
-                $a->realusername = html_writer::link(new moodle_url('/user/view.php', $params), $a->realusername);
+                $user->realusername = html_writer::link(new moodle_url('/user/view.php', $params), $user->realusername);
                 $params['id'] = $event->userid;
-                $a->asusername = html_writer::link(new moodle_url('/user/view.php', $params), $a->asusername);
+                $user->asusername = html_writer::link(new moodle_url('/user/view.php', $params), $user->asusername);
             }
-            $username = get_string('eventloggedas', 'tool_coursebank', $a);
+            $username = get_string('eventloggedas', 'tool_coursebank', $user);
         } else if (!empty($event->userid) && !empty($this->userfullnames[$event->userid])) {
             $params = array('id' => $event->userid);
             $username = $this->userfullnames[$event->userid];
@@ -161,13 +165,13 @@ class tool_coursebank_table_log extends table_sql {
     public function col_ip($event) {
         // Get extra event data for origin and realuserid.
         $logextra = $event->get_logextra();
-        $ip = $logextra['ip'];
+        $ipaddress = $logextra['ip'];
 
         if (empty($this->download)) {
-            $url = new moodle_url("/iplookup/index.php?ip={$ip}&user={$event->userid}");
-            $ip = $this->action_link($url, $ip, 'ip');
+            $url = new moodle_url("/iplookup/index.php?ip={$ipaddress}&user={$event->userid}");
+            $ipaddress = $this->action_link($url, $ipaddress, 'ip');
         }
-        return $ip;
+        return $ipaddress;
     }
     /**
      * Method to create a link with popup action.

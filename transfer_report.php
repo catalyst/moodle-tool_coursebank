@@ -41,9 +41,7 @@ require_login(null, false);
 require_capability('tool/coursebank:view', $context);
 
 // This means that it will not have a side menu bar to the left.
-//admin_externalpage_setup('tool_coursebank');
 
-//$url = new moodle_url('/admin/tool/coursebank/index.php');
 $url = new moodle_url('/admin/tool/coursebank/transfer_report.php');
 $PAGE->set_url($url);
 $PAGE->set_context($context);
@@ -54,10 +52,11 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($header);
 
 // Filters.
-$filtering = new coursebank_filtering('summary', array('status' => 0, 'coursefullname' => 1, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1));
+$filterparams = array('status' => 0, 'coursefullname' => 1, 'backupfilename' => 1, 'filesize' => 1, 'filetimemodified' => 1);
+$filtering = new coursebank_filtering('summary', $filterparams);
 list($extraselect, $extraparams) = $filtering->get_sql_filter();
-$fieldstosort = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'timetransferstarted', 'timecompleted', 'status');
-$results = tool_coursebank::get_summary_data($sort, $dir, $extraselect, $extraparams, $page, $perpage, $fieldstosort);
+$sort = array('coursefullname', 'filetimemodified', 'backupfilename', 'filesize', 'timetransferstarted', 'timecompleted', 'status');
+$results = tool_coursebank::get_summary_data($sort, $dir, $extraselect, $extraparams, $page, $perpage, $sort);
 
 // Display filters.
 $filtering->display_add();

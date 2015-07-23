@@ -75,7 +75,7 @@ class connection_check_failed extends \core\event\base {
                 $desc .= " Error code: " .  $this->data['other']['error'];
             }
             if (isset($this->data['other']['error_desc'])) {
-               $desc .= " Error text: " .  $this->data['other']['error_desc'];
+                $desc .= " Error text: " .  $this->data['other']['error_desc'];
             }
             return $desc;
 
