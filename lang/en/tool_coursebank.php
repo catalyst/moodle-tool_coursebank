@@ -26,6 +26,8 @@
 $string['pluginname'] = 'Course Bank';
 $string['backupfailed'] = 'Failed sending backup {$a}.';
 $string['deletefailed'] = 'Failed deleting backup {$a}.';
+$string['moodledeletesuccess'] = '{$a} deleted successfully from the automated backup filearea.';
+$string['localdeletesuccess'] = '{$a} deleted successfully from the designated storage area.';
 $string['sendcoursebackups'] = 'External course backups';
 $string['noaccesstofeature'] = 'Sorry, only admin or CLI has access to this feature.';
 $string['settingspage'] = 'Configuration';
@@ -100,6 +102,7 @@ $string['eventtransferinterrupted'] = 'Backup transfer interrupted';
 $string['eventbackupdownloaded'] = 'Backup downloaded';
 $string['eventbackupdownloadfailed'] = 'Backup download failed';
 $string['eventtransferresumed'] = 'Backup transfer resumed';
+$string['eventbackupdeleted'] = 'Backup file deleted';
 $string['coursename'] = 'Course name';
 $string['backupdate'] = 'Backup date';
 $string['filename'] = 'File name';

@@ -757,7 +757,6 @@ abstract class tool_coursebank {
             foreach ($files as $file) {
                 if ($backup->fileid == $file->get_id()) {
                     $file->delete();
-                    mtrace('Removed backup file from the automated filearea');
                 }
             }
         }
@@ -799,10 +798,18 @@ abstract class tool_coursebank {
             foreach (array_keys($files) as $file) {
                 if ($file == $backup->backupfilename) {
                     unlink($dir . '/' . $file);
-                    mtrace('Removed backup file from the automated filearea');
                 }
             }
         }
+
+        // Log it.
+        $delstring = get_string(
+                'moodledeletesuccess',
+                'tool_coursebank',
+                $backup->backupfilename
+        );
+        coursebank_logging::log_delete_backup($delstring, true);
+        mtrace($delstring);
 
         return true;
     }
@@ -2399,6 +2406,8 @@ class coursebank_logging {
     public static function log_delete_backup($info, $result = false) {
         if (!$result) {
             $event = 'backup_delete_failed';
+        } else {
+            $event = 'backup_deleted';
         }
         self::log_event($info, $event, 'Deleting backup');
     }
