@@ -757,6 +757,13 @@ abstract class tool_coursebank {
             foreach ($files as $file) {
                 if ($backup->fileid == $file->get_id()) {
                     $file->delete();
+                    // Log it.
+                    $delstring = get_string(
+                            'moodledeletesuccess',
+                            'tool_coursebank',
+                            $backup->backupfilename
+                    );
+                    coursebank_logging::log_delete_backup($delstring, true);
                 }
             }
         }
@@ -798,18 +805,16 @@ abstract class tool_coursebank {
             foreach (array_keys($files) as $file) {
                 if ($file == $backup->backupfilename) {
                     unlink($dir . '/' . $file);
+                    // Log it.
+                    $delstring = get_string(
+                            'moodledeletesuccess',
+                            'tool_coursebank',
+                            $backup->backupfilename
+                    );
+                    coursebank_logging::log_delete_backup($delstring, true);
                 }
             }
         }
-
-        // Log it.
-        $delstring = get_string(
-                'moodledeletesuccess',
-                'tool_coursebank',
-                $backup->backupfilename
-        );
-        coursebank_logging::log_delete_backup($delstring, true);
-        mtrace($delstring);
 
         return true;
     }
