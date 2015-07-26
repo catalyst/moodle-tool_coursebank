@@ -92,7 +92,7 @@ class tool_coursebank_testcase extends advanced_testcase {
             'http_code' => coursebank_ws_manager_tester::WS_HTTP_BAD_REQUEST
         );
         $body = new stdClass();
-        $body->error = coursebank_ws_manager_tester::WS_STATUS_ERROR_INVALID_JSON_DATA;
+        $body->error = 400;
         $body->err_desc = 'Error message';
 
         $response = new coursebank_http_response($body, $info);
@@ -252,6 +252,182 @@ class tool_coursebank_testcase extends advanced_testcase {
         $body->chunkhash = md5($data['original_data']);
         $result = $wsman->put_chunk($data, 1, 2, 'sesskey', 0);
         $this->assertEquals($response, $result);
+    }
+    /**
+     * @group tool_coursebank
+     */
+    public function test_tool_coursebank_should_response_be_logged() {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+
+        // Normal HTTP response.
+        $body1 = array(
+            'hash' => 'd41d8cd98f00b204e9800998ecf8427e',
+            'size' => 0,
+            'utc_time' => 1437620443.2718
+        );
+        $info1 = array(
+            'url' => 'HTTP://coursebank.local/test',
+            'content_type' => 'application/json',
+            'http_code' => 200
+        );
+        $request1 = array(
+            10036 => 'GET',
+            10015 => '{"data":"DATA"}',
+            10023 => array (
+                0 => 'Accept: application/json',
+                1 => 'Content-Type: application/json',
+                2 => 'Content-Length: 11',
+                3 => 'sesskey: GV8h1M7YoM'
+                     ),
+            10002 => 'coursebank.local/test'
+        );
+        $normal = new coursebank_http_response($body1, $info1, $request1);
+
+        // Chunk PUT HTTP response.
+        $info2 = array(
+            'url' => 'HTTP://coursebank.local/chunks/' .
+                    '13811cb2-4512-417e-b927-ae2d2ad2c9eb/25',
+            'content_type' => 'application/json',
+            'http_code' => 200
+        );
+        $request2 = array(
+            10036 => 'PUT',
+            10015 => '{"data":"DATA"}',
+            10023 => array (
+                0 => 'Accept: application/json',
+                1 => 'Content-Type: application/json',
+                2 => 'Content-Length: 11',
+                3 => 'sesskey: GV8h1M7YoM'
+                     ),
+            10002 => 'coursebank.local/chunks/' .
+                    '13811cb2-4512-417e-b927-ae2d2ad2c9eb/25',
+        );
+
+        $normalchunk = new coursebank_http_response($body1, $info2, $request2);
+
+        // Error HTTP response.
+        $info3 = array(
+            'url' => 'HTTP://coursebank.local/test',
+            'content_type' => 'application/json',
+            'http_code' => 500
+        );
+
+        $error = new coursebank_http_response($body1, $info3, $request1);
+
+        // No HTTP response.
+        $noresponse = new coursebank_http_response(false, false, $request1);
+
+        // Debug levels to expected responses.
+        $debugmap = array(
+            DEBUG_NONE => array(false, false, false),
+            DEBUG_MINIMAL => array(false, false, true),
+            DEBUG_NORMAL => array(false, true, true),
+            DEBUG_DEVELOPER => array(true, true, true),
+            DEBUG_ALL => array(true, true, true)
+        );
+
+        foreach ($debugmap as $level => $output) {
+            $CFG->debug = $level;
+            // Test normal HTTP chunk response.
+            $this->assertequals($output[0], $normalchunk->should_response_be_logged());
+
+            // Test normal http response.
+            $this->assertequals($output[1], $normal->should_response_be_logged());
+
+            // Test http error response.
+            $this->assertequals($output[2], $error->should_response_be_logged());
+
+            // Test response time-out.
+            $this->assertequals($output[2], $noresponse->should_response_be_logged());
+        }
+    }
+    /**
+     * @group tool_coursebank
+     */
+    public function test_tool_coursebank_generate_event_data() {
+        global $CFG;
+
+        $this->resetAfterTest(true);
+
+        // Normal HTTP response.
+        $body1 = array(
+            'hash' => 'd41d8cd98f00b204e9800998ecf8427e',
+            'size' => 0,
+            'utc_time' => 1437620443.2718
+        );
+        $info1 = array(
+            'url' => 'HTTP://coursebank.local/test',
+            'content_type' => 'application/json',
+            'http_code' => 200
+        );
+        $request1 = array(
+            10036 => 'GET',
+            10015 => '{"data":"DATA"}',
+            10023 => array (
+                0 => 'Accept: application/json',
+                1 => 'Content-Type: application/json',
+                2 => 'Content-Length: 11',
+                3 => 'sesskey: GV8h1M7YoM'
+                     ),
+            10002 => 'coursebank.local/test'
+        );
+        $normal = new coursebank_http_response($body1, $info1, $request1);
+        $eventdata = $normal->generate_event_data();
+        $this->assertInternalType('array', $eventdata);
+        $this->assertArrayHasKey('other', $eventdata);
+        $this->assertArrayHasKey('context', $eventdata);
+        $this->assertInstanceOf('context_system', $eventdata['context']);
+
+        // Chunk PUT HTTP response.
+        $info2 = array(
+            'url' => 'HTTP://coursebank.local/chunks/' .
+                    '13811cb2-4512-417e-b927-ae2d2ad2c9eb/25',
+            'content_type' => 'application/json',
+            'http_code' => 200
+        );
+        $request2 = array(
+            10036 => 'PUT',
+            10015 => '{"data":"DATA"}',
+            10023 => array (
+                0 => 'Accept: application/json',
+                1 => 'Content-Type: application/json',
+                2 => 'Content-Length: 11',
+                3 => 'sesskey: GV8h1M7YoM'
+                     ),
+            10002 => 'coursebank.local/chunks/' .
+                    '13811cb2-4512-417e-b927-ae2d2ad2c9eb/25',
+        );
+
+        $normalchunk = new coursebank_http_response($body1, $info2, $request2);
+        $eventdata = $normalchunk->generate_event_data();
+        $this->assertInternalType('array', $eventdata);
+        $this->assertArrayHasKey('other', $eventdata);
+        $this->assertArrayHasKey('context', $eventdata);
+        $this->assertInstanceOf('context_system', $eventdata['context']);
+
+        // Error HTTP response.
+        $info3 = array(
+            'url' => 'HTTP://coursebank.local/test',
+            'content_type' => 'application/json',
+            'http_code' => 500
+        );
+
+        $error = new coursebank_http_response($body1, $info3, $request1);
+        $eventdata = $error->generate_event_data();
+        $this->assertInternalType('array', $eventdata);
+        $this->assertArrayHasKey('other', $eventdata);
+        $this->assertArrayHasKey('context', $eventdata);
+        $this->assertInstanceOf('context_system', $eventdata['context']);
+
+        // No HTTP response.
+        $noresponse = new coursebank_http_response(false, false, $request1);
+        $eventdata = $noresponse->generate_event_data();
+        $this->assertInternalType('array', $eventdata);
+        $this->assertArrayHasKey('other', $eventdata);
+        $this->assertArrayHasKey('context', $eventdata);
+        $this->assertInstanceOf('context_system', $eventdata['context']);
     }
     /**
      * @group tool_coursebank
