@@ -1467,7 +1467,11 @@ class coursebank_ws_manager {
         if (!isset($response)) {
             $response = new coursebank_http_response(false, false, $curlopts);
         }
-        $response->log_http_response();
+        if ($response->should_response_be_logged()) {
+            $eventdata = $response->generate_event_data();
+            $event = \tool_coursebank\event\http_request::create($eventdata);
+            $event->trigger();
+        }
         return $response;
     }
 
@@ -1947,7 +1951,56 @@ class coursebank_http_response {
         add_to_log(SITEID, 'Course bank', 'Transfer error', '', $info, 0, $USER->id);
         return true;
     }
-    public function log_http_response() {
+    /**
+     * Method to determine if this HTTP response should be logged to the
+     * Moodle log, based on the current debugging level set in the Moodle
+     * config and the original request method (We make a lot of chunk PUT
+     * method requests, so we only log these if debugging is turned up).
+     *
+     * @return boolean True if response should be logged.
+     */
+    public function should_response_be_logged() {
+        global $CFG;
+
+        // Test if the HTTP code is a success or redirection (2** or 3**).
+        $issuccess = preg_match(
+                '/^[23][0-9]{2}$/',
+                (string) $this->httpcode
+        );
+        // Test if the the request was a chunk PUT method.
+        $ischunkmethod = preg_match(
+                '/^.*\/chunk/',
+                $this->request[CURLOPT_URL]
+        );
+        $ischunkput = $ischunkmethod &&
+                ($this->request[CURLOPT_CUSTOMREQUEST] == 'PUT');
+
+        switch ($CFG->debug) {
+            case DEBUG_NONE:
+                return false;
+            break;
+            case DEBUG_MINIMAL:
+                return !$issuccess;
+            break;
+            case DEBUG_NORMAL:
+                return !$issuccess || !$ischunkput;
+            break;
+            case DEBUG_ALL:
+            case DEBUG_DEVELOPER:
+            default:
+                return true;
+        }
+    }
+    /**
+     * This method generates the necessary data to log an event for this response.
+     *
+     * @return array $eventdata  Array suitable for inclusion in an http_request
+     *                           event object. i.e. of the form:
+     *
+     *                           array('other'   => array(...),
+     *                                 'context' => <valid Moodle context>)
+     */
+    public function generate_event_data() {
         global $CFG;
         // First do legacy log handling.
         // TODO: Set up legacy logging here.
@@ -1994,9 +2047,8 @@ class coursebank_http_response {
             'other'     => $otherdata,
             'context'   => context_system::instance()
         );
-        $event = \tool_coursebank\event\http_request::create($eventdata);
-        $event->trigger();
-        return true;
+
+        return $eventdata;
     }
 }
 
