@@ -1547,22 +1547,37 @@ class coursebank_ws_manager {
      * @param string    $hash      Authorization string
      */
     public function post_session($hash) {
+        global $USER;
         $authdata = array(
             'hash' => $hash,
         );
         $response = $this->send('session', $authdata, 'POST');
-        coursebank_logging::log_post_session($response);
+        $sessionset = false;
 
         if ($response->httpcode == self::WS_HTTP_CREATED) {
             $tagsesskey = self::WS_AUTH_SESSION_KEY;
+            $event = 'get_session';
+            $info = get_string('eventgetsession', 'tool_coursebank');
             if (isset($response->body->$tagsesskey)) {
                 $sesskey = trim((string) $response->body->$tagsesskey);
-                return tool_coursebank::set_session($sesskey);
+                $sessionset = tool_coursebank::set_session($sesskey);
             }
         } else {
-            // Unexpected response.
-            return $response;
+            $event = 'get_session_failed';
+            $info = get_string('eventgetsessionfailed', 'tool_coursebank');
         }
+
+        coursebank_logging::log_event(
+            $info,
+            $event,
+            'Create new session key',
+            coursebank_logging::LOG_MODULE_COURSE_BANK,
+            SITEID,
+            '',
+            $USER->id,
+            array()
+        );
+        return $sessionset;
     }
     /**
      * Send a test request
@@ -2258,45 +2273,6 @@ class coursebank_logging {
             $event = 'status_updated';
         }
         self::log_event($info, $event, 'Update status');
-    }
-    /**
-     * Log session creation event.
-     *
-     * @param coursebank_http_response $httpresponse  HTTP response object.
-     */
-    public static function log_post_session($httpresponse) {
-        global $USER;
-
-        $otherdata = array();
-        if (($httpresponse instanceof coursebank_http_response)
-             && $httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_CREATED) {
-            // We got a new session key. Log the event.
-            $event = 'get_session';
-            $info = "Get new session key succeeded.";
-        } else {
-            // Couldn't get a session key.
-            $event = 'get_session_failed';
-            $info = "Get new session key failed.";
-            if ($httpresponse instanceof coursebank_http_response) {
-                // Log the session key failure.
-                if (isset($httpresponse->error)) {
-                    $otherdata['error'] = $httpresponse->error;
-                }
-                if (isset($httpresponse->error_desc)) {
-                    $otherdata['error_desc'] = $httpresponse->error_desc;
-                }
-            }
-        }
-        self::log_event(
-            $info,
-            $event,
-            'Get session key',
-            self::LOG_MODULE_COURSE_BANK,
-            SITEID,
-            '',
-            $USER->id,
-            $otherdata
-        );
     }
     /** Log event for get_backup request.
      *
