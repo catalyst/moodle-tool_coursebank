@@ -105,12 +105,32 @@ abstract class tool_coursebank {
         global $USER;
 
         $result = $wsman->get_test($sesskey);
+        $success = false;
         if (isset($result->httpcode)) {
             if ($result->httpcode == coursebank_ws_manager::WS_HTTP_OK) {
-                return true;
+                $success = true;
             }
         }
-        return false;
+        // First log the result, then return it.
+        $info = 'Connection check ';
+        $info .= $success ? 'passed.' : 'failed.';
+        $event = $success ? 'connection_checked' : 'connection_check_failed';
+        $action = 'Connection check';
+        $otherdata = array(
+            'conncheckaction' => 'conncheck',
+            'status' => $success
+        );
+        coursebank_logging::log_event(
+            $info,
+            $event,
+            $action,
+            coursebank_logging::LOG_MODULE_COURSE_BANK,
+            SITEID,
+            '',
+            $USER->id,
+            $otherdata
+        );
+        return $success;
     }
     /**
      * Using get_optimal_chunksize, test the speed of a transfer request.
@@ -151,7 +171,8 @@ abstract class tool_coursebank {
      *                                       in ascending order, in kB.
      * @param int                    $retry  Number of retry attempts.
      *
-     * @return int                           Ideal chunk size in kB.
+     * @return array                         Array containing tested speed in
+     *                                       kbps and suggested chunksize in kB.
      */
     protected static function get_optimal_chunksize(coursebank_ws_manager $wsman,
             $sesskey, $sizes=array(10, 100, 1000), $retry=1) {
@@ -1534,9 +1555,7 @@ class coursebank_ws_manager {
             'data' => base64_encode($data)
         );
         $result = $this->send_authenticated('test', $json, 'GET', $headers);
-        if ($data == '') {
-            coursebank_logging::log_check_connection($result);
-        } else {
+        if (!$data == '') {
             // It's the speed test.
             $endtime = microtime(true);
             $speed = tool_coursebank::calculate_speed($count, $testsize, $starttime, $endtime);
@@ -2109,7 +2128,7 @@ class coursebank_logging {
      * @param array $other Other data we may want to use
      * @return boolean
      */
-    protected static function log_event($info='', $eventname='coursebank_logging', $action='',
+    public static function log_event($info='', $eventname='coursebank_logging', $action='',
             $module=self::LOG_MODULE_COURSE_BANK, $courseid=SITEID, $url='', $userid=0, $other = array()) {
         global $USER, $CFG;
 
@@ -2215,44 +2234,6 @@ class coursebank_logging {
             $event = 'status_updated';
         }
         self::log_event($info, $event, 'Update status');
-    }
-    /** Log a connection check event.
-     *
-     * @param coursebank_http_response $httpresponse Response object.
-     */
-    public static function log_check_connection($httpresponse) {
-        global $USER;
-
-        $otherdata = array('conncheckaction' => 'conncheck');
-        if (($httpresponse instanceof coursebank_http_response)
-            && $httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_OK) {
-            $event = 'connection_checked';
-            $info = "Connection check passed.";
-            $otherdata['status'] = true;
-        } else {
-            $event = 'connection_check_failed';
-            $info = "Connection check failed.";
-            $otherdata['status'] = false;
-            if ($httpresponse instanceof coursebank_http_response) {
-                // Log the failure.
-                if (isset($httpresponse->error)) {
-                    $otherdata['error'] = $httpresponse->error;
-                }
-                if (isset($httpresponse->error_desc)) {
-                    $otherdata['error_desc'] = $httpresponse->error_desc;
-                }
-            }
-        }
-        self::log_event(
-            $info,
-            $event,
-            'Connection check',
-            self::LOG_MODULE_COURSE_BANK,
-            SITEID,
-            '',
-            $USER->id,
-            $otherdata
-        );
     }
     public static function log_check_connection_speed($httpresponse, $speed) {
         global $USER;
