@@ -78,7 +78,7 @@ switch ($action) {
             $msgtype = 'fail';
         } else {
             $msgtype = $result >= 256 ? 'success' : 'slow';
-            $add = (string) $result .' kbps.';
+            $add = (string) $result['speed'] .' kbps.';
         }
 
         $content = get_string('speedtest' . $msgtype, 'tool_coursebank', $urltarget) . $add;
