@@ -25,6 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+require_once($CFG->dirroot.'/admin/tool/coursebank/classes/coursebank_ws_manager.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/classes/coursebank_http_response.php');
+
 abstract class tool_coursebank {
 
     // Status.
