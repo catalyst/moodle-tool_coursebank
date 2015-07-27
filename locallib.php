@@ -1351,7 +1351,7 @@ abstract class tool_coursebank {
  *
  */
 class coursebank_logging {
-    const LOG_MODULE_COURSE_BANK = 'Course bank';
+    const LOG_MODULE_COURSE_BANK = 'Coursebank';
 
     /**
      * Method to log course bank events, using either the modern events 2
