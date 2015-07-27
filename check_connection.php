@@ -68,9 +68,8 @@ switch ($action) {
 
         // Initialise, check connection.
         $wsmanager = new coursebank_ws_manager($urltarget, $timeout);
-        $testsize = 256;
 
-        $result = tool_coursebank::check_connection_speed($wsmanager, $testsize, 1, 5, $sesskey);
+        $result = tool_coursebank::check_connection_speed($wsmanager, 1, $sesskey);
         $wsmanager->close();
 
         $add = '';
