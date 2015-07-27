@@ -1450,11 +1450,7 @@ class coursebank_ws_manager {
         if (!isset($response)) {
             $response = new coursebank_http_response(false, false, $curlopts);
         }
-        if ($response->should_response_be_logged()) {
-            $eventdata = $response->generate_event_data();
-            $event = \tool_coursebank\event\http_request::create($eventdata);
-            $event->trigger();
-        }
+        $response->log_response();
         return $response;
     }
 
@@ -1934,6 +1930,62 @@ class coursebank_http_response {
         add_to_log(SITEID, 'Course bank', 'Transfer error', '', $info, 0, $USER->id);
         return true;
     }
+
+    /**
+     * Log the HTTP response if appropriate.
+     *
+     * First, check if the response should be logged based on the currently
+     * configured debug level, then log the response using either legacy
+     * logging for older versions of Moodle, or trigger an event for newer
+     * Moodle versions.
+     */
+    public function log_response() {
+        if (!$this->should_response_be_logged()) {
+            return false;
+        }
+        if (tool_coursebank::legacy_logging()) {
+            $this->log_response_legacy();
+            return true;
+        } else {
+            $eventdata = $this->generate_event_data();
+            $event = \tool_coursebank\event\http_request::create($eventdata);
+            $event->trigger();
+            return true;
+        }
+    }
+
+    /**
+     * Log the response using the legacy "add_to_log" function.
+     */
+    private function log_response_legacy() {
+        global $USER;
+        // Handle response time-out.
+        if ($this->info === false) {
+            if ($this->request[CURLOPT_URL]) {
+                $description = 'Request to "' . s($this->request[CURLOPT_URL]) .
+                    '" timed out.';
+            } else {
+                $description = 'HTTP request timed out';
+            }
+        } else {
+            $description = $this->httpcode . ' response received from "' .
+                    s($this->request[CURLOPT_URL]) . '"';
+
+            if (isset($this->error_desc)) {
+                $description .= ' ('.s($this->error_desc).')';
+            }
+        }
+
+        add_to_log(
+                SITEID,
+                'Coursebank',
+                'HTTP response',
+                '',
+                $description,
+                0,
+                $USER->id
+        );
+    }
     /**
      * Method to determine if this HTTP response should be logged to the
      * Moodle log, based on the current debugging level set in the Moodle
@@ -1942,7 +1994,7 @@ class coursebank_http_response {
      *
      * @return boolean True if response should be logged.
      */
-    public function should_response_be_logged() {
+    private function should_response_be_logged() {
         global $CFG;
 
         // Test if the HTTP code is a success or redirection (2** or 3**).
@@ -1985,8 +2037,6 @@ class coursebank_http_response {
      */
     public function generate_event_data() {
         global $CFG;
-        // First do legacy log handling.
-        // TODO: Set up legacy logging here.
 
         // We don't want to include the binary data in our logging.
         $request = (array) $this->request;

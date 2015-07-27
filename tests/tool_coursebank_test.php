@@ -256,7 +256,7 @@ class tool_coursebank_testcase extends advanced_testcase {
     /**
      * @group tool_coursebank
      */
-    public function test_tool_coursebank_should_response_be_logged() {
+    public function test_tool_coursebank_log_response() {
         global $CFG;
 
         $this->resetAfterTest(true);
@@ -331,16 +331,16 @@ class tool_coursebank_testcase extends advanced_testcase {
         foreach ($debugmap as $level => $output) {
             $CFG->debug = $level;
             // Test normal HTTP chunk response.
-            $this->assertequals($output[0], $normalchunk->should_response_be_logged());
+            $this->assertequals($output[0], $normalchunk->log_response());
 
             // Test normal http response.
-            $this->assertequals($output[1], $normal->should_response_be_logged());
+            $this->assertequals($output[1], $normal->log_response());
 
             // Test http error response.
-            $this->assertequals($output[2], $error->should_response_be_logged());
+            $this->assertequals($output[2], $error->log_response());
 
             // Test response time-out.
-            $this->assertequals($output[2], $noresponse->should_response_be_logged());
+            $this->assertequals($output[2], $noresponse->log_response());
         }
     }
     /**
