@@ -1616,7 +1616,6 @@ class coursebank_ws_manager {
         }
 
         $result = $this->send_authenticated('backup/'. $uniqueid, array(), 'GET', $headers);
-        coursebank_logging::log_get_backup($result);
         return $result;
     }
     public static function get_backup_validated_hash($data) {
@@ -1755,18 +1754,6 @@ class coursebank_ws_manager {
         return $this->send_authenticated('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey);
     }
     /**
-     * Get most recent chunk transferred for specific backup.
-     *
-     * @param string $auth      Authorization string
-     * @param string $uniqueid  UUID referencing external course bank backup resource
-     *
-     */
-    public function get_chunk($auth, $uniqueid) {
-        $result = $this->send_authenticated('chunks/' . $uniqueid, array(), 'GET', $auth);
-        coursebank_logging::log_get_chunk($result);
-        return $result;
-    }
-    /**
      * Transfer chunk
      *
      * @param string $auth      Authorization string
@@ -1804,7 +1791,6 @@ class coursebank_ws_manager {
      */
     public function delete_chunk($sessionkey, $uniqueid, $chunkiterator, $retries=4) {
         $result = $this->send_authenticated('chunks/' . $uniqueid . '/' . $chunkiterator, array(), 'DELETE', $sessionkey, $retries);
-        coursebank_logging::log_delete_chunk($result);
         return $result;
     }
     /**
@@ -2273,66 +2259,6 @@ class coursebank_logging {
             $event = 'status_updated';
         }
         self::log_event($info, $event, 'Update status');
-    }
-    /** Log event for get_backup request.
-     *
-     * @param coursebank_http_response $httpresponse Response object.
-     */
-    public static function log_get_backup($httpresponse) {
-        global $USER;
-
-        self::log_generic_request(
-               $httpresponse, 'http_request', 'GET backup request',
-                'Get backup information.'
-        );
-    }
-    /** Log event for get_chunk request.
-     *
-     * @param coursebank_http_responsehttpresponse Response object.
-     */
-    public static function log_get_chunk($httpresponse) {
-        global $USER;
-
-        self::log_generic_request(
-               $httpresponse, 'http_request', 'GET chunk request',
-                'Get chunk information.'
-        );
-    }
-    /** Log event for delete_chunk request.
-     *
-     * @param coursebank_http_responsehttpresponse Response object.
-     */
-    public static function log_delete_chunk($httpresponse) {
-        global $USER;
-
-        self::log_generic_request(
-                $httpresponse, 'http_request', 'DELETE chunk request',
-                'Delete chunk information.'
-        );
-    }
-    /** Log event for get_download request.
-     *
-     * @param coursebank_http_responsehttpresponse Response object.
-     */
-    public static function log_get_downloads($httpresponse) {
-        global $USER;
-
-        self::log_generic_request(
-                $httpresponse, 'http_request', 'GET download request',
-                'Get External Course Bank backups available for download.'
-        );
-    }
-    /** Log event for get_downloadcount request.
-     *
-     * @param coursebank_http_responsehttpresponse Response object.
-     */
-    public static function log_get_downloadcount($httpresponse) {
-        global $USER;
-
-        self::log_generic_request(
-                $httpresponse, 'http_request', 'GET download count request',
-                'Get count of available External Course Bank backups.'
-        );
     }
     /**
      * Log the fact that transfers for a course backup or chunk have started.
