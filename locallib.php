@@ -1344,54 +1344,6 @@ abstract class tool_coursebank {
 }
 
 /**
- * Class to keep errors specific to this plugin.
- *
- */
-abstract class tool_coursebank_error {
-    // Errors.
-    const ERROR_TIMEOUT              = 100;
-    const ERROR_MAX_ATTEMPTS_REACHED = 101;
-    // Etc. populate as needed.
-
-    /**
-     * Checks if response body contains errors.
-     *
-     * @param type $httpresponse
-     * @return boolean
-     */
-    public static function is_response_error($httpresponse) {
-        if (isset($httpresponse->body->error) and isset($httpresponse->body->error_desc)) {
-            return true;
-        }
-
-        return false;
-    }
-    /**
-     * Checks if the response is valid and file mcan be downloaded.
-     *
-     * @param type $httpresponse
-     * @return boolean
-     */
-    public static function is_response_backup_download_error($httpresponse) {
-
-        if (self::is_response_error($httpresponse)) {
-            return true;
-        }
-        if (!isset($httpresponse->body->url)) {
-            return true;
-        }
-        if (!tool_coursebank_check_url($httpresponse->body->url)) {
-            return true;
-        }
-        if (!tool_coursebank_is_url_available($httpresponse->body->url)) {
-            return true;
-        }
-
-        return false;
-    }
-}
-
-/**
  * Class that handles outgoing web service requests.
  *
  */
