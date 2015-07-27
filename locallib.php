@@ -135,8 +135,8 @@ abstract class tool_coursebank {
     /**
      * Using get_optimal_chunksize, test the speed of a transfer request.
      *
-     * Return an array containing both the tested transfer speed in kbps and
-     * the optimal chunk size for the site.
+     * Log the result of the test before returning an array containing both the
+     * tested transfer speed in kbps and the optimal chunk size for the site.
      *
      * @param coursebank_ws_manager $wsman  Web service manager object.
      * @param int                    $retry  Number of retry attempts.
@@ -150,8 +150,38 @@ abstract class tool_coursebank {
      */
     public static function check_connection_speed(coursebank_ws_manager $wsman,
             $retry, $sesskey) {
+        global $USER;
+
         $chunksizes = array(10, 100, 200, 500, 1000, 1500, 2000);
-        return self::get_optimal_chunksize($wsman, $sesskey, $chunksizes, $retry);
+        $result = self::get_optimal_chunksize($wsman, $sesskey, $chunksizes, $retry);
+
+        // Log connection speed test.
+        $otherdata = array(
+            'conncheckaction' => 'speedtest',
+        );
+        if ($result['speed'] > 0) {
+            $event = 'connection_checked';
+            $status = ($result['speed'] > 256) ? 'passed' : 'very slow';
+            $info = "Connection speed test $status. Approximate speed: "
+                    . $result['speed'] . " kbps.";
+            $otherdata['speed'] = $result['speed'];
+        } else {
+            $event = 'connection_check_failed';
+            $info = "Connection speed test failed.";
+            $otherdata['speed'] = 0;
+        }
+        coursebank_logging::log_event(
+            $info,
+            $event,
+            'Connection check',
+            coursebank_logging::LOG_MODULE_COURSE_BANK,
+            SITEID,
+            '',
+            $USER->id,
+            $otherdata
+        );
+
+        return $result;
     }
     /**
      * Send test transfer requests for each of the provided chunk sizes, and
@@ -212,7 +242,6 @@ abstract class tool_coursebank {
      */
     public static function test_chunk_speed(coursebank_ws_manager $wsman,
             $testsize, $retry, $sesskey, $count=1) {
-
         $starttime = microtime(true);
         for ($j = 0; $j <= $retry; $j++) {
             $check = str_pad('', $testsize * 1000, '0');
@@ -1555,12 +1584,7 @@ class coursebank_ws_manager {
             'data' => base64_encode($data)
         );
         $result = $this->send_authenticated('test', $json, 'GET', $headers);
-        if (!$data == '') {
-            // It's the speed test.
-            $endtime = microtime(true);
-            $speed = tool_coursebank::calculate_speed($count, $testsize, $starttime, $endtime);
-            coursebank_logging::log_check_connection_speed($result, $speed);
-        }
+        $endtime = microtime(true);
         return $result;
     }
     /**
@@ -2235,47 +2259,6 @@ class coursebank_logging {
         }
         self::log_event($info, $event, 'Update status');
     }
-    public static function log_check_connection_speed($httpresponse, $speed) {
-        global $USER;
-
-        // Log connection speed test.
-        $otherdata = array(
-            'conncheckaction' => 'speedtest',
-        );
-
-        if (($httpresponse instanceof coursebank_http_response)
-            && $httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_OK
-            && $speed != 0) {
-            $event = 'connection_checked';
-            $status = ($speed > 256) ? 'passed' : 'very slow';
-            $info = "Connection speed test $status. Approximate speed: " . $speed . " kbps.";
-            $otherdata['speed'] = $speed;
-        } else {
-            $event = 'connection_check_failed';
-            $info = "Connection speed test failed.";
-            $otherdata['speed'] = 0;
-            if ($httpresponse instanceof coursebank_http_response) {
-                // Log the failure.
-                if (isset($httpresponse->error)) {
-                    $otherdata['error'] = $httpresponse->error;
-                }
-                if (isset($httpresponse->error_desc)) {
-                    $otherdata['error_desc'] = $httpresponse->error_desc;
-                }
-            }
-        }
-        self::log_event(
-            $info,
-            $event,
-            'Connection check',
-            self::LOG_MODULE_COURSE_BANK,
-            SITEID,
-            '',
-            $USER->id,
-            $otherdata
-        );
-    }
-
     /**
      * Log session creation event.
      *
