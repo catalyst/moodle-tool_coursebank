@@ -262,7 +262,7 @@ class coursebank_http_response {
             $otherdata = array(
                 'courseid'      => SITEID,
                 'body'          => $body,
-                'responseinfo'  => $this->info,
+                'responseinfo'  => json_encode($this->info),
                 'httpcode'      => $this->httpcode,
                 'request'       => $request,
                 'info'          => $description
