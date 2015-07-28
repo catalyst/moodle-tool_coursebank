@@ -255,29 +255,13 @@ abstract class tool_coursebank {
             }
         }
         if ($response->httpcode == coursebank_ws_manager::WS_HTTP_OK) {
-            $elapsed = $endtime - $starttime;
             // Convert 'total kB transferred'/'total time' into kb/s.
-            $speed = self::calculate_speed(1, $testsize, $starttime, $endtime);
+            $elapsed = $endtime - $starttime;
+            $speed = round(($testsize * $count * 8) / $elapsed, 2);
         } else {
             $speed = 0;
         }
 
-        return $speed;
-    }
-    /**
-     * Calculate rough transfer speed based on request count, transfer size,
-     * start time and end time.
-     *
-     * @param    int    $count      Number of requests sent.
-     * @param    int    $testsize   Size of transfer data in bytes.
-     * @param    float  $starttime  Epoch time of test start (microtime).
-     * @param    float  $endtime    Epoch time of test completion (microtime).
-     */
-    public static function calculate_speed($count, $testsize, $starttime, $endtime) {
-        $elapsed = $endtime - $starttime;
-
-        // Convert 'total kB transferred'/'total time' into kb/s.
-        $speed = round(($testsize * $count * 8 ) / $elapsed, 2);
         return $speed;
     }
     /**
