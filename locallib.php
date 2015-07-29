@@ -1630,59 +1630,6 @@ class coursebank_logging {
         self::log_event($info, $event, 'Deleting backup');
     }
     /**
-     * Log transfer backup download event.
-     *
-     * @param http_response $httpresponse   HTTP response object generated.
-     * @param int           $coursebankid  Course bank ID
-     *
-     * @return bool                         Success/failure of download.
-     */
-    public static function log_backup_download($httpresponse, $coursebankid) {
-        global $USER;
-
-        $error = false;
-        $info = "Downloading backup file coursebankid $coursebankid userid $USER->id: ";
-
-        if (isset($httpresponse->body->error) and isset($httpresponse->body->error_desc)) {
-            // Log it.
-            $infoadd = "ERROR: error code {$httpresponse->body->error}, error desc: {$httpresponse->body->error_desc}";
-            $error = true;
-        }
-        if (!isset($httpresponse->body->url)) {
-            // Log it.
-            $infoadd = "ERROR: url is empty";
-            $error = true;
-        }
-        if (!tool_coursebank_check_url($httpresponse->body->url)) {
-            $infoadd = "ERROR: url {$httpresponse->body->url} invalid";
-            $error = true;
-        }
-        if (!tool_coursebank_is_url_available($httpresponse->body->url)) {
-            $infoadd = "ERROR: url {$httpresponse->body->url} in not available";
-            $error = true;
-        }
-
-        $courseid = isset($backup->courseid) ? $backup->courseid : 0;
-
-        // Log either success or failure event.
-        if ($error) {
-            $event = 'backup_download_failed';
-            $info .= $infoadd;
-        } else {
-            $event = 'backup_downloaded';
-            $infoadd = "SUCCESS";
-            $info .= $infoadd;
-        }
-        self::log_event(
-                $info,
-                $event,
-                'Backup file download',
-                self::LOG_MODULE_COURSE_BANK,
-                $courseid,
-                '');
-    }
-
-    /**
      * Returns log table name of preferred reader, if leagcy then return empty string.
      *
      * @return string table name
