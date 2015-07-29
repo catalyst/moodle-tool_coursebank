@@ -175,6 +175,8 @@ $string['event_backup_update_interrupted'] = 'Transfer of backup with UUID ' .
         '{$a} interrupted by backup update failure.';
 $string['event_backup_update'] = 'Transfer record of backup with UUID ' .
         '{$a} updated.';
+$string['eventbackupupdated'] = 'Backup record updated';
+$string['eventdownloadsviewed'] = 'Download list viewed';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';

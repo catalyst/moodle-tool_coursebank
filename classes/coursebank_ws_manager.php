@@ -474,7 +474,6 @@ class coursebank_ws_manager {
         $nonemptyarray = is_array($params) && !empty($params);
         $query = $nonemptyarray ? array('query' => $params) : array();
         $result = $this->send_authenticated($url, $query, 'GET', $sesskey);
-        coursebank_logging::log_get_downloads($result);
         return $result;
     }
     /**
@@ -482,7 +481,6 @@ class coursebank_ws_manager {
      */
     public function get_downloadcount($sesskey, array $params = null) {
         $result = $this->send_authenticated('downloadcount', array(), 'GET', $sesskey);
-        coursebank_logging::log_get_downloadcount($result);
         return $result;
     }
 }

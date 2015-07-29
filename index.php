@@ -38,6 +38,7 @@ $dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
 $page         = optional_param('page', 0, PARAM_INT);
 $perpage      = optional_param('perpage', 50, PARAM_INT);
 
+global $USER;
 $context = context_system::instance();
 require_login(null, false);
 require_capability('tool/coursebank:view', $context);
@@ -76,6 +77,16 @@ $extraparams = $filtering->get_param_filter();
 
 $error = false;
 $response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
+coursebank_logging::log_event(
+        'Download page viewed',
+        'downloads_viewed',
+        get_string('eventdownloadsviewed', 'tool_coursebank'),
+        coursebank_logging::LOG_MODULE_COURSE_BANK,
+        SITEID,
+        '',
+        $USER->id,
+        array()
+);
 
 if ($response->httpcode != $wsman::WS_HTTP_OK or isset($response->body->error)) {
     $error = true;
