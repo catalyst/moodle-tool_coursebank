@@ -50,19 +50,7 @@ class transfer_interrupted extends \core\event\base {
     }
 
     public function get_description() {
-        $desc = "Transfer of backup with Moodle course bank id ".
-                $this->data['other']['coursebankid'] .
-                " interruped due to error. (Original course id: " .
-                $this->data['other']['courseid'] . ")";
-
-        if (isset($this->data['other']['error'])) {
-            $desc .= " Error code: " .  $this->data['other']['error'];
-        }
-        if (isset($this->data['other']['error_desc'])) {
-            $desc .= " Error text: " .  $this->data['other']['error_desc'];
-        }
-
-        return $desc;
+        return $this->data['other']['info'];
     }
 
     public function get_url() {

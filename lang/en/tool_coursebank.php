@@ -166,7 +166,13 @@ $string['event_backup_init_exists_nodata'] = 'Course backup with UUID {$a} alrea
 $string['event_backup_init_exists_data'] = 'Course backup with UUID {$a} already' .
         'exists in Coursebank. Existing data will be overwritten.';
 $string['event_backup_init_interrupted'] = 'Transfer of backup with UUID {$a} ' .
-    'interrupted during backup initialisation';
+        'interrupted during backup initialisation';
+$string['event_backup_update_interrupted'] = 'Transfer of backup with UUID ' .
+        '{$a} interrupted during update of backup record.';
+$string['event_backup_chunk_interrupted'] = 'Transfer of backup with UUID ' .
+        '{$a} interrupted by chunk failure.';
+$string['event_backup_update_interrupted'] = 'Transfer of backup with UUID ' .
+        '{$a} interrupted by backup update failure.';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';

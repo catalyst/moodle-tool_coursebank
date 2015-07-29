@@ -271,12 +271,6 @@ class coursebank_ws_manager {
         // Check that each of the above fields matches, log an error if not.
         foreach ($fields as $datafield => $responsefield) {
             if (!isset($httpresponse->body->$responsefield) || $httpresponse->body->$responsefield != $data[$datafield]) {
-                $info = "Local value for $datafield does not match external coursebank value.";
-                $httpresponse->log_http_error(
-                        $data['courseid'],
-                        $data['fileid'],
-                        $info
-                );
                 return false;
             }
         }
@@ -286,13 +280,6 @@ class coursebank_ws_manager {
         $responsedate = $dtresponse->format('Y-m-d H:i:s');
         $datadate = $dtdata->format('Y-m-d H:i:s');
         if ($responsedate != $datadate) {
-            $info = "startdate: response=" . $httpresponse->body->coursestartdate .
-                    "; data=" . $data['startdate'];
-            $httpresponse->log_http_error(
-                    $data['courseid'],
-                    $data['fileid'],
-                    $info
-            );
             return false;
         }
 

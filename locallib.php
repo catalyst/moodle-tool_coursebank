@@ -332,7 +332,7 @@ abstract class tool_coursebank {
      *
      */
     private static function update_backup(coursebank_ws_manager $wsmanager, $data, $backup, $sessionkey, $retries) {
-        global $DB;
+        global $DB, $USER;
 
         $result = null;
         $deletechunks = false;
@@ -347,7 +347,21 @@ abstract class tool_coursebank {
                         $backup->status = self::STATUS_ERROR;
                         $DB->update_record('tool_coursebank', $backup);
                         // Log a transfer interruption event.
-                        $putresponse->log_http_error($backup->courseid, $backup->id);
+                        $description = get_string(
+                                'event_backup_update_interrupted',
+                                'tool_coursebank',
+                                $data['uuid']
+                        );
+                        coursebank_logging::log_event(
+                                $description,
+                                'transfer_interrupted',
+                                'Transfer interrupted',
+                                coursebank_logging::LOG_MODULE_COURSE_BANK,
+                                $data['courseid'],
+                                '',
+                                $USER->id,
+                                $data
+                        );
                         return array('result'          => -1,
                                      'deletechunks'    => $deletechunks,
                                      'highestiterator' => $highestiterator,
@@ -461,7 +475,7 @@ abstract class tool_coursebank {
                         $data['uuid']
                     );
                     coursebank_logging::log_event(
-                        $description
+                        $description,
                         'transfer_started',
                         'Transfer started',
                         coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -543,7 +557,7 @@ abstract class tool_coursebank {
                     $data['uuid']
                 );
                 coursebank_logging::log_event(
-                    $description
+                    $description,
                     'transfer_start_failed',
                     'Transfer start failed',
                     coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -677,7 +691,21 @@ abstract class tool_coursebank {
                 }
                 $DB->update_record('tool_coursebank', $backup);
                 // Log a transfer interruption event.
-                $response->log_http_error($backup->courseid, $backup->id);
+                $description = get_string(
+                        'event_backup_chunk_interrupted',
+                        'tool_coursebank',
+                        $backup->uuid
+                );
+                coursebank_logging::log_event(
+                        $description,
+                        'transfer_interrupted',
+                        'Transfer interrupted',
+                        coursebank_logging::LOG_MODULE_COURSE_BANK,
+                        $backup->courseid,
+                        '',
+                        $USER->id,
+                        $backup
+                );
                 return self::SEND_ERROR;
             }
             if (time() >= $endtime) {
@@ -706,7 +734,21 @@ abstract class tool_coursebank {
                 $DB->update_record('tool_coursebank', $backup);
 
                 // Log a transfer interruption event.
-                $completion->log_http_error($backup->courseid, $backup->id);
+                $description = get_string(
+                        'event_backup_update_interrupted',
+                        'tool_coursebank',
+                        $backup->uuid
+                );
+                coursebank_logging::log_event(
+                        $description,
+                        'transfer_interrupted',
+                        'Transfer interrupted',
+                        coursebank_logging::LOG_MODULE_COURSE_BANK,
+                        $backup->courseid,
+                        '',
+                        $USER->id,
+                        $backup
+                );
                 return self::SEND_ERROR;
             }
             $backup->status = self::STATUS_FINISHED;
