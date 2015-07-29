@@ -390,6 +390,22 @@ abstract class tool_coursebank {
                 }
             }
         }
+        // Log a transfer update event.
+        $description = get_string(
+                'event_backup_update',
+                'tool_coursebank',
+                $data['uuid']
+        );
+        coursebank_logging::log_event(
+                $description,
+                'backup_updated',
+                'Backup updated',
+                coursebank_logging::LOG_MODULE_COURSE_BANK,
+                $data['courseid'],
+                '',
+                $USER->id,
+                $data
+        );
         return array('result'          => null,
                      'deletechunks'    => $deletechunks,
                      'highestiterator' => $highestiterator,
@@ -1586,9 +1602,6 @@ class coursebank_logging {
                 $USER->id,
                 $otherdata
         );
-    }
-    public static function log_backup_updated($data, $response) {
-        // TODO: log backup updated event.
     }
     /**
      * Log final status of backup sending.

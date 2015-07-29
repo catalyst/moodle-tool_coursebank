@@ -336,7 +336,6 @@ class coursebank_ws_manager {
     public function put_backup($sessionkey, $data, $uniqueid, $retries=4) {
 
         $response = $this->send_authenticated('backup/' . $uniqueid, $data, 'PUT', $sessionkey);
-        coursebank_logging::log_backup_updated($data, $response);
 
         if ($response->httpcode == self::WS_HTTP_OK) {
             // Make sure the hash is good.
