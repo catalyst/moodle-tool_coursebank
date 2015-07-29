@@ -787,7 +787,21 @@ abstract class tool_coursebank {
                 $backup->timecompleted = time();
                 $DB->update_record('tool_coursebank', $backup);
                 // Log transfer_completed event.
-                coursebank_logging::log_transfer_completed($backup);
+                $info = get_string(
+                        'event_backup_transfer_completed',
+                        'tool_coursebank',
+                        $backup->uniqueid
+                        );
+                coursebank_logging::log_event(
+                        $info,
+                        'transfer_completed',
+                        'Transfer completed',
+                        coursebank_logging::LOG_MODULE_COURSE_BANK,
+                        $backup->courseid,
+                        '',
+                        $USER->id,
+                        $backup
+                );
             }
         }
 
@@ -1599,30 +1613,6 @@ class coursebank_logging {
             '',
             $USER->id,
             $otherdata
-        );
-    }
-    /**
-     * Log transfer completion event.
-     *
-     * @param object $backup    Course bank database record object
-     */
-    public static function log_transfer_completed($backup) {
-        global $USER;
-
-        $info = get_string(
-                'event_backup_transfer_completed',
-                'tool_coursebank',
-                $backup->uniqueid
-                );
-        self::log_event(
-                $info,
-                'transfer_completed',
-                'Transfer completed',
-                self::LOG_MODULE_COURSE_BANK,
-                $backup->courseid,
-                '',
-                $USER->id,
-                $backup
         );
     }
     /**
