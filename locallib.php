@@ -391,7 +391,7 @@ abstract class tool_coursebank {
      *              1 = all good but don't continue -> i.e. External Course Bank already has the backup.
      */
     private static function initialise_backup(coursebank_ws_manager $wsmanager, $backup, $sessionkey, $retries) {
-        global $DB;
+        global $DB, $USER;
 
         $coursedate = '';
         if ($backup->coursestartdate > 0) {
@@ -417,8 +417,9 @@ abstract class tool_coursebank {
             $backup->timetransferstarted = time();
         }
         $postresponse = $wsmanager->post_backup($data, $sessionkey, $retries);
+
         // Unexpected http response or none received.
-        if (!is_int($postresponse)) {
+        if ($postresponse instanceof coursebank_http_response) {
             $deletechunks = false;
             $highestiterator = 0;
             $putresponse = null;
@@ -430,6 +431,21 @@ abstract class tool_coursebank {
                     $backup->status = self::STATUS_FINISHED;
                     $backup->timecompleted = time();
                     $DB->update_record('tool_coursebank', $backup);
+                    $description = get_string(
+                        'event_backup_init_completed',
+                        'tool_coursebank',
+                        $data['uuid']
+                    );
+                    coursebank_logging::log_event(
+                        $description,
+                        'transfer_started',
+                        'Transfer started',
+                        coursebank_logging::LOG_MODULE_COURSE_BANK,
+                        $data['courseid'],
+                        '',
+                        $USER->id,
+                        $data
+                    );
                     // Don't let the send_backup() continue.
                     return 1;
                 } else if ($postresponse->body->chunksreceived == 0) {
@@ -439,6 +455,21 @@ abstract class tool_coursebank {
                      * Don't unset the fileid or the uuid fields.*/
                     list($result, $deletechunks, $highestiterator, $putresponse) = self::update_backup(
                             $wsmanager, $data, $backup, $sessionkey, $retries);
+                    $description = get_string(
+                        'event_backup_init_exists_nodata',
+                        'tool_coursebank',
+                        $data['uuid']
+                    );
+                    coursebank_logging::log_event(
+                        $description
+                        'transfer_started',
+                        'Transfer started',
+                        coursebank_logging::LOG_MODULE_COURSE_BANK,
+                        $data['courseid'],
+                        '',
+                        $USER->id,
+                        $data
+                    );
                     if (!is_null($result)) {
                         return $result;
                     }
@@ -448,6 +479,21 @@ abstract class tool_coursebank {
                      * chunks.
                      * We need to delete the chunks, then update the backup, then continue.*/
                     if (isset($postresponse->body->chunksreceived)) {
+                        $description = get_string(
+                            'event_backup_init_exists_data',
+                            'tool_coursebank',
+                            $data['uuid']
+                        );
+                        coursebank_logging::log_event(
+                            $description,
+                            'transfer_started',
+                            'Transfer started',
+                            coursebank_logging::LOG_MODULE_COURSE_BANK,
+                            $data['courseid'],
+                            '',
+                            $USER->id,
+                            $data
+                        );
                         $deletechunks = true;
                         $highestiterator = $postresponse->body->highestchunkiterator;
                     }
@@ -470,16 +516,42 @@ abstract class tool_coursebank {
                     // Something is wrong. Try again later.
                     $backup->status = self::STATUS_ERROR;
                     $DB->update_record('tool_coursebank', $backup);
-                    // Log a transfer interruption event.
-                    $putresponse->log_http_error($backup->courseid, $backup->id);
+                    $description = get_string(
+                        'event_backup_init_interrupted',
+                        'tool_coursebank',
+                        $data['uuid']
+                    );
+                    coursebank_logging::log_event(
+                        $description,
+                        'transfer_start_failed',
+                        'Transfer start failed',
+                        coursebank_logging::LOG_MODULE_COURSE_BANK,
+                        $data['courseid'],
+                        '',
+                        $USER->id,
+                        $data
+                    );
                     return -1;
                 }
                 // Continue.
             } else {
                 $backup->status = self::STATUS_ERROR;
                 $DB->update_record('tool_coursebank', $backup);
-                // Log a transfer interruption event.
-                $postresponse->log_http_error($backup->courseid, $backup->id);
+                $description = get_string(
+                    'event_backup_init_interrupted',
+                    'tool_coursebank',
+                    $data['uuid']
+                );
+                coursebank_logging::log_event(
+                    $description
+                    'transfer_start_failed',
+                    'Transfer start failed',
+                    coursebank_logging::LOG_MODULE_COURSE_BANK,
+                    $data['courseid'],
+                    '',
+                    $USER->id,
+                    $data
+                );
                 return -1;
             }
         }
@@ -1460,91 +1532,6 @@ class coursebank_logging {
             $event = 'status_updated';
         }
         self::log_event($info, $event, 'Update status');
-    }
-    /**
-     * Log the fact that transfers for a course backup or chunk have started.
-     *
-     * @param mixed $backup    if object: Course bank database record object
-     *                         if array: data getting sent to webservice.
-     * @param object $httpresponse
-     * @param string $level    either 'course' or 'chunk'.
-     */
-    public static function log_transfer_started($backup, $httpresponse=null, $level='course') {
-        global $USER;
-
-        if (is_object($backup)) {
-            // This is the backup object.
-            $coursebankid = $backup->id;
-            $courseid = $backup->courseid;
-        } else if (is_array($backup)) {
-            // This is the data that is getting sent to the webservice.
-            $coursebankid = $backup['fileid'];
-            $courseid = $backup['courseid'];
-        }
-
-        $otherdata = array(
-            'level'         => $level,
-            'coursebankid' => $coursebankid,
-        );
-        if (($httpresponse instanceof coursebank_http_response)
-            && $httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_CREATED) {
-            // At this stage, $backup is an array.
-            $validatehash = coursebank_ws_manager::get_backup_validated_hash($backup);
-            if ($validatehash != $httpresponse->body->hash) {
-                $event = 'transfer_start_failed';
-                $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course bank id $coursebankid " .
-                        "failed. (Course ID: $courseid)";
-                $otherdata['error_desc'] = "Returned hash ({$httpresponse->body->hash}) " .
-                                           "does not match validated hash ($validatehash).";
-            } else {
-                $event = 'transfer_started';
-                $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course bank id $coursebankid " .
-                        "started. (Course ID: $courseid)";
-            }
-        } else {
-            $event = 'transfer_start_failed';
-            $info = "Transfer of " . ($level == 'course' ? 'backup' : 'chunk') . " for course bank id $coursebankid " .
-                    "failed. (Course ID: $courseid)";
-            if ($httpresponse instanceof coursebank_http_response) {
-                if ($httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_CONFLICT && $level == 'course') {
-                    // The course was already created.
-                    // Check if External Course Bank has the same data as us.
-                    if (!coursebank_ws_manager::check_post_backup_data_is_same($httpresponse, $backup)) {
-                        $info .= " The backup already exists.";
-                        if ($httpresponse->body->is_completed) {
-                            // External Course Bank already has a complete copy of this backup.
-                            $info .= " The backup is complete in External Course Bank.";
-                        }
-                    } else {
-                        // It's ok, will continue.
-                        $event = 'transfer_started';
-                        $info = "Transfer of " .
-                                ($level == 'course' ? 'backup' : 'chunk') .
-                                " for course bank id $coursebankid " .
-                        "started. (Course ID: $courseid) It already exists " .
-                        "in External Course Bank.  Will continue.";
-                    }
-                }
-                // Log the session key failure.
-                if (isset($httpresponse->error)) {
-                    $otherdata['error'] = $httpresponse->error;
-                }
-                if (isset($httpresponse->error_desc)) {
-                    $otherdata['error_desc'] = $httpresponse->error_desc;
-                }
-            }
-        }
-
-        self::log_event(
-            $info,
-            $event,
-            'Transfer started',
-            self::LOG_MODULE_COURSE_BANK,
-            $courseid,
-            '',
-            $USER->id,
-            $otherdata
-        );
     }
     /**
      * Log the fact that transfers for a backup have resumed.

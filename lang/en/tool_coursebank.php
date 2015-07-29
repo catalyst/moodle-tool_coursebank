@@ -159,6 +159,14 @@ $string['settings_proxypass'] = 'Password';
 $string['settings_proxypass_desc'] = 'Proxy password credential';
 $string['settings_proxyport'] = 'Port';
 $string['settings_proxyport_desc'] = 'Proxy port';
+$string['event_backup_init_completed'] = 'Course backup with UUID {$a} has ' .
+        'already been transferred to Coursebank.';
+$string['event_backup_init_exists_nodata'] = 'Course backup with UUID {$a} already' .
+        'exists in Coursebank, but no data has been transferred yet.';
+$string['event_backup_init_exists_data'] = 'Course backup with UUID {$a} already' .
+        'exists in Coursebank. Existing data will be overwritten.';
+$string['event_backup_init_interrupted'] = 'Transfer of backup with UUID {$a} ' .
+    'interrupted during backup initialisation';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
