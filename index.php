@@ -78,7 +78,7 @@ $extraparams = $filtering->get_param_filter();
 $error = false;
 $response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
 coursebank_logging::log_event(
-        'Download page viewed',
+        get_string('event_downloads_viewed', 'tool_coursebank', $USER->id),
         'downloads_viewed',
         get_string('eventdownloadsviewed', 'tool_coursebank'),
         coursebank_logging::LOG_MODULE_COURSE_BANK,
