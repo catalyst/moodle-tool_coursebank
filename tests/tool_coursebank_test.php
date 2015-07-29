@@ -319,7 +319,18 @@ class tool_coursebank_testcase extends advanced_testcase {
         // No HTTP response.
         $noresponse = new coursebank_http_response(false, false, $request1);
 
-        // Debug levels to expected responses.
+        // Debug levels mapped to expected responses.
+        //
+        // Each response array includes boolean values corresponding to:
+        //     - Successful chunk HTTP responses
+        //     - Successful normal HTTP responses
+        //     - Error HTTP responses
+        //
+        // log_response should log any type of response for which the value
+        // mapped in the response array is true.
+        //
+        // For example: if the debug level is DEBUG_NORMAL, log_response
+        // should log normal HTTP responses and error responses.
         $debugmap = array(
             DEBUG_NONE => array(false, false, false),
             DEBUG_MINIMAL => array(false, false, true),
@@ -469,7 +480,7 @@ class tool_coursebank_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
 
         $backup = new stdClass();
-        $backup->courseid =$course->id;
+        $backup->courseid = $course->id;
         $backup->backupfilename = 'test.mbz';
 
         set_config('deletelocalbackup', false, 'tool_coursebank');
