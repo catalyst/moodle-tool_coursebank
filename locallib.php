@@ -1510,43 +1510,6 @@ class coursebank_logging {
             return true;
         }
     }
-    /** Log simple generic event for an http request.
-     *
-     * @param coursebank_http_responsehttpresponse Response object.
-     * @param string                   eventname    Event class name.
-     * @param string                   eventdesc    Event description.
-     * @param string                   action       Action description.
-     */
-    protected static function log_generic_request($httpresponse, $eventname, $eventdesc, $action) {
-        global $USER;
-
-        if ($httpresponse->httpcode == coursebank_ws_manager::WS_HTTP_OK) {
-            $otherdata = array('status' => true);
-        } else {
-            $otherdata = array(
-                'status' => false,
-                'error'  => $httpresponse->error_desc,
-                'error'  => $httpresponse->error
-            );
-        }
-        $status = $otherdata['status'] ? 'Succeeded' : 'Failed';
-
-        if ($status == 'Failed') {
-            $eventname = $eventname . '_failed';
-        }
-        $info = $eventdesc . ' ' . $status . '.';
-
-        self::log_event(
-            $info,
-            $eventname,
-            $action,
-            self::LOG_MODULE_COURSE_BANK,
-            SITEID,
-            '',
-            $USER->id,
-            $otherdata
-        );
-    }
     /**
      * Log an event for cron run time out.
      *
