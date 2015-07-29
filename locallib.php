@@ -673,6 +673,22 @@ abstract class tool_coursebank {
                     break;
             }
         }
+        // Log a transfer start event.
+        $description = get_string(
+                'event_backup_transfer_started',
+                'tool_coursebank',
+                $backup->uniqueid
+        );
+        coursebank_logging::log_event(
+                $description,
+                'transfer_started',
+                'Transfer started',
+                coursebank_logging::LOG_MODULE_COURSE_BANK,
+                $backup->courseid,
+                '',
+                $USER->id,
+                $backup
+        );
 
         // Read the file in chunks, attempt to send them.
         while ($contents = fread($file, $chunksize)) {
@@ -710,7 +726,7 @@ abstract class tool_coursebank {
                 $description = get_string(
                         'event_backup_chunk_interrupted',
                         'tool_coursebank',
-                        $backup->uuid
+                        $backup->uniqueid
                 );
                 coursebank_logging::log_event(
                         $description,
@@ -753,7 +769,7 @@ abstract class tool_coursebank {
                 $description = get_string(
                         'event_backup_update_interrupted',
                         'tool_coursebank',
-                        $backup->uuid
+                        $backup->uniqueid
                 );
                 coursebank_logging::log_event(
                         $description,
@@ -766,10 +782,13 @@ abstract class tool_coursebank {
                         $backup
                 );
                 return self::SEND_ERROR;
+            } else {
+                $backup->status = self::STATUS_FINISHED;
+                $backup->timecompleted = time();
+                $DB->update_record('tool_coursebank', $backup);
+                // Log transfer_completed event.
+                coursebank_logging::log_transfer_completed($backup);
             }
-            $backup->status = self::STATUS_FINISHED;
-            $backup->timecompleted = time();
-            $DB->update_record('tool_coursebank', $backup);
         }
 
         $wsmanager->close();
@@ -1481,7 +1500,7 @@ class coursebank_logging {
      * @param int $courseid Moodle course ID
      * @param string $url URL
      * @param int $userid Moodle user ID
-     * @param array $other Other data we may want to use
+     * @param array/stdClass $other Other data we may want to use
      * @return boolean
      */
     public static function log_event($info='', $eventname='coursebank_logging', $action='',
@@ -1493,6 +1512,9 @@ class coursebank_logging {
         }
 
         $url = str_replace($CFG->wwwroot, "/", $url);
+
+        // Cast $other to array in case we've been passed an object.
+        $other = (array) $other;
 
         if (!tool_coursebank::legacy_logging()) {
             $otherdata = array_merge(
@@ -1525,6 +1547,7 @@ class coursebank_logging {
             add_to_log($courseid, $module, $action, $url, $info, 0, $userid);
             return true;
         }
+        return false;
     }
     /**
      * Log an event for cron run time out.
@@ -1586,12 +1609,11 @@ class coursebank_logging {
     public static function log_transfer_completed($backup) {
         global $USER;
 
-        // Log transfer_completed event.
-        $info = "Transfer of backup with course bank id $backup->id " .
-                "completed. (Course ID: $backup->courseid)";
-        $otherdata = array(
-            'coursebankid' => $backup->id
-            );
+        $info = get_string(
+                'event_backup_transfer_completed',
+                'tool_coursebank',
+                $backup->uniqueid
+                );
         self::log_event(
                 $info,
                 'transfer_completed',
@@ -1600,7 +1622,7 @@ class coursebank_logging {
                 $backup->courseid,
                 '',
                 $USER->id,
-                $otherdata
+                $backup
         );
     }
     /**

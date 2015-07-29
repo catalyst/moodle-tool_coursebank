@@ -365,8 +365,6 @@ class coursebank_ws_manager {
      *
      */
     public function put_backup_complete($sessionkey, $data, $backup, $retries=4) {
-        // Log transfer_completed event.
-        coursebank_logging::log_transfer_completed($backup);
         $uniqueid = $backup->uniqueid;
         return $this->send_authenticated('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey);
     }

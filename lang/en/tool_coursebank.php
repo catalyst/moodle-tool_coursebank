@@ -177,6 +177,10 @@ $string['event_backup_update'] = 'Transfer record of backup with UUID ' .
         '{$a} updated.';
 $string['event_downloads_viewed'] = 'The user with id \'{$a}\' viewed the' .
         ' backup downloads page.';
+$string['event_backup_transfer_started'] = 'Transfer of course backup with UUID ' .
+        '\'{$a}\' started.';
+$string['event_backup_transfer_completed'] = 'Transfer of course backup with UUID ' .
+        '\'{$a}\' completed.';
 $string['eventbackupupdated'] = 'Backup record updated';
 $string['eventdownloadsviewed'] = 'Download page viewed';
 // Error codes.
