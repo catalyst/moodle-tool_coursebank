@@ -297,7 +297,6 @@ class coursebank_ws_manager {
     public function post_backup($data, $sessionkey, $retries=4) {
 
         $response = $this->send_authenticated('backup', $data, 'POST', $sessionkey, $retries);
-        coursebank_logging::log_transfer_started($data, $response, 'course');
 
         if ($response->httpcode == self::WS_HTTP_CREATED) {
             // Make sure the hash is good.
