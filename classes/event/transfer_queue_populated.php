@@ -15,18 +15,38 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * transfer_queue_populated
  *
- * @package    tool
- * @subpackage coursebank
- * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
+ * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @copyright  2015 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace tool_coursebank\event;
+defined('MOODLE_INTERNAL') || die();
+/**
+ * transfer_queue_populated
+ *
+ * @package    tool_coursebank
+ * @author     Adam Riddell <adamr@catalyst-au.net>
+ * @copyright  2015 Catalyst IT
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ **/
+class transfer_queue_populated extends \core\event\base {
+    protected function init() {
+        $this->data['crud'] = 'r';
+        $this->data['edulevel'] = self::LEVEL_OTHER;
+    }
 
-defined('MOODLE_INTERNAL') || die;
+    public static function get_name() {
+        return get_string('eventqueuepopulated', 'tool_coursebank');
+    }
 
-$plugin->version   = 2015072904;
-$plugin->requires  = 2013111800;
-$plugin->component = 'tool_coursebank';
+    public function get_description() {
+        return $this->data['other']['info'];
+    }
+
+    public function get_url() {
+        return new \moodle_url('/admin/tool/coursebank/queue.php');
+    }
+}

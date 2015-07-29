@@ -181,6 +181,8 @@ $string['event_backup_transfer_started'] = 'Transfer of course backup with UUID 
         '\'{$a}\' started.';
 $string['event_backup_transfer_completed'] = 'Transfer of course backup with UUID ' .
         '\'{$a}\' completed.';
+$string['event_transfer_queue_populated'] = '{$a} course backup files added to the transfer queue.';
+$string['eventqueuepopulated'] = 'Course backup queue populated';
 $string['eventbackupupdated'] = 'Backup record updated';
 $string['eventdownloadsviewed'] = 'Download page viewed';
 // Error codes.

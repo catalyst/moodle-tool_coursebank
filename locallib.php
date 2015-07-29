@@ -1113,7 +1113,7 @@ abstract class tool_coursebank {
      *
      */
     public static function fetch_backups() {
-        global $CFG, $DB;
+        global $CFG, $DB, $USER;
 
         $starttime = time();
 
@@ -1238,6 +1238,7 @@ abstract class tool_coursebank {
                 'courseshortname', 'coursestartdate', 'categoryid',
                 'categoryname'
         );
+        $insertcount = 0;
         foreach ($recordset as $coursebackup) {
             if (!isset($coursebackup->status)) {
                 // The record hasn't been input in the course bank table yet.
@@ -1254,6 +1255,7 @@ abstract class tool_coursebank {
                     $cs->$field = $coursebackup->$field;
                 }
                 $backupid = $DB->insert_record('tool_coursebank', $cs);
+                $insertcount++;
 
                 $coursebackup->id = $backupid;
                 $coursebackup->uniqueid = $cs->uniqueid;
@@ -1284,6 +1286,23 @@ abstract class tool_coursebank {
                 $coursebackup->categoryname = $cs->categoryname;
             }
         }
+
+        // Log transfer_queue populated event.
+        $info = get_string(
+                'event_transfer_queue_populated',
+                'tool_coursebank',
+                $insertcount
+        );
+        coursebank_logging::log_event(
+                $info,
+                'transfer_queue_populated',
+                'Transfer queue populated',
+                coursebank_logging::LOG_MODULE_COURSE_BANK,
+                SITEID,
+                '',
+                $USER->id,
+                array('queuecount' => $insertcount)
+        );
         $recordset->close();
 
         // Get all backups that are pending transfer, attempt to transfer them.
