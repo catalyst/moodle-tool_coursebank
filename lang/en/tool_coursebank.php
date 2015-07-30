@@ -187,6 +187,7 @@ $string['eventbackupupdated'] = 'Backup record updated';
 $string['eventdownloadsviewed'] = 'Download page viewed';
 $string['eventcronstarted'] = 'Coursebank scheduled task started';
 $string['eventcroncompleted'] = 'Coursebank scheduled task completed';
+$string['eventtimeoutreached'] = 'Event time out reached';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
