@@ -185,6 +185,8 @@ $string['event_transfer_queue_populated'] = '{$a} course backup files added to t
 $string['eventqueuepopulated'] = 'Course backup queue populated';
 $string['eventbackupupdated'] = 'Backup record updated';
 $string['eventdownloadsviewed'] = 'Download page viewed';
+$string['eventcronstarted'] = 'Coursebank scheduled task started';
+$string['eventcroncompleted'] = 'Coursebank scheduled task completed';
 // Error codes.
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';

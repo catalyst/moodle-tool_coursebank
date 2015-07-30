@@ -1109,12 +1109,22 @@ abstract class tool_coursebank {
      * to the course bank table, and then process the files before sending
      * via web service to the configured external course bank instance.
      *
-     * - The query consists of three parts which are combined with a UNION
-     *
      */
     public static function fetch_backups() {
         global $CFG, $DB, $USER;
 
+        // Log cron_started event.
+        $info = get_string('eventcronstarted', 'tool_coursebank') . '.';
+        coursebank_logging::log_event(
+                $info,
+                'cron_started',
+                get_string('eventcronstarted', 'tool_coursebank'),
+                coursebank_logging::LOG_MODULE_COURSE_BANK,
+                SITEID,
+                '',
+                $USER->id,
+                array()
+        );
         $starttime = time();
 
         // Cancel any old backups that are in the coursebank table
@@ -1383,6 +1393,18 @@ abstract class tool_coursebank {
         }
         $transferrs->close();
 
+        // Log cron_completed event.
+        $info = get_string('eventcroncompleted', 'tool_coursebank') . '.';
+        coursebank_logging::log_event(
+                $info,
+                'cron_completed',
+                get_string('eventcroncompleted', 'tool_coursebank'),
+                coursebank_logging::LOG_MODULE_COURSE_BANK,
+                SITEID,
+                '',
+                $USER->id,
+                array()
+        );
     }
     /**
      * Test the Moodle version number and return true if the Moodle version is
