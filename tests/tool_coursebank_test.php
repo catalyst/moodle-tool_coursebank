@@ -330,7 +330,7 @@ class tool_coursebank_testcase extends advanced_testcase {
         // For example: if the debug level is DEBUG_NORMAL, log_response
         // should log normal HTTP responses and error responses.
         $debugmap = array(
-            DEBUG_NONE => array(false, false, false),
+            DEBUG_NONE => array(false, false, true),
             DEBUG_MINIMAL => array(false, false, true),
             DEBUG_NORMAL => array(false, true, true),
             DEBUG_DEVELOPER => array(true, true, true),

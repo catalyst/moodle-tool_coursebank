@@ -139,7 +139,7 @@ class coursebank_http_response {
 
         switch ($CFG->debug) {
             case DEBUG_NONE:
-                return false;
+                return !$issuccess;
             break;
             case DEBUG_MINIMAL:
                 return !$issuccess;
