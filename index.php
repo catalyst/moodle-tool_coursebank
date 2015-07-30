@@ -78,9 +78,7 @@ $extraparams = $filtering->get_param_filter();
 $error = false;
 $response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
 
-if ($response->httpcode != $wsman::WS_HTTP_OK or isset($response->body->error)) {
-    $error = true;
-} else {
+if ($response && $response->httpcode != $wsman::WS_HTTP_OK) {
     coursebank_logging::log_event(
             get_string('event_downloads_viewed', 'tool_coursebank', $USER->id),
             'downloads_viewed',
@@ -91,10 +89,12 @@ if ($response->httpcode != $wsman::WS_HTTP_OK or isset($response->body->error)) 
             $USER->id,
             array()
     );
+} else {
+    $error = true;
 }
 
 $count = $wsman->get_downloadcount($sesskey);
-if ($response->httpcode != $wsman::WS_HTTP_OK or isset($count->body->error)) {
+if (!$count || $count->httpcode != $wsman::WS_HTTP_OK) {
     $error = true;
 }
 
