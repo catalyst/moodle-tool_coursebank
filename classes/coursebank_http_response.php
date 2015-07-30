@@ -124,8 +124,10 @@ class coursebank_http_response {
     private function should_response_be_logged() {
         global $CFG;
 
+        // Test if a response was actually received.
+        $isresponse = isset($this->info) && isset($this->body);
         // Test if the HTTP code is a success or redirection (2** or 3**).
-        $issuccess = preg_match(
+        $issuccess = $isresponse && preg_match(
                 '/^[23][0-9]{2}$/',
                 (string) $this->httpcode
         );
@@ -172,7 +174,7 @@ class coursebank_http_response {
         unset($request[CURLOPT_POSTFIELDS]['data']);
 
         // Handle response time-out.
-        if (!isset($this->httpcode)) {
+        if (!$this->info || !isset($this->httpcode)) {
             if ($this->request[CURLOPT_URL]) {
                 $description = 'Request to "' . s($this->request[CURLOPT_URL]) .
                     '" timed out.';
