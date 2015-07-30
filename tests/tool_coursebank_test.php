@@ -111,7 +111,7 @@ class tool_coursebank_testcase extends advanced_testcase {
 
         // Test false response.
         $wsman->set_response($response);
-        $this->assertEquals($response, $wsman->post_session('hash'));
+        $this->assertFalse($wsman->post_session('hash'));
 
         // Test successful response.
         $info = array(
@@ -132,7 +132,7 @@ class tool_coursebank_testcase extends advanced_testcase {
         );
         $expected = new coursebank_http_response($body, $info);
         $wsman->set_response($expected);
-        $this->assertEquals($expected, $wsman->post_session('hash'));
+        $this->assertFalse($wsman->post_session('hash'));
     }
     /**
      * @group tool_coursebank
