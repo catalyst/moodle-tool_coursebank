@@ -172,7 +172,7 @@ class coursebank_http_response {
         unset($request[CURLOPT_POSTFIELDS]['data']);
 
         // Handle response time-out.
-        if ($this->info === false) {
+        if (!isset($this->httpcode)) {
             if ($this->request[CURLOPT_URL]) {
                 $description = 'Request to "' . s($this->request[CURLOPT_URL]) .
                     '" timed out.';
