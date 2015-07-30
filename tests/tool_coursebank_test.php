@@ -66,8 +66,6 @@ class coursebank_ws_manager_tester extends coursebank_ws_manager {
     protected function send($resource=null, $data=null, $method=null, $auth=null, $retries=null) {
         return $this->testresponse;
     }
-    protected function test_get_test() {
-    }
 }
 class tool_coursebank_testcase extends advanced_testcase {
     /**
@@ -439,6 +437,51 @@ class tool_coursebank_testcase extends advanced_testcase {
         $this->assertArrayHasKey('other', $eventdata);
         $this->assertArrayHasKey('context', $eventdata);
         $this->assertInstanceOf('context_system', $eventdata['context']);
+    }
+    /**
+     * @group tool_coursebank
+     */
+    public function test_tool_coursebank_log_event() {
+        global $CFG, $USER, $DB;
+
+        $this->resetAfterTest(true);
+
+        // Set up test logging data.
+        $info = 'Event description';
+        $eventname = 'coursebank_logging';
+        $action = 'Event action';
+        $module = coursebank_logging::LOG_MODULE_COURSE_BANK;
+        $courseid = SITEID;
+        $url = 'some.kind/of/url';
+        $userid = $USER->id;
+        $other = array(
+            'somedata' => 'other data',
+            'float'    => 2.0,
+            'bla'      => 'whatever'
+        );
+
+        // Test modern event-based logging.
+        if ((float) $CFG->version >= 2014051200) {
+            $eventsink = $this->redirectEvents();
+            $countbefore = $eventsink->count();
+            coursebank_logging::log_event(
+                    $info,
+                    $eventname,
+                    $action,
+                    $module,
+                    $courseid,
+                    $url,
+                    $userid,
+                    $other
+            );
+            $logentries = $DB->get_records('logstore_standard_log');
+            $this->assertEquals($countbefore + 1, $eventsink->count());
+            $events = $eventsink->get_events();
+            $mostrecentevent = $events[count($events) - 1];
+            $this->assertEquals($info, $mostrecentevent->get_description());
+            $this->assertEquals($url, $mostrecentevent->get_url()->out());
+        }
+        // TODO: Add legacy add_to_log testing.
     }
     /**
      * @group tool_coursebank
