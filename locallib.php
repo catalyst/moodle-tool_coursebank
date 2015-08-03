@@ -421,7 +421,7 @@ abstract class tool_coursebank {
      *              1 = all good but don't continue -> i.e. External Course Bank already has the backup.
      */
     private static function initialise_backup(coursebank_ws_manager $wsmanager, $backup, $sessionkey, $retries) {
-        global $DB, $USER;
+        global $DB, $USER, $CFG;
 
         $coursedate = '';
         if ($backup->coursestartdate > 0) {
@@ -441,7 +441,8 @@ abstract class tool_coursebank {
             'startdate'    => $coursedate,
             'categoryid'   => $backup->categoryid,
             'categoryname' => $backup->categoryname,
-            'filetimemodified' => $backup->filetimemodified
+            'filetimemodified' => $backup->filetimemodified,
+            'dbtype'           => isset($CFG->dbtype) ? $CFG->dbtype : 'unknown'
         );
         if (!isset($backup->timetransferstarted) || $backup->timetransferstarted == 0) {
             $backup->timetransferstarted = time();
