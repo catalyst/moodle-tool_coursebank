@@ -78,7 +78,7 @@ $extraparams = $filtering->get_param_filter();
 $error = false;
 $response = $wsman->get_downloads($sesskey, $extraparams, $sort, $dir, $page, $perpage);
 
-if ($response && $response->httpcode != $wsman::WS_HTTP_OK) {
+if ($response && $response->httpcode == $wsman::WS_HTTP_OK) {
     coursebank_logging::log_event(
             get_string('event_downloads_viewed', 'tool_coursebank', $USER->id),
             'downloads_viewed',
