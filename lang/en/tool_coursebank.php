@@ -177,6 +177,8 @@ $string['event_backup_update'] = 'Transfer record of backup with UUID ' .
         '{$a} updated.';
 $string['event_downloads_viewed'] = 'The user with id \'{$a}\' viewed the' .
         ' backup downloads page.';
+$string['event_download_view_failed'] = 'The user with id \'{$a}\' attemped' .
+        ' to view the backup downloads page but an error occurred.';
 $string['event_backup_transfer_started'] = 'Transfer of course backup with UUID ' .
         '\'{$a}\' started.';
 $string['event_backup_transfer_completed'] = 'Transfer of course backup with UUID ' .
@@ -185,6 +187,7 @@ $string['event_transfer_queue_populated'] = '{$a} course backup files added to t
 $string['eventqueuepopulated'] = 'Course backup queue populated';
 $string['eventbackupupdated'] = 'Backup record updated';
 $string['eventdownloadsviewed'] = 'Download page viewed';
+$string['eventdownloadviewfailed'] = 'Download page view failed';
 $string['eventcronstarted'] = 'Coursebank scheduled task started';
 $string['eventcroncompleted'] = 'Coursebank scheduled task completed';
 $string['eventtimeoutreached'] = 'Cron time out reached';

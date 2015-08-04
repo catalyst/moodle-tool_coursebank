@@ -90,6 +90,16 @@ if ($response && $response->httpcode == $wsman::WS_HTTP_OK) {
             array()
     );
 } else {
+    coursebank_logging::log_event(
+            get_string('event_download_view_failed', 'tool_coursebank', $USER->id),
+            'downloads_viewed',
+            get_string('eventdownloadviewfailed', 'tool_coursebank'),
+            coursebank_logging::LOG_MODULE_COURSE_BANK,
+            SITEID,
+            '',
+            $USER->id,
+            array()
+    );
     $error = true;
 }
 
