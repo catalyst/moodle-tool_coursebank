@@ -8,7 +8,7 @@ Supported versions of Moodle: 2.5 to 2.9 inclusive
 
 See https://coursebank.biz
 
-## Instalation
+## Installation
 
 It should be installed into your Moodle codebase in
  admin/tool/coursebank
