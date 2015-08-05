@@ -473,7 +473,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         $html .= html_writer::end_tag('div');
 
         // Success notification.
-        $urltarget = get_config('tool_coursebank', 'url');
+        $urltarget = isset($this->get_config()->url) ? $this->get_config()->url : null;
         $html .= $this->course_bank_check_notification(
                 'conncheck',
                 'success',
@@ -552,7 +552,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         $html .= html_writer::tag('input', '', $wwwrootattr);
 
         // Success notification.
-        $urltarget = get_config('tool_coursebank', 'url');
+        $urltarget = isset($this->get_config()->url) ? $this->get_config()->url : null;
 
         $attr = array(
             'type' => 'hidden',
