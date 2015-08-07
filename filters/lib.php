@@ -62,7 +62,9 @@ class coursebank_filtering {
 
         foreach ($fieldnames as $fieldname => $advanced) {
             if ($field = $this->get_field($fieldname, $advanced)) {
-                $this->_fields[$fieldname] = $field;
+                if (!($prefix == 'queue' && $fieldname == 'filetimemodified')) {
+                    $this->_fields[$fieldname] = $field;
+                }
             }
         }
 
