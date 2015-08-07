@@ -478,7 +478,9 @@ class coursebank_ws_manager {
      * Get count of backup files available from external course bank instance.
      */
     public function get_downloadcount($sesskey, array $params = null) {
-        $result = $this->send_authenticated('downloadcount', array(), 'GET', $sesskey);
+        $nonemptyarray = is_array($params) && !empty($params);
+        $query = $nonemptyarray ? array('query' => $params) : array();
+        $result = $this->send_authenticated('downloadcount', $query, 'GET', $sesskey);
         return $result;
     }
 }

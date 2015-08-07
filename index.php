@@ -103,7 +103,7 @@ if ($response && $response->httpcode == $wsman::WS_HTTP_OK) {
     $error = true;
 }
 
-$count = $wsman->get_downloadcount($sesskey);
+$count = $wsman->get_downloadcount($sesskey, $extraparams);
 if (!$count || $count->httpcode != $wsman::WS_HTTP_OK) {
     $error = true;
 }
