@@ -193,7 +193,7 @@ class coursebank_http_response {
                 'body'          => $body,
                 'responseinfo'  => json_encode($this->info),
                 'httpcode'      => $this->httpcode,
-                'request'       => $request,
+                'request'       => json_encode($request),
                 'info'          => $description
                 );
             if (isset($this->error)) {
