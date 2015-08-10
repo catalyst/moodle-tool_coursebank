@@ -347,13 +347,13 @@ abstract class tool_coursebank {
                         $backup->status = self::STATUS_ERROR;
                         $DB->update_record('tool_coursebank', $backup);
                         // Log a transfer interruption event.
-                        $description = get_string(
+                        $desc = coursebank_logging::get_backup_details(
                                 'event_backup_update_interrupted',
-                                'tool_coursebank',
-                                $data['uuid']
+                                $backup->uniqueid,
+                                $backup->backupfilename
                         );
                         coursebank_logging::log_event(
-                                $description,
+                                $desc,
                                 'transfer_interrupted',
                                 'Transfer interrupted',
                                 coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -391,13 +391,13 @@ abstract class tool_coursebank {
             }
         }
         // Log a transfer update event.
-        $description = get_string(
+        $desc = coursebank_logging::get_backup_details(
                 'event_backup_update',
-                'tool_coursebank',
-                $data['uuid']
+                $data['uuid'],
+                $data['filename']
         );
         coursebank_logging::log_event(
-                $description,
+                $desc,
                 'backup_updated',
                 'Backup updated',
                 coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -462,13 +462,13 @@ abstract class tool_coursebank {
                     $backup->status = self::STATUS_FINISHED;
                     $backup->timecompleted = time();
                     $DB->update_record('tool_coursebank', $backup);
-                    $description = get_string(
-                        'event_backup_init_completed',
-                        'tool_coursebank',
-                        $data['uuid']
+                    $desc = coursebank_logging::get_backup_details(
+                            'event_backup_init_completed',
+                            $data['uuid'],
+                            $data['filename']
                     );
                     coursebank_logging::log_event(
-                        $description,
+                        $desc,
                         'transfer_started',
                         'Transfer started',
                         coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -486,13 +486,13 @@ abstract class tool_coursebank {
                      * Don't unset the fileid or the uuid fields.*/
                     list($result, $deletechunks, $highestiterator, $putresponse) = self::update_backup(
                             $wsmanager, $data, $backup, $sessionkey, $retries);
-                    $description = get_string(
+                    $desc = coursebank_logging::get_backup_details(
                         'event_backup_init_exists_nodata',
-                        'tool_coursebank',
-                        $data['uuid']
+                        $data['uuid'],
+                        $data['filename']
                     );
                     coursebank_logging::log_event(
-                        $description,
+                        $desc,
                         'transfer_started',
                         'Transfer started',
                         coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -510,13 +510,13 @@ abstract class tool_coursebank {
                      * chunks.
                      * We need to delete the chunks, then update the backup, then continue.*/
                     if (isset($postresponse->body->chunksreceived)) {
-                        $description = get_string(
-                            'event_backup_init_exists_data',
-                            'tool_coursebank',
-                            $data['uuid']
+                        $desc = coursebank_logging::get_backup_details(
+                                'event_backup_init_exists_data',
+                                $data['uuid'],
+                                $data['filename']
                         );
                         coursebank_logging::log_event(
-                            $description,
+                            $desc,
                             'transfer_started',
                             'Transfer started',
                             coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -547,13 +547,13 @@ abstract class tool_coursebank {
                     // Something is wrong. Try again later.
                     $backup->status = self::STATUS_ERROR;
                     $DB->update_record('tool_coursebank', $backup);
-                    $description = get_string(
-                        'event_backup_init_interrupted',
-                        'tool_coursebank',
-                        $data['uuid']
+                    $desc = coursebank_logging::get_backup_details(
+                            'event_backup_init_interrupted',
+                            $data['uuid'],
+                            $data['filename']
                     );
                     coursebank_logging::log_event(
-                        $description,
+                        $desc,
                         'transfer_start_failed',
                         'Transfer start failed',
                         coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -568,13 +568,13 @@ abstract class tool_coursebank {
             } else {
                 $backup->status = self::STATUS_ERROR;
                 $DB->update_record('tool_coursebank', $backup);
-                $description = get_string(
-                    'event_backup_init_interrupted',
-                    'tool_coursebank',
-                    $data['uuid']
+                $desc = coursebank_logging::get_backup_details(
+                        'event_backup_init_interrupted',
+                        $data['uuid'],
+                        $data['filename']
                 );
                 coursebank_logging::log_event(
-                    $description,
+                    $desc,
                     'transfer_start_failed',
                     'Transfer start failed',
                     coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -675,13 +675,13 @@ abstract class tool_coursebank {
             }
         }
         // Log a transfer start event.
-        $description = get_string(
+        $desc = coursebank_logging::get_backup_details(
                 'event_backup_transfer_started',
-                'tool_coursebank',
-                $backup->uniqueid
+                $backup->uniqueid,
+                $backup->backupfilename
         );
         coursebank_logging::log_event(
-                $description,
+                $desc,
                 'transfer_started',
                 'Transfer started',
                 coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -724,13 +724,13 @@ abstract class tool_coursebank {
                 }
                 $DB->update_record('tool_coursebank', $backup);
                 // Log a transfer interruption event.
-                $description = get_string(
+                $desc = coursebank_logging::get_backup_details(
                         'event_backup_chunk_interrupted',
-                        'tool_coursebank',
-                        $backup->uniqueid
+                        $backup->uniqueid,
+                        $backup->backupfilename
                 );
                 coursebank_logging::log_event(
-                        $description,
+                        $desc,
                         'transfer_interrupted',
                         'Transfer interrupted',
                         coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -767,13 +767,13 @@ abstract class tool_coursebank {
                 $DB->update_record('tool_coursebank', $backup);
 
                 // Log a transfer interruption event.
-                $description = get_string(
+                $desc = coursebank_logging::get_backup_details(
                         'event_backup_update_interrupted',
-                        'tool_coursebank',
-                        $backup->uniqueid
+                        $backup->uniqueid,
+                        $data['filename']
                 );
                 coursebank_logging::log_event(
-                        $description,
+                        $desc,
                         'transfer_interrupted',
                         'Transfer interrupted',
                         coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -788,13 +788,13 @@ abstract class tool_coursebank {
                 $backup->timecompleted = time();
                 $DB->update_record('tool_coursebank', $backup);
                 // Log transfer_completed event.
-                $info = get_string(
+                $desc = coursebank_logging::get_backup_details(
                         'event_backup_transfer_completed',
-                        'tool_coursebank',
-                        $backup->uniqueid
-                        );
+                        $backup->uniqueid,
+                        $backup->backupfilename
+                );
                 coursebank_logging::log_event(
-                        $info,
+                        $desc,
                         'transfer_completed',
                         'Transfer completed',
                         coursebank_logging::LOG_MODULE_COURSE_BANK,
@@ -1710,6 +1710,24 @@ class coursebank_logging {
             }
         }
         return $logtable;
+    }
+
+    /**
+     * Fetch the provided event information language string, and pass it
+     * backup details derived from the provided UUID and filename.
+     *
+     * @param string $lang
+     * @param string $uuid
+     * @param string $filename
+     */
+    public static function get_backup_details($lang, $uuid, $filename) {
+        $data = (object) array('uuid' => $uuid, 'filename' => $filename);
+        $backupdetails = get_string(
+                'identify_backup',
+                'tool_coursebank',
+                $data
+        );
+        return get_string($lang, 'tool_coursebank', $backupdetails);
     }
 }
 /**
