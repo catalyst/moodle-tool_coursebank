@@ -1713,12 +1713,14 @@ class coursebank_logging {
     }
 
     /**
-     * Fetch the provided event information language string, and pass it
-     * backup details derived from the provided UUID and filename.
+     * Build a language string for use in logging an event.
      *
-     * @param string $lang
-     * @param string $uuid
-     * @param string $filename
+     * Fetch the language string provided in $lang and insert backup details
+     * derived from the provided UUID and filename.
+     *
+     * @param string $lang      Language string to insert the details into.
+     * @param string $uuid      Coursebank unique ID.
+     * @param string $filename  Moodle course backup filename.
      */
     public static function get_backup_details($lang, $uuid, $filename) {
         $data = (object) array('uuid' => $uuid, 'filename' => $filename);
