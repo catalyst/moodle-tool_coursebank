@@ -6,42 +6,42 @@
   <TABLES>
     <TABLE NAME="tool_coursebank" COMMENT="Keeps details of the backups that have been sent and their status.">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="uniqueid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="UUID."/>
-        <FIELD NAME="backupfilename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the backup."/>
-        <FIELD NAME="fileid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key into the files table."/>
-        <FIELD NAME="chunksize" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How big the pieces of the file will be broken into."/>
-        <FIELD NAME="totalchunks" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How many chunks will get sent."/>
-        <FIELD NAME="chunknumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Which chunk is currently getting sent."/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this record was created."/>
-        <FIELD NAME="timetransferstarted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup started to get sent."/>
-        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup completed getting sent."/>
-        <FIELD NAME="timechunksent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunk was started to get sent."/>
-        <FIELD NAME="timechunkcompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunk was completed getting sent."/>
-        <FIELD NAME="chunkretries" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The total number of retries sending the current chunk."/>
-        <FIELD NAME="status" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The status of sending this backup."/>
-        <FIELD NAME="isbackedup" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="pathnamehash" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="filesize" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="filetimecreated" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="filetimemodified" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="coursefullname" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="courseshortname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="coursestartdate" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="categoryid" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="categoryname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="uniqueid"/>
+        <FIELD NAME="uniqueid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="UUID." PREVIOUS="id" NEXT="backupfilename"/>
+        <FIELD NAME="backupfilename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the backup." PREVIOUS="uniqueid" NEXT="fileid"/>
+        <FIELD NAME="fileid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key into the files table." PREVIOUS="backupfilename" NEXT="chunksize"/>
+        <FIELD NAME="chunksize" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How big the pieces of the file will be broken into." PREVIOUS="fileid" NEXT="totalchunks"/>
+        <FIELD NAME="totalchunks" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="How many chunks will get sent." PREVIOUS="chunksize" NEXT="chunknumber"/>
+        <FIELD NAME="chunknumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Which chunk is currently getting sent." PREVIOUS="totalchunks" NEXT="timecreated"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this record was created." PREVIOUS="chunknumber" NEXT="timetransferstarted"/>
+        <FIELD NAME="timetransferstarted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup started to get sent." PREVIOUS="timecreated" NEXT="timecompleted"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this entire backup completed getting sent." PREVIOUS="timetransferstarted" NEXT="timechunksent"/>
+        <FIELD NAME="timechunksent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunk was started to get sent." PREVIOUS="timecompleted" NEXT="timechunkcompleted"/>
+        <FIELD NAME="timechunkcompleted" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time this current chunk was completed getting sent." PREVIOUS="timechunksent" NEXT="chunkretries"/>
+        <FIELD NAME="chunkretries" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The total number of retries sending the current chunk." PREVIOUS="timechunkcompleted" NEXT="status"/>
+        <FIELD NAME="status" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The status of sending this backup." PREVIOUS="chunkretries" NEXT="isbackedup"/>
+        <FIELD NAME="isbackedup" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="status" NEXT="contenthash"/>
+        <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" PREVIOUS="isbackedup" NEXT="pathnamehash"/>
+        <FIELD NAME="pathnamehash" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" PREVIOUS="contenthash" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" PREVIOUS="pathnamehash" NEXT="filesize"/>
+        <FIELD NAME="filesize" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" PREVIOUS="userid" NEXT="filetimecreated"/>
+        <FIELD NAME="filetimecreated" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" PREVIOUS="filesize" NEXT="filetimemodified"/>
+        <FIELD NAME="filetimemodified" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" PREVIOUS="filetimecreated" NEXT="courseid"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" PREVIOUS="filetimemodified" NEXT="coursefullname"/>
+        <FIELD NAME="coursefullname" TYPE="char" LENGTH="254" NOTNULL="true" SEQUENCE="false" PREVIOUS="courseid" NEXT="courseshortname"/>
+        <FIELD NAME="courseshortname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="coursefullname" NEXT="coursestartdate"/>
+        <FIELD NAME="coursestartdate" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseshortname" NEXT="categoryid"/>
+        <FIELD NAME="categoryid" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="coursestartdate" NEXT="categoryname"/>
+        <FIELD NAME="categoryname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="categoryid"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="uq_fileid" UNIQUE="true" FIELDS="fileid" COMMENT="The linked file id into the files table."/>
-        <INDEX NAME="uq_uniqueid" UNIQUE="true" FIELDS="uniqueid" COMMENT="UUID."/>
-        <INDEX NAME="ix_filedata" UNIQUE="false" FIELDS="fileid, status, backupfilename" COMMENT="Index to easily retrieve the backup file details."/>
-        <INDEX NAME="ix_timecreated" UNIQUE="false" FIELDS="timecreated" COMMENT="Index to easily retrieve the backup files in chronological order."/>
+        <INDEX NAME="uq_fileid" UNIQUE="true" FIELDS="fileid" COMMENT="The linked file id into the files table." NEXT="uq_uniqueid"/>
+        <INDEX NAME="uq_uniqueid" UNIQUE="true" FIELDS="uniqueid" COMMENT="UUID." PREVIOUS="uq_fileid" NEXT="ix_filedata"/>
+        <INDEX NAME="ix_filedata" UNIQUE="false" FIELDS="fileid, status, backupfilename" COMMENT="Index to easily retrieve the backup file details." PREVIOUS="uq_uniqueid" NEXT="ix_timecreated"/>
+        <INDEX NAME="ix_timecreated" UNIQUE="false" FIELDS="timecreated" COMMENT="Index to easily retrieve the backup files in chronological order." PREVIOUS="ix_filedata"/>
       </INDEXES>
     </TABLE>
   </TABLES>

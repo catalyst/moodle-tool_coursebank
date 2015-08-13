@@ -28,5 +28,5 @@
 defined('MOODLE_INTERNAL') || die;
 
 $plugin->version   = 2015073000;
-$plugin->requires  = 2013111800;
+$plugin->requires  = 2012120311;
 $plugin->component = 'tool_coursebank';

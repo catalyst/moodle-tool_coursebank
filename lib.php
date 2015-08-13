@@ -217,7 +217,7 @@ function tool_coursebank_is_url_available($url, $invaldheaders=array('404', '403
  * elements, so this invisible element allows us to empty the session key
  * on submit without cluttering the settings page unnecessarily.
  */
-class admin_setting_configsessionkey extends admin_setting_configempty {
+class admin_setting_configsessionkey /*extends admin_setting_configempty*/ {
     /**
      * Returns an XHTML string for the hidden field
      *
