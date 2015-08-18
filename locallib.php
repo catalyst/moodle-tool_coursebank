@@ -1579,8 +1579,7 @@ class coursebank_logging {
                     'module'   => $module,
                     'action'   => $action,
                     'url'      => $url,
-                    'info'     => $info,
-                    'userid'   => $userid
+                    'info'     => $info
                 ),
                 $other
             );
