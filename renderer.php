@@ -302,7 +302,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         }
         // Get path only if host is set.
         if (isset($parsedurl['path']) and isset($parsedurl['host'])) {
-            $path = $path['path'];
+            $path = $parsedurl['path'];
         }
 
         $this->hosturl = $scheme . $host . $port . $path;
