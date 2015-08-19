@@ -157,7 +157,12 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         $html .= html_writer::start_tag('tbody');
 
         foreach ($downloads as $download) {
-            $html .= html_writer::start_tag('tr');
+            if (!empty($download->disabled)) {
+                $class = "greyed";
+            } else {
+                $class = '';
+            }
+            $html .= html_writer::start_tag('tr', array("class" => $class));
             $html .= html_writer::tag('td', s($download->coursefullname));
             $html .= html_writer::tag('td', s($download->backupfilename));
             $html .= html_writer::tag('td', s(display_size($download->filesize)));
@@ -321,6 +326,8 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         if (isset($result->id) && isset($result->downloadtoken)) {
             $hosturl = $this->course_bank_get_hosturl();
             $url = new moodle_url($hosturl .  '/backup/' . $result->id . '/download/' . $result->downloadtoken);
+        } else {
+            $url = new moodle_url($result->downloadurl);
         }
 
         return $url;
