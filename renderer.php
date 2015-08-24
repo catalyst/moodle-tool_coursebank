@@ -687,7 +687,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
      */
     public function report_selector_form(tool_coursebank_renderable $report) {
         echo html_writer::start_tag('form', array('class' => 'logselecform', 'action' => $report->url, 'method' => 'get'));
-        echo html_writer::start_div();
+        echo html_writer::start_tag('div');
         echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'chooselog', 'value' => '1'));
 
         // Add date selector.
@@ -737,7 +737,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         } else if (!empty($report->lagacy)) {
             echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('gettheselogs')));
         }
-        echo html_writer::end_div();
+        echo html_writer::end_tag('div');
         echo html_writer::end_tag('form');
     }
 }

@@ -26,6 +26,7 @@
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/classes/renderable.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/filters/lib.php');
 require_once($CFG->dirroot.'/lib/tablelib.php');
 

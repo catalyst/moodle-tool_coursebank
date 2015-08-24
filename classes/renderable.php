@@ -203,7 +203,16 @@ class tool_coursebank_renderable implements renderable {
         $context = context_course::instance($courseid);
         $limitfrom = empty($this->showusers) ? 0 : '';
         $limitnum  = empty($this->showusers) ? COURSE_MAX_USERS_PER_DROPDOWN + 1 : '';
-        $courseusers = get_enrolled_users($context, '', 0, 'u.id, ' . get_all_user_name_fields(true, 'u'),
+        // Function get_all_user_name_fields is missing from 2.4, so we need to do it manually.
+        $alternatenames = array('firstname' => 'firstname',
+                                'lastname' => 'lastname');
+        // Create an sql field snippet if requested.
+        foreach ($alternatenames as $key => $altname) {
+            $alternatenames[$key] = 'u.' . $altname;
+        }
+        $alternatenames = implode(',', $alternatenames);
+
+        $courseusers = get_enrolled_users($context, '', 0, 'u.id, ' . $alternatenames,
                 null, $limitfrom, $limitnum);
 
         if (count($courseusers) < COURSE_MAX_USERS_PER_DROPDOWN && !$this->showusers) {

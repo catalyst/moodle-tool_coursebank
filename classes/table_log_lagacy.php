@@ -25,6 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+require_once($CFG->dirroot . '/admin/tool/coursebank/classes/table_log.php');
+
 /**
  * Table class for moodle less then 2.7.
  *
