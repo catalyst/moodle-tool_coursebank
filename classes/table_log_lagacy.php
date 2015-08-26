@@ -207,7 +207,7 @@ class tool_coursebank_table_log_legacy extends tool_coursebank_table_log {
      * which will be used to render logs in table.
      */
     public function update_users_used() {
-        global $DB;
+        global $DB, $CFG;
 
         $this->userfullnames = array();
         $userids = array();
@@ -222,8 +222,18 @@ class tool_coursebank_table_log_legacy extends tool_coursebank_table_log {
         // Get user fullname and put that in return list.
         if (!empty($userids)) {
             list($usql, $uparams) = $DB->get_in_or_equal($userids);
-            $users = $DB->get_records_sql("SELECT id," . get_all_user_name_fields(true) . " FROM {user} WHERE id " . $usql,
-                    $uparams);
+            // Function get_all_user_name_fields is missing from 2.4, so we need to do it manually.
+            // Check if moodle is older then 2.7.x.
+            if ((float)$CFG->version < 2014051200) {
+                $alternatenames = array('firstname' => 'firstname',
+                                        'lastname' => 'lastname');
+                $alternatenames = implode(',', $alternatenames);
+                $users = $DB->get_records_sql("SELECT id," . $alternatenames . " FROM {user} WHERE id " . $usql,
+                        $uparams);
+            } else {
+                $users = $DB->get_records_sql("SELECT id," . get_all_user_name_fields(true) . " FROM {user} WHERE id " . $usql,
+                        $uparams);
+            }
             foreach ($users as $userid => $user) {
                 $this->userfullnames[$userid] = fullname($user);
             }
