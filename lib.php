@@ -41,7 +41,7 @@ function tool_coursebank_rrmdir($dir) {
         foreach ($objects as $object) {
             if ($object != "." && $object != "..") {
                 if (filetype($dir."/".$object) == "dir") {
-                    coursebank_rrmdir($dir."/".$object);
+                    tool_coursebank_rrmdir($dir."/".$object);
                 } else {
                     unlink($dir."/".$object);
                 }
