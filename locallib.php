@@ -651,7 +651,7 @@ abstract class tool_coursebank {
         // Log transfer_resumed event.
         if ($backup->chunknumber > 0) {
             // Don't need to log the start. It will be logged in the post_backup call.
-            coursebank_logging::log_transfer_resumed($backup, null, 'course');
+            coursebank_logging::log_transfer_resumed($backup);
         }
 
         // Set offset based on chunk number.
@@ -1358,7 +1358,7 @@ abstract class tool_coursebank {
                     mtrace($delfail . "\n");
                 }
                 // Delete file from the automated backups storage area.
-                $localdelete = self::delete_moodle_backup($coursebackup, true);
+                $localdelete = self::delete_moodle_backup($coursebackup);
                 if (!$localdelete) {
                     $delfail = get_string(
                             'localdeletefailed',
