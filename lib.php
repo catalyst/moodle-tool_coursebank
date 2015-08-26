@@ -87,8 +87,8 @@ function tool_coursebank_cron_run() {
  * @return boolean|string If can't run returns a key of lang string.
  */
 function tool_coursebank_can_run_cron($type) {
-    $enabled = tool_coursebank_get_config('enable');
-    $externalcronenabled = tool_coursebank_get_config('externalcron');
+    $enabled = get_config('tool_coursebank', 'enable');
+    $externalcronenabled = get_config('tool_coursebank', 'externalcron');
 
     if ($enabled) {
         if ($type == CRON_MOODLE and $externalcronenabled) {
@@ -101,27 +101,6 @@ function tool_coursebank_can_run_cron($type) {
     }
 
     return true;
-}
-/**
- * Set config to tool_coursebank plugin
- *
- * @param string $name
- * @param string $value
- * @return bool true or exception
- */
-function tool_coursebank_set_config($name, $value) {
-    $result = set_config($name, $value, 'tool_coursebank');
-    return $result;
-}
-/**
- * Gets config for tool_coursebank plugin
- *
- * @param string $name
- * @return mixed hash-like object or single value, return false no config found
- */
-function tool_coursebank_get_config($name) {
-    $value = get_config('tool_coursebank', $name);
-    return $value;
 }
 /**
  * Insert temporary cron lock into the config table

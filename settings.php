@@ -35,7 +35,7 @@ global $PAGE;
 $PAGE->requires->js('/admin/tool/coursebank/javascript/jquery-1.11.0.min.js');
 $PAGE->requires->js('/admin/tool/coursebank/javascript/coursebank.js');
 
-$displaypages = tool_coursebank_get_config('displaypages');
+$displaypages = get_config('tool_coursebank', 'displaypages');
 
 if ($displaypages) {
     if (PHPUNIT_TEST) {
