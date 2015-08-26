@@ -38,7 +38,6 @@ $dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
 $page         = optional_param('page', 0, PARAM_INT);
 $perpage      = optional_param('perpage', 50, PARAM_INT);
 
-global $USER;
 $context = context_system::instance();
 require_login(null, false);
 require_capability('tool/coursebank:view', $context);
