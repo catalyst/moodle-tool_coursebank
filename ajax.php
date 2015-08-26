@@ -24,7 +24,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define('MOODLE_INTERNAL', 1);
 define('AJAX_SCRIPT', 1);
 
 require_once('../../../config.php');

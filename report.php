@@ -23,14 +23,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die;
+
 require_once('../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/classes/renderable.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/filters/lib.php');
 require_once($CFG->dirroot.'/lib/tablelib.php');
-
-defined('MOODLE_INTERNAL') || die;
 
 $sort      = optional_param('sort', 'status', PARAM_ALPHANUM);
 $dir       = optional_param('dir', 'ASC', PARAM_ALPHA);
