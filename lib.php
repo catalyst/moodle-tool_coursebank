@@ -76,9 +76,9 @@ function tool_coursebank_cron_run() {
         return true;
     }
 
-    tool_coursebank_set_cron_lock($name, time());
+    set_config($name, time());
     tool_coursebank::fetch_backups();
-    tool_coursebank_delete_cron_lock($name);
+    unset_config($name);
 }
 /**
  * Check if we can run cron.
@@ -103,26 +103,6 @@ function tool_coursebank_can_run_cron($type) {
     return true;
 }
 /**
- * Insert temporary cron lock into the config table
- *
- * @global type DB
- * @param string $name cron lock's name
- * @param string $value cron lock's value
- * @return bool
- */
-function tool_coursebank_set_cron_lock($name, $value) {
-    global $DB;
-    try {
-        $lock = new stdClass();
-        $lock->name = $name;
-        $lock->value = $value;
-        $DB->insert_record('config', $lock);
-        return true;
-    } catch (Exception $e) {
-        return false;
-    }
-}
-/**
  * Check if the temporary cron lock still exists in the config table
  *
  * @global type DB
@@ -133,18 +113,6 @@ function tool_coursebank_does_cron_lock_exist($name) {
     global $DB;
 
     return $DB->record_exists('config', array('name' => $name));
-}
- /**
-  * Delete the temporary cron lock from the config table
-  *
-  * @global type DB
-  * @param string $name cron lock's name
-  */
-function tool_coursebank_delete_cron_lock($name) {
-    global $DB;
-    if (tool_coursebank_does_cron_lock_exist($name)) {
-        $DB->delete_records('config', array('name' => $name));
-    }
 }
 /**
  * Check if URL is valid
