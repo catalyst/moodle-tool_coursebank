@@ -32,7 +32,10 @@ require_once($CFG->dirroot.'/admin/tool/coursebank/lib.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 
 global $PAGE;
-$PAGE->requires->jquery();
+// Check if moodle is older then 2.9.x.
+if ((float)$CFG->version < 2015051100) {
+    $PAGE->requires->jquery();
+}
 $PAGE->requires->js('/admin/tool/coursebank/javascript/jquery-1.11.0.min.js');
 $PAGE->requires->js('/admin/tool/coursebank/javascript/coursebank.js');
 
