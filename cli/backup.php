@@ -43,7 +43,7 @@ mtrace('Started at ' . date('Y-m-d h:i:s', time()));
 foreach ($argslist as $arg) {
     if ($arg == '--force') {
         mtrace(get_string('cron_removinglock', 'tool_coursebank'));
-        unset_config($name);
+        unset_config($name, 'tool_coursebank');
     }
 }
 // Check if lock is in database. If so probably something was broken during the last run.
@@ -53,7 +53,7 @@ if (tool_coursebank_does_cron_lock_exist($name)) {
     die();
 }
 // Lock cron.
-if (!set_config($name, time())) {
+if (!set_config($name, time(), 'tool_coursebank')) {
     mtrace(get_string('cron_duplicate', 'tool_coursebank'));
     die();
 }
@@ -62,5 +62,5 @@ mtrace(get_string('cron_sending', 'tool_coursebank'));
 tool_coursebank::fetch_backups();
 mtrace('Successfully completed at ' . date('Y-m-d h:i:s', time()));
 // Purge DB lock.
-unset_config($name);
+unset_config($name, 'tool_coursebank');
 

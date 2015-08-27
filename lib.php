@@ -76,9 +76,9 @@ function tool_coursebank_cron_run() {
         return true;
     }
 
-    set_config($name, time());
+    set_config($name, time(), 'tool_coursebank');
     tool_coursebank::fetch_backups();
-    unset_config($name);
+    unset_config($name, 'tool_coursebank');
 }
 /**
  * Check if we can run cron.
