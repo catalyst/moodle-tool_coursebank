@@ -159,30 +159,18 @@ $string['settings_proxypass'] = 'Password';
 $string['settings_proxypass_desc'] = 'Proxy password credential';
 $string['settings_proxyport'] = 'Port';
 $string['settings_proxyport_desc'] = 'Proxy port';
-$string['event_downloads_viewed'] = 'The user with id \'{$a}\' viewed the' .
-        ' backup downloads page.';
-$string['event_download_view_failed'] = 'The user with id \'{$a}\' attemped' .
-$string['event_backup_init_completed'] = 'Course backup with {$a} has ' .
-        'already been transferred to Coursebank.';
-$string['event_backup_init_exists_nodata'] = 'Course backup with {$a} already' .
-        'exists in Coursebank, but no data has been transferred yet.';
-$string['event_backup_init_exists_data'] = 'Course backup with {$a} already' .
-        'exists in Coursebank. Existing data will be overwritten.';
-$string['event_backup_init_interrupted'] = 'Transfer of backup with {$a} ' .
-        'interrupted during backup initialisation';
-$string['event_backup_update_interrupted'] = 'Transfer of backup with {$a} ' .
-        'interrupted during update of backup record.';
-$string['event_backup_chunk_interrupted'] = 'Transfer of backup with {$a} ' .
-        'interrupted by chunk failure.';
-$string['event_backup_update_interrupted'] = 'Transfer of backup with {$a} ' .
-        'interrupted by backup update failure.';
-$string['event_backup_update'] = 'Transfer record of backup with {$a} ' .
-        'updated.';
-        ' to view the backup downloads page but an error occurred.';
-$string['event_backup_transfer_started'] = 'Transfer of course backup with {$a} ' .
-        'started.';
-$string['event_backup_transfer_completed'] = 'Transfer of course backup with {$a} ' .
-        'completed.';
+$string['event_downloads_viewed'] = 'The user with id \'{$a}\' viewed the backup downloads page.';
+$string['event_download_view_failed'] = 'The user with id \'{$a}\' attempted to view the backup downloads page but an error occurred.';
+$string['event_backup_init_completed'] = 'Course backup with {$a} has already been transferred to Coursebank.';
+$string['event_backup_init_exists_nodata'] = 'Course backup with {$a} already exists in Coursebank, but no data has been transferred yet.';
+$string['event_backup_init_exists_data'] = 'Course backup with {$a} already exists in Coursebank. Existing data will be overwritten.';
+$string['event_backup_init_interrupted'] = 'Transfer of backup with {$a} interrupted during backup initialisation';
+$string['event_backup_update_interrupted'] = 'Transfer of backup with {$a} interrupted during update of backup record.';
+$string['event_backup_chunk_interrupted'] = 'Transfer of backup with {$a} interrupted by chunk failure.';
+$string['event_backup_update_interrupted'] = 'Transfer of backup with {$a} interrupted by backup update failure.';
+$string['event_backup_update'] = 'Transfer record of backup with {$a} updated.';
+$string['event_backup_transfer_started'] = 'Transfer of course backup with {$a} started.';
+$string['event_backup_transfer_completed'] = 'Transfer of course backup with {$a} completed.';
 $string['event_transfer_queue_populated'] = '{$a} course backup files added to the transfer queue.';
 $string['identify_backup'] = 'UUID \'{$a->uuid}\' and file name \'{$a->filename}\'';
 $string['eventqueuepopulated'] = 'Course backup queue populated';
