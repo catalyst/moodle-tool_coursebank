@@ -35,42 +35,42 @@ global $PAGE;
 // Check if moodle is newer then 2.9.x.
 if ((float)$CFG->version > 2015051100) {
     $PAGE->requires->jquery();
+} else {
+    $PAGE->requires->js('/admin/tool/coursebank/javascript/jquery-1.11.0.min.js');
 }
-$PAGE->requires->js('/admin/tool/coursebank/javascript/jquery-1.11.0.min.js');
 $PAGE->requires->js('/admin/tool/coursebank/javascript/coursebank.js');
 
 $displaypages = get_config('tool_coursebank', 'displaypages');
 
-if ($displaypages) {
-    if (PHPUNIT_TEST) {
-        // When unit tests are run,  the menu item 'courses/backups' has not been created yet
-        // in Moodle 2.7+.  It has been created for Moodle 2.6 and below.
-        // We need to check if it has not been created and actually
-        // add it so we don't get the error that the parent doesn't exist.
-        // This is not required in the real-world though as these plugins are loaded
-        // after the course menu has been set up.
-        if (!$ADMIN->locate('backups')) {
-            $ADMIN->add('courses', new admin_category('backups', new lang_string('backups', 'admin')));
-        }
-    }
-
-    $ADMIN->add('backups', new admin_category('coursebank_pages',
-            get_string('pluginname', 'tool_coursebank')));
-
-    $ADMIN->add('coursebank_pages', new admin_externalpage('tool_coursebank_queue',
-            get_string('nav_queue', 'tool_coursebank'),
-            "$CFG->wwwroot/$CFG->admin/tool/coursebank/queue.php", 'tool/coursebank:view'));
-
-    $ADMIN->add('coursebank_pages', new admin_externalpage('tool_coursebank_download',
-            get_string('nav_download', 'tool_coursebank'),
-            "$CFG->wwwroot/$CFG->admin/tool/coursebank/index.php", 'tool/coursebank:view'));
-
-    $ADMIN->add('reports', new admin_externalpage('tool_coursebank_report',
-            get_string('nav_report', 'tool_coursebank'),
-            "$CFG->wwwroot/$CFG->admin/tool/coursebank/report.php", 'tool/coursebank:viewlogs'));
-}
-
 if ($hassiteconfig) {
+    if ($displaypages) {
+        if (PHPUNIT_TEST) {
+            // When unit tests are run,  the menu item 'courses/backups' has not been created yet
+            // in Moodle 2.7+.  It has been created for Moodle 2.6 and below.
+            // We need to check if it has not been created and actually
+            // add it so we don't get the error that the parent doesn't exist.
+            // This is not required in the real-world though as these plugins are loaded
+            // after the course menu has been set up.
+            if (!$ADMIN->locate('backups')) {
+                $ADMIN->add('courses', new admin_category('backups', new lang_string('backups', 'admin')));
+            }
+        }
+
+        $ADMIN->add('backups', new admin_category('coursebank_pages',
+                get_string('pluginname', 'tool_coursebank')));
+
+        $ADMIN->add('coursebank_pages', new admin_externalpage('tool_coursebank_queue',
+                get_string('nav_queue', 'tool_coursebank'),
+                "$CFG->wwwroot/$CFG->admin/tool/coursebank/queue.php", 'tool/coursebank:view'));
+
+        $ADMIN->add('coursebank_pages', new admin_externalpage('tool_coursebank_download',
+                get_string('nav_download', 'tool_coursebank'),
+                "$CFG->wwwroot/$CFG->admin/tool/coursebank/index.php", 'tool/coursebank:view'));
+
+        $ADMIN->add('reports', new admin_externalpage('tool_coursebank_report',
+                get_string('nav_report', 'tool_coursebank'),
+                "$CFG->wwwroot/$CFG->admin/tool/coursebank/report.php", 'tool/coursebank:viewlogs'));
+    }
 
     $settings = new admin_settingpage('coursebank_settings',
             get_string('pluginname', 'tool_coursebank')
