@@ -31,8 +31,8 @@ require_once($CFG->dirroot.'/admin/tool/coursebank/filters/lib.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/lib.php');
 
 $file         = optional_param('file', 0, PARAM_ALPHANUMEXT);
-$sort         = optional_param('sort', 'coursefullname', PARAM_ALPHANUM);
-$dir          = optional_param('dir', 'ASC', PARAM_ALPHA);
+$sort         = optional_param('sort', 'filetimemodified', PARAM_ALPHANUM);
+$dir          = optional_param('dir', 'DESC', PARAM_ALPHA);
 $page         = optional_param('page', 0, PARAM_INT);
 $perpage      = optional_param('perpage', 50, PARAM_INT);
 
