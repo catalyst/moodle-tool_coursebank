@@ -32,14 +32,18 @@ require_once($CFG->dirroot.'/admin/tool/coursebank/lib.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 
 global $PAGE;
-// Check if moodle is newer then 2.9.x.
-if ((float)$CFG->version > 2015051100) {
-    $PAGE->requires->jquery();
-} else {
-    $PAGE->requires->js('/admin/tool/coursebank/javascript/jquery-1.11.0.min.js');
-}
-$PAGE->requires->js('/admin/tool/coursebank/javascript/coursebank.js');
+// Somewhat hacky fix for jquery load issues.
+$current_section = optional_param('section', '', PARAM_ALPHAEXT);
 
+if ($current_section == 'coursebank_settings') {
+    // Check if moodle is newer then 2.9.x.
+    if ((float)$CFG->version > 2015051100) {
+        $PAGE->requires->jquery();
+    } else {
+        $PAGE->requires->js('/admin/tool/coursebank/javascript/jquery-1.11.0.min.js');
+    }
+    $PAGE->requires->js('/admin/tool/coursebank/javascript/coursebank.js');
+}
 $displaypages = get_config('tool_coursebank', 'displaypages');
 
 if ($hassiteconfig) {
