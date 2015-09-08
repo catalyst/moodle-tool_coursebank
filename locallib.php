@@ -1706,6 +1706,11 @@ class coursebank_logging {
                     $logtable = $reader->get_internal_log_table_name();
                     break;
                 }
+                // Moodle 2.9
+                else if ($reader instanceof \core\log\sql_internal_table_reader) {
+                    $logtable = $reader->get_internal_log_table_name();
+                    break;
+                }
             }
         }
         return $logtable;
