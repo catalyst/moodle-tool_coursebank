@@ -36,6 +36,7 @@ class coursebank_http_response {
      public $request;
      public $error;
      public $errordesc;
+     public $curlerrno;
     /**
      * Constructor method for http_response object.
      *
@@ -176,14 +177,18 @@ class coursebank_http_response {
         // Handle response time-out.
         if (!$this->info || !isset($this->httpcode)) {
             if ($this->request[CURLOPT_URL]) {
-                $description = 'Request to "' . s($this->request[CURLOPT_URL]) .
-                    '" timed out.';
+                $description = 'Request to "' . s($this->request[CURLOPT_URL]) . '" timed out. ';
             } else {
-                $description = 'HTTP request timed out';
+                $description = 'HTTP request timed out.  ';
+            }
+            if (isset($this->curlerrno)) {
+                // This will show in Moodle reports.
+                $description .= 'Curl error code: "'. $this->curlerrno . '"';
             }
             $otherdata = array(
                 'info' => $description,
-                'request'     => $request
+                'curlerrno' => $this->curlerrno,
+                'request' => $request,
             );
         } else {
             $description = $this->httpcode . ' response received from "' .
@@ -194,7 +199,8 @@ class coursebank_http_response {
                 'responseinfo'  => json_encode($this->info),
                 'httpcode'      => $this->httpcode,
                 'request'       => json_encode($request),
-                'info'          => $description
+                'info'          => $description,
+                'curlerrno'     => $this->curlerrno
                 );
             if (isset($this->error)) {
                 $otherdata['error'] = $this->error;

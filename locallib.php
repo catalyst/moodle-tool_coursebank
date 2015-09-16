@@ -767,6 +767,11 @@ abstract class tool_coursebank {
             if ($completion->httpcode != coursebank_ws_manager::WS_HTTP_OK) {
                 $backup->status = self::STATUS_ERROR;
                 // Start from the beginning next time.
+                //
+                // IMPORTANT: in the event that Coursebank has completed the backup, but
+                // we timed out or failed for some reason, we rely here on chunknumber
+                // being reset to 0 so that initialise_backup will be called in the next run.
+                // This should get a WS_HTTP_CONFLICT from Coursebank and finish the backup.
                 $backup->chunknumber = 0;
                 $backup->timechunkcompleted = 0;
                 $DB->update_record('tool_coursebank', $backup);

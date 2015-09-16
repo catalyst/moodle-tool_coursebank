@@ -43,6 +43,7 @@ class coursebank_ws_manager {
     const WS_HTTP_OK = 200;
     const WS_HTTP_CREATED = 201;
     const WS_HTTP_INT_ERR = 500;
+    const WS_HTTP_DEFAULT_TIMEOUT_SECS = 100;  // default timeout for request duration
 
     const WS_AUTH_SESSION_KEY = 'sesskey';
 
@@ -85,13 +86,16 @@ class coursebank_ws_manager {
      * @param mixed   $auth         string: Authorization string
      *                              array: 'sesskey' => Authorisation string
      *                                     'data'    => test data string
+     * @param string  $timeoutsecs  Request timeout.
      *
      * @return array or bool false  Associative array of the form:
      *                                  'body' => <response body array>,
      *                                  'response => <response info array>
      *                              Or false if connection could not be made
      */
-    protected function send($resource='', $data=array(), $method='POST', $auth=null, $retries = 4) {
+    protected function send($resource='', $data=array(), $method='POST', $auth=null, $retries=4,
+                            $timeoutsecs=self::WS_HTTP_DEFAULT_TIMEOUT_SECS) {
+
         $postdata = json_encode($data);
         $header = array(
             'Accept: application/json',
@@ -108,6 +112,7 @@ class coursebank_ws_manager {
             }
         }
         $curlopts = array(
+            CURLOPT_TIMEOUT => $timeoutsecs,
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_POSTFIELDS => $postdata,
             CURLOPT_HTTPHEADER => $header,
@@ -121,8 +126,23 @@ class coursebank_ws_manager {
         }
         curl_setopt_array($this->curlhandle, $curlopts);
         for ($attempt = 0; $attempt <= $retries; $attempt++) {
-            $result = curl_exec($this->curlhandle);
+            $errno = null;
+            try {
+                $result = curl_exec($this->curlhandle);
+            } catch (Exception $e) {
+                $body = new stdClass();
+                $body->error = $e->getCode();
+                $body->error_desc = $e->getMessage();
+                $response = new coursebank_http_response($body, false, $curlopts);
+                break;
+            }
             $info = curl_getinfo($this->curlhandle);
+            $errno = curl_errno($this->curlhandle);
+            if ($errno == CURLE_OPERATION_TIMEOUTED) { // older versions of php use this
+                // We timed out - try again later, don't do any more retries.
+                $response = new coursebank_http_response(false, false, $curlopts);
+                break;
+            }
             if ($result) {
                 $body = json_decode($result);
                 $response = new coursebank_http_response($body, $info, $curlopts);
@@ -131,6 +151,9 @@ class coursebank_ws_manager {
         }
         if (!isset($response)) {
             $response = new coursebank_http_response(false, false, $curlopts);
+        }
+        if ($errno) {
+            $response->curlerrno = $errno;
         }
         $response->log_response();
         return $response;
@@ -152,23 +175,26 @@ class coursebank_ws_manager {
      * @param mixed   $auth         string: Authorization string
      *                              array: 'sesskey' => Authorisation string
      *                                     'data'    => test data string
+     * @param string  $timeoutsecs  Request timeout.
      *
      * @return array or bool false  Associative array of the form:
      *                                  'body' => <response body array>,
      *                                  'response => <response info array>
      *                              Or false if connection could not be made
      */
-    protected function send_authenticated($resource='', $data=array(), $method='POST', $auth=null, $retries = 4) {
+    protected function send_authenticated($resource='', $data=array(), $method='POST', $auth=null, $retries=4,
+                                          $timeoutsecs=self::WS_HTTP_DEFAULT_TIMEOUT_SECS) {
+
         // Don't try sending unless we already have a session key.
         $result = false;
         if ($auth) {
-            $result = $this->send($resource, $data, $method, $auth, $retries);
+            $result = $this->send($resource, $data, $method, $auth, $retries, $timeoutsecs);
         }
         if (!$result || $result->httpcode == self::WS_HTTP_UNAUTHORIZED) {
             $token = get_config('tool_coursebank', 'authtoken');
             if ($this->post_session($token) === true) {
                 $sesskey = tool_coursebank::get_session();
-                return $this->send($resource, $data, $method, $sesskey, $retries);
+                return $this->send($resource, $data, $method, $sesskey, $retries, $timeoutsecs);
             }
         }
         return $result;
@@ -314,6 +340,16 @@ class coursebank_ws_manager {
                 // Need to deal with this.
                 return $response;
             }
+
+            // Post data is the same (verified) and CourseBank says it is complete.
+            //
+            // This could happen if moodle times out doing /backupcomplete but Coursebank
+            // completes the process.
+
+            if (isset($response->body->is_completed) && $response->body->is_completed == true) {
+                return $response;
+            }
+
             // It's the same, continue.
             return (int) $data['fileid'];
         }
@@ -366,7 +402,8 @@ class coursebank_ws_manager {
      */
     public function put_backup_complete($sessionkey, $data, $backup, $retries=4) {
         $uniqueid = $backup->uniqueid;
-        return $this->send_authenticated('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey);
+        $timeoutsecs = 600; // TODO: Allow more time - this is a temporary measure.
+        return $this->send_authenticated('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey, $retries, $timeoutsecs);
     }
     /**
      * Transfer chunk

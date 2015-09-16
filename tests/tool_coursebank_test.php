@@ -64,7 +64,7 @@ class coursebank_ws_manager_tester extends coursebank_ws_manager {
      * @param null $auth
      * @param null $retries
      */
-    protected function send($resource=null, $data=null, $method=null, $auth=null, $retries=null) {
+    protected function send($resource=null, $data=null, $method=null, $auth=null, $retries=null, $timeoutsecs=30) {
         return $this->testresponse;
     }
 }
@@ -138,19 +138,15 @@ class tool_coursebank_testcase extends advanced_testcase {
      */
     public function test_tool_coursebank_get_backup() {
     }
-    /**
-     * @group tool_coursebank
-     */
-    public function test_tool_coursebank_post_backup() {
-        $this->resetAfterTest(true);
-        $wsman = new coursebank_ws_manager_tester();
 
-        // Test successful response.
+    // Return all data needed for a successful POST /backup request / response.
+
+    public function make_post_backup_data() {
         $info = array(
             'http_code' => coursebank_ws_manager_tester::WS_HTTP_CREATED
         );
-        $body = new stdClass();
-        $testdata = array(
+        $response = new stdClass();
+        $request = array(
             'fileid' => 1,
             'filename' => 'test.mbz',
             'filehash' => 'somehash',
@@ -164,43 +160,87 @@ class tool_coursebank_testcase extends advanced_testcase {
             'categoryname' => 'test category',
             'startdate' => '2015-01-01 12:00:00'
         );
-        $body->hash = md5($testdata['fileid'] . ',' . $testdata['uuid'] .
-                ',' . $testdata['filename'] . ',' . $testdata['filesize']);
+        $response->hash = md5($request['fileid'] . ',' . $request['uuid'] .
+                ',' . $request['filename'] . ',' . $request['filesize']);
 
-        $response = new coursebank_http_response($body, $info);
-        $wsman->set_response($response);
-        $result = $wsman->post_backup($testdata, 'sesskey', 0);
-        $this->assertEquals($testdata['fileid'], $result);
+        return array($request, $response, $info);
+    }
+
+    /**
+     * @group tool_coursebank
+     */
+    public function test_tool_coursebank_post_backup() {
+        $this->resetAfterTest(true);
+        $wsman = new coursebank_ws_manager_tester();
+
+        list ($req, $res, $info) = $this->make_post_backup_data();
+        $wsman->set_response(new coursebank_http_response($res, $info));
+        $result = $wsman->post_backup($req, 'sesskey', 0);
+        $this->assertEquals($req['fileid'], $result);
 
         // Test hash mismatch response.
-        $testdata['filename'] = 'test-different-hash.mbz';
-        $result = $wsman->post_backup($testdata, 'sesskey', 0);
+        list ($req, $res, $info) = $this->make_post_backup_data();
+        $req['filename'] = 'test-different-hash.mbz';
+        $result = $wsman->post_backup($req, 'sesskey', 0);
+        $response = new coursebank_http_response($res, $info);
         $this->assertEquals($response, $result);
 
         // Test failed request.
+        list ($req, $res, $info) = $this->make_post_backup_data();
         $response = new coursebank_http_response();
         $wsman->set_response($response);
-        $result = $wsman->post_backup($testdata, 'sesskey', 0);
+        $result = $wsman->post_backup($req, 'sesskey', 0);
         $this->assertEquals($response, $result);
 
-        // Test response if backup already exists.
+        // Test response if backup already exists and Coursebank says backup is NOT completed.
+        list ($req, $res, $info) = $this->make_post_backup_data();
         $info['http_code'] = coursebank_ws_manager_tester::WS_HTTP_CONFLICT;
-        $body->is_completed = true;
-        foreach ($testdata as $field => $value) {
-            $body->$field = $value;
+        $res->is_completed = false;
+        $res->is_inprogress = true;
+        foreach ($req as $field => $value) {
+            $res->$field = $value;
         }
-        $body->coursestartdate = $testdata['startdate'];
-        $response = new coursebank_http_response($body, $info);
+        $res->coursestartdate = $req['startdate'];
+        $response = new coursebank_http_response($res, $info);
         $wsman->set_response($response);
-        $result = $wsman->post_backup($testdata, 'sesskey', 0);
-        $this->assertEquals($testdata['fileid'], $result);
+        $result = $wsman->post_backup($req, 'sesskey', 0);
+        $this->assertEquals($req['fileid'], $result, "We should continue sending the backup.");
+
+        // Test response if backup already exists and Coursebank says backup IS completed.
+        //
+        // This might happen if
+        // - Moodle times out doing PUT /backupcomplete (after successfully PUTting all chunks)
+        // - but CourseBank successfully processes the PUT /backupcomplete
+        // 
+        // NOTE: this plugin will set chunknumber to 0 in
+        // {tool_coursebank} table as a result of /backupcomplete
+        // failing.  As a result, when we retry (on the next cron run)
+        // this will trigger initialise_backup() which will call POST
+        // /backup again.  Coursebank will then return a
+        // WS_HTTP_CONFLICT.
+
+        list ($req, $res, $info) = $this->make_post_backup_data();
+        $info['http_code'] = coursebank_ws_manager_tester::WS_HTTP_CONFLICT;
+        $res->is_completed = true; // CourseBank says the backup is completed (assembled etc)
+        foreach ($req as $field => $value) {
+            $res->$field = $value;
+        }
+        $res->coursestartdate = $req['startdate'];
+        $response = new coursebank_http_response($res, $info);
+        $wsman->set_response($response);
+        $result = $wsman->post_backup($req, 'sesskey', 0);
+        $this->assertEquals($response, $result, "We should get back response NOT file id and NOT continue the backup.");
 
         // Test unexpected HTTP response code.
+
+        list ($req, $res, $info) = $this->make_post_backup_data();
         $info['http_code'] = coursebank_ws_manager_tester::WS_HTTP_UNAUTHORIZED;
-        $response = new coursebank_http_response($body, $info);
+        $response = new coursebank_http_response($res, $info);
         $wsman->set_response($response);
-        $result = $wsman->post_backup($testdata, 'sesskey', 0);
-        $this->assertEquals($response, $result);
+        $result = $wsman->post_backup($req, 'sesskey', 0);
+        $this->assertEquals($response, $result, "We should get back response NOT file id");
+
+
     }
     /**
      * @group tool_coursebank
