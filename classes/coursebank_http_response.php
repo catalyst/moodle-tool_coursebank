@@ -98,8 +98,8 @@ class coursebank_http_response {
             $description = $this->httpcode . ' response received from "' .
                     s($this->request[CURLOPT_URL]) . '"';
 
-            if (isset($this->error_desc)) {
-                $description .= ' ('.s($this->error_desc).')';
+            if (isset($this->errordesc)) {
+                $description .= ' ('.s($this->errordesc).')';
             }
         }
 
@@ -199,9 +199,9 @@ class coursebank_http_response {
             if (isset($this->error)) {
                 $otherdata['error'] = $this->error;
             }
-            if (isset($this->error_desc)) {
-                $otherdata['error_desc'] = $this->error_desc;
-                $otherdata['info'] .= ' - '. $this->error_desc;
+            if (isset($this->errordesc)) {
+                $otherdata['error_desc'] = $this->errordesc;
+                $otherdata['info'] .= ' - '. $this->errordesc;
             }
         }
 
