@@ -55,31 +55,52 @@ function tool_coursebank_rrmdir($dir) {
  * Legacy cron function
  */
 function tool_coursebank_cron() {
-    tool_coursebank_cron_run();
+    return tool_coursebank_send_backups_with_lock(CRON_MOODLE);
 }
 /**
- * Run cron code
+ * Fetch backups from automated system and send them.
  *
+ * This function will need to acquire a lock before continuing.
+ *
+ * Returns true if successfully run.
+ *
+ * @param int Execution context: CRON_MOODLE or CRON_EXTERNAL
  * @return boolean
  */
-function tool_coursebank_cron_run() {
-    $name = 'tool_coursebank_cronlock';
-    $canrun = tool_coursebank_can_run_cron(CRON_MOODLE);
-
+function tool_coursebank_send_backups_with_lock($type) {
+    mtrace('Started at ' . date('Y-m-d h:i:s', time()));
+    $canrun = tool_coursebank_can_run_cron($type);
     if (is_string($canrun)) {
         mtrace(get_string($canrun, 'tool_coursebank'));
-        return true;
+        mtrace('Failed.  ' . date('Y-m-d h:i:s', time()));
+        return false;
     }
 
-    if (tool_coursebank_does_cron_lock_exist($name)) {
+    // If there's an existing lock...
+
+    if (tool_coursebank_get_cron_lock()) {
+        if (!tool_coursebank_cron_lock_can_be_cleared()) {
+            mtrace(get_string('cron_locked', 'tool_coursebank'));
+            //mtrace(get_string('cron_duplicate', 'tool_coursebank'));
+            mtrace('Failed.  ' . date('Y-m-d h:i:s', time()));
+            return false;
+        } else {
+            mtrace(get_string('cron_lock_cleared', 'tool_coursebank'));
+        }
+    }
+
+    if (!tool_coursebank_set_cron_lock()) {
         mtrace(get_string('cron_locked', 'tool_coursebank'));
-        return true;
+        mtrace('Failed.  ' . date('Y-m-d h:i:s', time()));
+        return false;
     }
-
-    set_config($name, time(), 'tool_coursebank');
+    mtrace(get_string('cron_sending', 'tool_coursebank'));
     tool_coursebank::fetch_backups();
-    unset_config($name, 'tool_coursebank');
+    mtrace('Completed at ' . date('Y-m-d h:i:s', time()));
+    tool_coursebank_clear_cron_lock();
+    return true;
 }
+
 /**
  * Check if we can run cron.
  *
@@ -103,17 +124,77 @@ function tool_coursebank_can_run_cron($type) {
     return true;
 }
 /**
- * Check if the temporary cron lock still exists in the config table
+ * Get the CourseBank cron lock.
+ *
+ * If the lock is present, returns the value of the lock (unix timestamp).
+ * If there is no lock, returns null.
  *
  * @global type DB
  * @param string $name cron lock's name
- * @return bool
+ * @return int|null
  */
-function tool_coursebank_does_cron_lock_exist($name) {
-    global $DB;
-
+function tool_coursebank_get_cron_lock() {
     return get_config('tool_coursebank', 'tool_coursebank_cronlock');
 }
+
+/**
+ * Set the CourseBank cron lock.
+ *
+ * This is intended to ensure that the plugin talks to CourseBank one
+ * session at time.
+ * Normally should be called without $time parameter so that the lock value can
+ * default to now.
+ *
+ * No attempt is made to check if it *should* be set.
+ * @see tool_coursebank_cron_lock_can_be_cleared .
+ * 
+ * @param int $time unix timestamp which is used as the lock value.
+ * @return bool Whether lock was set.
+ */
+function tool_coursebank_set_cron_lock($time=null) {
+    if (!$time) {
+        $time = time();
+    }
+    if (!is_int($time)) {
+        return false;
+    }
+    return set_config('tool_coursebank_cronlock', $time, 'tool_coursebank');
+}
+
+/**
+ * Removes CourseBank cron lock if present.
+ * 
+ * No attempt is made to check if it *should* be cleared.
+ * @see tool_coursebank_cron_lock_can_be_cleared .
+ * 
+ * @param int $time unix timestamp which is used as the lock value.
+ * @return bool Whether lock was cleared.
+ */
+function tool_coursebank_clear_cron_lock($time=null) {
+    return unset_config('tool_coursebank_cronlock', 'tool_coursebank');
+}
+
+/**
+ * Determines if the existing cron lock can be cleared.
+ *
+ * The intention is to clear out a stale cron lock (one that should
+ * have been cleared).
+ *
+ * @return bool
+ */
+function tool_coursebank_cron_lock_can_be_cleared($maxsecs=tool_coursebank::CRON_LOCK_TIMEOUT) {
+    $now = time();
+    $time = tool_coursebank_get_cron_lock();
+    if (!$time) {
+        return true;
+    }
+    if (($now - $time) >= $maxsecs) {
+        return true;
+    }
+    return false;
+}
+
+
 /**
  * Check if URL is valid
  *

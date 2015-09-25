@@ -32,7 +32,7 @@ function xmldb_tool_coursebank_uninstall() {
     global $CFG;
 
     // Check if transfer is in progress.
-    if (tool_coursebank_does_cron_lock_exist('tool_coursebank_cronlock')) {
+    if (tool_coursebank_get_cron_lock('tool_coursebank_cronlock')) {
         throw new transfer_in_progress();
     }
 

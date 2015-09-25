@@ -77,6 +77,7 @@ $string['settings_authtoken'] = 'Authentication token';
 $string['settings_authtoken_desc'] = 'Authentication token for use in communication with external course bank instance.';
 $string['cron_skippingmoodle'] = 'Configured to use an external cron. Skipping...';
 $string['cron_locked'] = 'Cron lock record is in the database. The process may have been interrupted recently or still running.';
+$string['cron_lock_cleared'] = 'Clearing old cron lock record in database because it is considered stale.';
 $string['cron_force'] = 'The lock can be removed by running this script with --force as an argument.';
 $string['cron_duplicate'] = 'Duplicate cron lock';
 $string['cron_sending'] = 'Sending backups...';

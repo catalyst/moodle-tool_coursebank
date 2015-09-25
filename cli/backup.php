@@ -29,38 +29,18 @@ require(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/admin/tool/coursebank/lib.php');
 
-$canrun = tool_coursebank_can_run_cron(CRON_EXTERNAL);
 $name = 'tool_coursebank_cronlock';
 $argslist = array_slice($argv, 1);
 
-if (is_string($canrun)) {
-    mtrace(get_string($canrun, 'tool_coursebank'));
-    die();
-}
-
-mtrace('Started at ' . date('Y-m-d h:i:s', time()));
-
 foreach ($argslist as $arg) {
+    // Clear the lock regardless of whether we think it is stale.
     if ($arg == '--force') {
+        tool_coursebank_clear_cron_lock();
         mtrace(get_string('cron_removinglock', 'tool_coursebank'));
-        unset_config($name, 'tool_coursebank');
     }
 }
-// Check if lock is in database. If so probably something was broken during the last run.
-// We need to get admin to check this manually.
-if (tool_coursebank_does_cron_lock_exist($name)) {
-    mtrace(get_string('cron_locked', 'tool_coursebank') . get_string('cron_force', 'tool_coursebank'));
-    die();
-}
-// Lock cron.
-if (!set_config($name, time(), 'tool_coursebank')) {
-    mtrace(get_string('cron_duplicate', 'tool_coursebank'));
-    die();
-}
-// Run the process.
-mtrace(get_string('cron_sending', 'tool_coursebank'));
-tool_coursebank::fetch_backups();
-mtrace('Successfully completed at ' . date('Y-m-d h:i:s', time()));
-// Purge DB lock.
-unset_config($name, 'tool_coursebank');
 
+if (!tool_coursebank_send_backups_with_lock(CRON_EXTERNAL)) {
+    exit(1);
+}
+exit(0);

@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
+require_once($CFG->dirroot.'/admin/tool/coursebank/lib.php');
 
 class coursebank_ws_manager_tester extends coursebank_ws_manager {
     private $testresponse;
@@ -534,4 +535,61 @@ class tool_coursebank_testcase extends advanced_testcase {
         $result = tool_coursebank::delete_moodle_backup($backup);
         $this->assertTrue($result);
     }
+
+    /**
+     * @group tool_coursebank
+     */
+    public function test_cron_lock_get_set_clear() {
+        $this->resetAfterTest(true);
+        $lockname = 'tool_coursebank_cronlock';
+        $now = time();
+        set_config($lockname, $now, 'tool_coursebank');
+
+        // Get
+        $this->assertEquals($now, tool_coursebank_get_cron_lock(), "We can get the lock.");
+
+        // Set
+        $this->assertTrue(tool_coursebank_set_cron_lock($now+1), "We can set a new lock.");
+        $this->assertEquals($now+1, get_config('tool_coursebank', $lockname), "We should get the new lock.");
+
+        // Clearing the lock:
+        $this->assertTrue(tool_coursebank_clear_cron_lock());
+        $this->assertEquals(null, get_config('tool_coursebank', $lockname), "Lock should be cleared.");
+
+        $this->assertTrue(tool_coursebank_clear_cron_lock());
+        $this->assertTrue(tool_coursebank_clear_cron_lock(), "Clearing more than once should be fine.");
+
+        // Bad lock:
+        $this->assertFalse(tool_coursebank_set_cron_lock('foo'), "Should fail to set lock if not int.");
+        $this->assertEquals(null, get_config('tool_coursebank', $lockname), "Lock should not be set.");
+
+        // Default behaviour
+        set_config($lockname, 1, 'tool_coursebank');
+        $this->assertTrue((tool_coursebank_set_cron_lock() - $now) < 3, "Default lock sets time to now.");
+    }
+
+    /**
+     * @group tool_coursebank
+     */
+    public function test_cron_lock_can_be_cleared() {
+        $lockname = 'tool_coursebank_cronlock';
+        $this->resetAfterTest(true);
+        $now = time();
+
+        // Default behaviour: should clear lock after a day:
+        tool_coursebank_set_cron_lock($now - 25*60*60);
+        $this->assertEquals(true, tool_coursebank_cron_lock_can_be_cleared());
+        tool_coursebank_set_cron_lock($now - 24*60*60);
+        $this->assertEquals(true, tool_coursebank_cron_lock_can_be_cleared());
+        tool_coursebank_set_cron_lock($now - 23*60*60);
+        $this->assertEquals(false, tool_coursebank_cron_lock_can_be_cleared(), "Lock should be deemed not clearable.");
+
+        unset_config($lockname, 'tool_coursebank');
+        $this->assertEquals(true, tool_coursebank_cron_lock_can_be_cleared(), "Return true if lock already cleared.");
+
+        // With parameter:
+        set_config($lockname, $now - 1, 'tool_coursebank');
+        $this->assertEquals(true, tool_coursebank_cron_lock_can_be_cleared(1), "Lock should be clearable.");
+    }
+
 }

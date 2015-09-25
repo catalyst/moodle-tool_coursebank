@@ -43,6 +43,11 @@ abstract class tool_coursebank {
     const SEND_ERROR = 1;
     const SEND_CRON_TIMEOUT = 2;
     const CRON_TIMEOUT = 30;
+
+    // The youngest age a lock can reach before it will be removed.
+    // Allow a longish period of time.
+    const CRON_LOCK_TIMEOUT = 86400; // seconds (1 day)
+
     // Maximum number of days a backup can be for fetching.
     const MAX_BACKUP_DAYS = 2;
     /**
