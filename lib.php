@@ -112,7 +112,7 @@ function tool_coursebank_can_run_cron($type) {
 function tool_coursebank_does_cron_lock_exist($name) {
     global $DB;
 
-    return $DB->record_exists('config', array('name' => $name));
+    return get_config('tool_coursebank', 'tool_coursebank_cronlock');
 }
 /**
  * Check if URL is valid
