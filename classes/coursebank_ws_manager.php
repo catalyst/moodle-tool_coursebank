@@ -44,6 +44,7 @@ class coursebank_ws_manager {
     const WS_HTTP_CREATED = 201;
     const WS_HTTP_INT_ERR = 500;
     const WS_HTTP_DEFAULT_TIMEOUT_SECS = 100;  // default timeout for request duration
+    const WS_HTTP_DEFAULT_BACKUP_COMPLETE_TIMEOUT_SECS = 600;  // request duration for backup complete (TODO: remove)
 
     const WS_AUTH_SESSION_KEY = 'sesskey';
 
@@ -402,8 +403,8 @@ class coursebank_ws_manager {
      */
     public function put_backup_complete($sessionkey, $data, $backup, $retries=4) {
         $uniqueid = $backup->uniqueid;
-        $timeoutsecs = 600; // TODO: Allow more time - this is a temporary measure.
-        return $this->send_authenticated('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey, $retries, $timeoutsecs);
+        return $this->send_authenticated('backupcomplete/' . $uniqueid, $data, 'PUT', $sessionkey, $retries,
+                                         self::WS_HTTP_DEFAULT_BACKUP_COMPLETE_TIMEOUT_SECS);
     }
     /**
      * Transfer chunk
