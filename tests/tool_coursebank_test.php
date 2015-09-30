@@ -615,13 +615,14 @@ class tool_coursebank_testcase extends advanced_testcase {
         $lockname = 'tool_coursebank_cronlock';
         $this->resetAfterTest(true);
         $now = time();
+        $TIMEOUT = tool_coursebank::CRON_LOCK_TIMEOUT;
 
         // Default behaviour: should clear lock after a day:
-        tool_coursebank_set_cron_lock($now - 25*60*60);
+        tool_coursebank_set_cron_lock($now - ($TIMEOUT + 1));
         $this->assertEquals(true, tool_coursebank_cron_lock_can_be_cleared());
-        tool_coursebank_set_cron_lock($now - 24*60*60);
+        tool_coursebank_set_cron_lock($now - $TIMEOUT);
         $this->assertEquals(true, tool_coursebank_cron_lock_can_be_cleared());
-        tool_coursebank_set_cron_lock($now - 23*60*60);
+        tool_coursebank_set_cron_lock($now - ($TIMEOUT - 1));
         $this->assertEquals(false, tool_coursebank_cron_lock_can_be_cleared(), "Lock should be deemed not clearable.");
 
         unset_config($lockname, 'tool_coursebank');
