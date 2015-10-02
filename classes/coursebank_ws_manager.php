@@ -96,6 +96,10 @@ class coursebank_ws_manager {
      */
     protected function send($resource='', $data=array(), $method='POST', $auth=null, $retries=4,
                             $timeoutsecs=self::WS_HTTP_DEFAULT_TIMEOUT_SECS) {
+        global $CFG;
+
+        $data['moodle_version'] = $CFG->version;
+        $data['plugin_version'] = get_config('tool_coursebank', 'version');
 
         $postdata = json_encode($data);
         $header = array(
