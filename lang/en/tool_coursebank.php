@@ -26,6 +26,7 @@
 $string['pluginname'] = 'Course Bank';
 $string['backupfailed'] = 'Failed sending backup {$a}.';
 $string['deletefailed'] = 'Failed deleting backup {$a}.';
+$string['moodledeleteskip'] = 'Skip deleting {$a} from the automated backup filearea as the last automated backup for the course is not successful.';
 $string['moodledeletesuccess'] = '{$a} deleted successfully from the automated backup filearea.';
 $string['localdeletesuccess'] = '{$a} deleted successfully from the designated storage area.';
 $string['sendcoursebackups'] = 'External course backups';
@@ -141,6 +142,7 @@ $string['eventhttprequestfailed'] = 'HTTP request failed';
 $string['eventstatusupdated'] = 'Backup status updated';
 $string['eventstatusupdatefailed'] = 'Backup status update failed';
 $string['eventbackupdeletefailed'] = 'Backup delete failed';
+$string['eventbackupdeleteskipped'] = 'Backup delete skipped';
 $string['eventbackupsendfailed'] = 'Backup send failed';
 $string['errorsonly'] = 'Errors only';
 $string['eventorigin'] = 'Origin';
