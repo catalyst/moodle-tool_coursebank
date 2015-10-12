@@ -706,6 +706,10 @@ abstract class tool_coursebank {
                 'original_data' => $contents,
             );
 
+            // Record time this current chunk was started to get sent.
+            $backup->timechunksent = time();
+            $DB->update_record('tool_coursebank', $backup);
+
             $response = $wsmanager->put_chunk(
                     $data,
                     $backup->uniqueid,
@@ -1303,39 +1307,12 @@ abstract class tool_coursebank {
                 $cs->chunknumber = 0;
                 $cs->status = self::STATUS_NOTSTARTED;
                 $cs->isbackedup = 0; // No copy has been created yet.
+                $cs->timecreated = time();
                 foreach ($insertfields as $field) {
                     $cs->$field = $coursebackup->$field;
                 }
-                $backupid = $DB->insert_record('tool_coursebank', $cs);
+                $DB->insert_record('tool_coursebank', $cs);
                 $insertcount++;
-
-                $coursebackup->id = $backupid;
-                $coursebackup->uniqueid = $cs->uniqueid;
-                $coursebackup->backupfilename = $cs->backupfilename;
-                $coursebackup->fileid = $cs->fileid;
-                $coursebackup->chunksize = $cs->chunksize;
-                $coursebackup->totalchunks = $cs->totalchunks;
-                $coursebackup->chunknumber = $cs->chunknumber;
-                $coursebackup->timecreated = time();
-                $coursebackup->timecompleted = 0;
-                $coursebackup->timechunksent = 0;
-                $coursebackup->timechunkcompleted = 0;
-                $coursebackup->timetransferstarted = 0;
-                $coursebackup->chunkretries = 0;
-                $coursebackup->status = $cs->status;
-                $coursebackup->isbackedup = 0;
-                $coursebackup->contenthash = $cs->contenthash;
-                $coursebackup->pathnamehash = $cs->pathnamehash;
-                $coursebackup->userid = $cs->userid;
-                $coursebackup->filesize = $cs->filesize;
-                $coursebackup->filetimecreated = $cs->filetimecreated;
-                $coursebackup->filetimemodified = $cs->filetimemodified;
-                $coursebackup->courseid = $cs->courseid;
-                $coursebackup->coursefullname = $cs->coursefullname;
-                $coursebackup->courseshortname = $cs->courseshortname;
-                $coursebackup->coursestartdate = $cs->coursestartdate;
-                $coursebackup->categoryid = $cs->categoryid;
-                $coursebackup->categoryname = $cs->categoryname;
             }
         }
 
