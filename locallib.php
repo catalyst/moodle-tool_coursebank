@@ -1337,7 +1337,7 @@ abstract class tool_coursebank {
         // Get all backups that are pending transfer, attempt to transfer them.
         $sql = 'SELECT * FROM {tool_coursebank}
                         WHERE status IN (:notstarted, :inprogress, :error)
-                        AND filetimecreated >= :maxbackuptime';
+                        AND filetimecreated >= :maxbackuptime ORDER BY id';
         $contstatus = array(
             'notstarted'    => self::STATUS_NOTSTARTED,
             'inprogress'    => self::STATUS_INPROGRESS,
