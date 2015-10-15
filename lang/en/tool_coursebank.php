@@ -31,6 +31,7 @@ $string['moodledeletesuccess'] = '{$a} deleted successfully from the automated b
 $string['localdeletesuccess'] = '{$a} deleted successfully from the designated storage area.';
 $string['sendcoursebackups'] = 'External course backups';
 $string['noaccesstofeature'] = 'Sorry, only admin or CLI has access to this feature.';
+$string['settings_intro'] = 'Please see <a href="https://account.coursebank.biz/content/moodle-setup" target="_blank">Moodle setup documentation</a> to learn how to configure your plugin. There is also a <a href="https://account.coursebank.biz/content/faq" target="_blank">FAQ page</a>.';
 $string['settingspage'] = 'Configuration';
 $string['settings_header'] = 'Course Bank configuration options';
 $string['settings_url'] = 'Target URL';

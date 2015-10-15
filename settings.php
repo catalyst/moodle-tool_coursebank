@@ -80,6 +80,8 @@ if ($hassiteconfig) {
             get_string('pluginname', 'tool_coursebank')
     );
 
+    $settings->add(new admin_setting_heading('coursebank_settings_description', '', get_string('settings_intro', 'tool_coursebank')));
+
     $renderer = $PAGE->get_renderer('tool_coursebank');
 
     $text = $renderer->course_bank_conncheck();
