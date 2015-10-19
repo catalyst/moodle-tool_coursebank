@@ -110,6 +110,7 @@ $string['backupdate'] = 'Backup date';
 $string['filename'] = 'File name';
 $string['filesize'] = 'File size';
 $string['status'] = 'Status';
+$string['completion'] = 'Completion';
 $string['notavailable'] = 'Not available';
 $string['timecreated'] = 'Transfer started';
 $string['timetransferstarted'] = 'Transfer started';

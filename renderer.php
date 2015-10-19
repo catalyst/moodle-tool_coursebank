@@ -206,6 +206,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         foreach ($columns as $column) {
             $html .= html_writer::tag('th', $this->course_bank_get_column_link($column, $sort, $dir, $page, $perpage));
         }
+        $html .= html_writer::tag('th', $this->course_bank_get_field_name('completion'));
         $html .= html_writer::tag('th', get_string('action'));
         $html .= html_writer::end_tag('tr');
         $html .= html_writer::end_tag('thead');
@@ -223,6 +224,7 @@ class tool_coursebank_renderer extends plugin_renderer_base {
                 $html .= html_writer::tag('td', get_string('notstarted', 'tool_coursebank'));
             }
             $html .= html_writer::tag('td', s($this->course_bank_get_status($result)));
+            $html .= html_writer::tag('td', s($this->course_bank_get_completion($result)));
             $link = $this->course_bank_get_queue_actions_links($result);
             $html .= html_writer::tag('td', $link);
             $html .= html_writer::start_tag('tr');
@@ -244,6 +246,22 @@ class tool_coursebank_renderer extends plugin_renderer_base {
             return $statusmap[$result->status];
         }
         return '';
+    }
+    /**
+     * Generates completion percentage.
+     *
+     * @param object $result
+     * @return HTML
+     */
+    private function course_bank_get_completion($result) {
+        $percentage = round(($result->chunknumber / $result->totalchunks) * 100);
+
+        // Max value we would like to display is 99%.
+        if ($percentage == 100 ) {
+            $percentage = $percentage - 1;
+        }
+
+        return $percentage . '%';
     }
     /**
      * Generates action links for download page
