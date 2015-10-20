@@ -33,9 +33,9 @@ require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
 
 global $PAGE;
 // Somewhat hacky fix for jquery load issues.
-$current_section = optional_param('section', '', PARAM_ALPHAEXT);
+$currentsection = optional_param('section', '', PARAM_ALPHAEXT);
 
-if ($current_section == 'coursebank_settings') {
+if ($currentsection == 'coursebank_settings') {
     // Check if moodle is newer then 2.9.x.
     if ((float)$CFG->version > 2015051100) {
         $PAGE->requires->jquery();
@@ -80,7 +80,8 @@ if ($hassiteconfig) {
             get_string('pluginname', 'tool_coursebank')
     );
 
-    $settings->add(new admin_setting_heading('coursebank_settings_description', '', get_string('settings_intro', 'tool_coursebank')));
+    $settings->add(new admin_setting_heading('coursebank_settings_description', '',
+            get_string('settings_intro', 'tool_coursebank')));
 
     $renderer = $PAGE->get_renderer('tool_coursebank');
 
