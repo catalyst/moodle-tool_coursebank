@@ -190,8 +190,18 @@ class coursebank_filtering {
                 }
                 $field = $this->_fields[$fname];
                 foreach ($datas as $i => $data) {
-                    $p = $field->get_param_filter($data);
-                    $params[$fname][] = $p;
+                    if ($fname == 'filetimemodified' && $this->prefix != 'queue') {
+                        // Split for passing it to flask as different filter items.
+                        foreach ($data as $key => $value) {
+                            if (!empty($value)) {
+                                $p = $field->get_param_filter(array($key => $value));
+                                $params[$fname][] = $p;
+                            }
+                        }
+                    } else {
+                        $p = $field->get_param_filter($data);
+                        $params[$fname][] = $p;
+                    }
                 }
             }
         }
