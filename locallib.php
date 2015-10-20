@@ -47,7 +47,7 @@ abstract class tool_coursebank {
 
     // The youngest age a lock can reach before it will be removed.
     // Allow a longish period of time.
-    const CRON_LOCK_TIMEOUT = 28800; // seconds (8 hours)
+    const CRON_LOCK_TIMEOUT = 28800; // seconds (8 hours).
 
     // Maximum number of days a backup can be for fetching.
     const MAX_BACKUP_DAYS = 2;
@@ -1057,11 +1057,11 @@ abstract class tool_coursebank {
         }
 
         // The last backup is considered as successful when OK or SKIPPED.
-        $lastbackupwassuccessful = ($backupcourse->laststatus == backup_cron_automated_helper::BACKUP_STATUS_SKIPPED ||
+        $lastbackupsuccess = ($backupcourse->laststatus == backup_cron_automated_helper::BACKUP_STATUS_SKIPPED ||
                                    $backupcourse->laststatus == backup_cron_automated_helper::BACKUP_STATUS_OK) && (
                                    $backupcourse->laststarttime > 0 && $backupcourse->lastendtime > 0);
 
-        return $lastbackupwassuccessful;
+        return $lastbackupsuccess;
     }
 
     /**
@@ -1271,10 +1271,7 @@ abstract class tool_coursebank {
                 ORDER BY timecreated";
         // This could possibly be done better... But moodle expects each instance of the variable to be provided separately,
         // so we have this.
-        $params = array('statusnotstarted'  => self::STATUS_NOTSTARTED,
-                        'statuserror'       => self::STATUS_ERROR,
-                        'statusinprogress'  => self::STATUS_INPROGRESS,
-                        'statusnotstarted2' => self::STATUS_NOTSTARTED,
+        $params = array('statusnotstarted2' => self::STATUS_NOTSTARTED,
                         'statuserror2'      => self::STATUS_ERROR,
                         'statusinprogress2' => self::STATUS_INPROGRESS,
                         'statusnotstarted3' => self::STATUS_NOTSTARTED,
@@ -1723,9 +1720,7 @@ class coursebank_logging {
                 if ($reader instanceof \core\log\sql_internal_reader) {
                     $logtable = $reader->get_internal_log_table_name();
                     break;
-                }
-                // Moodle 2.9
-                else if ($reader instanceof \core\log\sql_internal_table_reader) {
+                } else if ($reader instanceof \core\log\sql_internal_table_reader) { // Moodle 2.9.
                     $logtable = $reader->get_internal_log_table_name();
                     break;
                 }

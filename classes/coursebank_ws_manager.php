@@ -43,8 +43,8 @@ class coursebank_ws_manager {
     const WS_HTTP_OK = 200;
     const WS_HTTP_CREATED = 201;
     const WS_HTTP_INT_ERR = 500;
-    const WS_HTTP_DEFAULT_TIMEOUT_SECS = 100;  // default timeout for request duration
-    const WS_HTTP_DEFAULT_BACKUP_COMPLETE_TIMEOUT_SECS = 600;  // request duration for backup complete (TODO: remove)
+    const WS_HTTP_DEFAULT_TIMEOUT_SECS = 100;  // Default timeout for request duration.
+    const WS_HTTP_DEFAULT_BACKUP_COMPLETE_TIMEOUT_SECS = 600;  // Request duration for backup complete (TODO: remove).
 
     const WS_AUTH_SESSION_KEY = 'sesskey';
 
@@ -143,7 +143,7 @@ class coursebank_ws_manager {
             }
             $info = curl_getinfo($this->curlhandle);
             $errno = curl_errno($this->curlhandle);
-            if ($errno == CURLE_OPERATION_TIMEOUTED) { // older versions of php use this
+            if ($errno == CURLE_OPERATION_TIMEOUTED) { // Older versions of php use this.
                 // We timed out - try again later, don't do any more retries.
                 $response = new coursebank_http_response(false, false, $curlopts);
                 break;

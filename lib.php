@@ -81,7 +81,6 @@ function tool_coursebank_send_backups_with_lock($type) {
     if (tool_coursebank_get_cron_lock()) {
         if (!tool_coursebank_cron_lock_can_be_cleared()) {
             mtrace(get_string('cron_locked', 'tool_coursebank'));
-            //mtrace(get_string('cron_duplicate', 'tool_coursebank'));
             mtrace('Failed.  ' . date('Y-m-d h:i:s', time()));
             return false;
         } else {
@@ -147,7 +146,7 @@ function tool_coursebank_get_cron_lock() {
  *
  * No attempt is made to check if it *should* be set.
  * @see tool_coursebank_cron_lock_can_be_cleared .
- * 
+ *
  * @param int $time unix timestamp which is used as the lock value.
  * @return bool Whether lock was set.
  */
@@ -163,10 +162,10 @@ function tool_coursebank_set_cron_lock($time=null) {
 
 /**
  * Removes CourseBank cron lock if present.
- * 
+ *
  * No attempt is made to check if it *should* be cleared.
  * @see tool_coursebank_cron_lock_can_be_cleared .
- * 
+ *
  * @param int $time unix timestamp which is used as the lock value.
  * @return bool Whether lock was cleared.
  */
