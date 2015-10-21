@@ -110,7 +110,11 @@ if (!empty($chooselog)) {
         }
         echo $output->render($reportlog);
     } else {
-        \core\session\manager::write_close();
+        if (class_exists('\core\session\manager')) {
+            \core\session\manager::write_close();
+        } else {
+            session_get_instance()->write_close();
+        }
         $reportlog->download();
         exit();
     }
