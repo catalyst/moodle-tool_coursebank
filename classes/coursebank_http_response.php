@@ -30,13 +30,13 @@ defined('MOODLE_INTERNAL') || die;
  *
  */
 class coursebank_http_response {
-     public $body;
-     public $info;
-     public $httpcode;
-     public $request;
-     public $error;
-     public $errordesc;
-     public $curlerrno;
+    public $body;
+    public $info;
+    public $httpcode;
+    public $request;
+    public $error;
+    public $errordesc;
+    public $curlerrno;
     /**
      * Constructor method for http_response object.
      *
