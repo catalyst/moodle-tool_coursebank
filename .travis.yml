@@ -16,7 +16,8 @@ php:
 
 
 env:
-  - IGNORE_PATHS=javascript/jquery-1.11.0.js
+  global:
+    - IGNORE_PATHS=javascript/jquery-1.11.0.js
   - DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE
   - DB=pgsql MOODLE_BRANCH=MOODLE_28_STABLE
   - DB=pgsql MOODLE_BRANCH=MOODLE_29_STABLE
