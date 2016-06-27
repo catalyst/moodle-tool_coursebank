@@ -54,19 +54,19 @@ function speed_test( event ) {
             if (response[1]) {
                 window.location = response[2];
             } else {
-                if (+(response[0].speed) == 0){
+                if ( + (response[0].speed) == 0){
                     // Connection has failed.
                     jQuery(".speedtest-div").addClass("hide");
                     jQuery(".speedtest-fail").removeClass("hide");
 
-                    // hide the other divs.
+                    // Hide the other divs.
                     if (!jQuery(".speedtest-success").hasClass("hide")) {
                         jQuery(".speedtest-success").addClass("hide");
                     }
                     if (!jQuery(".speedtest-slow").hasClass("hide")) {
                         jQuery(".speedtest-slow").addClass("hide");
                     }
-                } else if (+(response[0].speed) >= 256) {
+                } else if ( + (response[0].speed) >= 256) {
                     // Good connection.
                     var speedtestcontent = jQuery('.speedtestsuccess').val();
                     var speedtestchunk   = jQuery('.speedtestchunk').val();
@@ -74,7 +74,7 @@ function speed_test( event ) {
                     jQuery(".speedtest-div").addClass("hide");
                     jQuery(".speedtest-success").removeClass("hide");
 
-                    // hide the other divs.
+                    // Hide the other divs.
                     if (!jQuery(".speedtest-fail").hasClass("hide")) {
                         jQuery(".speedtest-fail").addClass("hide");
                     }
@@ -89,7 +89,7 @@ function speed_test( event ) {
                     jQuery(".speedtest-div").addClass("hide");
                     jQuery(".speedtest-slow").removeClass("hide");
 
-                    // hide the other divs.
+                    // Hide the other divs.
                     if (!jQuery(".speedtest-fail").hasClass("hide")) {
                         jQuery(".speedtest-fail").addClass("hide");
                     }
