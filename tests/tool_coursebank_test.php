@@ -211,7 +211,7 @@ class tool_coursebank_testcase extends advanced_testcase {
         // This might happen if
         // - Moodle times out doing PUT /backupcomplete (after successfully PUTting all chunks)
         // - but CourseBank successfully processes the PUT /backupcomplete
-        // 
+        //
         // NOTE: this plugin will set chunknumber to 0 in
         // {tool_coursebank} table as a result of /backupcomplete
         // failing.  As a result, when we retry (on the next cron run)
@@ -221,7 +221,7 @@ class tool_coursebank_testcase extends advanced_testcase {
 
         list ($req, $res, $info) = $this->make_post_backup_data();
         $info['http_code'] = coursebank_ws_manager_tester::WS_HTTP_CONFLICT;
-        $res->is_completed = true; // CourseBank says the backup is completed (assembled etc)
+        $res->is_completed = true; // CourseBank says the backup is completed (assembled etc).
         foreach ($req as $field => $value) {
             $res->$field = $value;
         }
@@ -239,7 +239,6 @@ class tool_coursebank_testcase extends advanced_testcase {
         $wsman->set_response($response);
         $result = $wsman->post_backup($req, 'sesskey', 0);
         $this->assertEquals($response, $result, "We should get back response NOT file id");
-
 
     }
     /**
@@ -361,9 +360,9 @@ class tool_coursebank_testcase extends advanced_testcase {
         // Debug levels mapped to expected responses.
         //
         // Each response array includes boolean values corresponding to:
-        //     - Successful chunk HTTP responses
-        //     - Successful normal HTTP responses
-        //     - Error HTTP responses
+        // - Successful chunk HTTP responses
+        // - Successful normal HTTP responses
+        // - Error HTTP responses
         //
         // log_response should log any type of response for which the value
         // mapped in the response array is true.
@@ -589,8 +588,8 @@ class tool_coursebank_testcase extends advanced_testcase {
         $this->assertEquals($now, tool_coursebank_get_cron_lock(), "We can get the lock.");
 
         // Set
-        $this->assertTrue(tool_coursebank_set_cron_lock($now+1), "We can set a new lock.");
-        $this->assertEquals($now+1, get_config('tool_coursebank', $lockname), "We should get the new lock.");
+        $this->assertTrue(tool_coursebank_set_cron_lock($now + 1), "We can set a new lock.");
+        $this->assertEquals($now + 1, get_config('tool_coursebank', $lockname), "We should get the new lock.");
 
         // Clearing the lock:
         $this->assertTrue(tool_coursebank_clear_cron_lock());
@@ -615,14 +614,14 @@ class tool_coursebank_testcase extends advanced_testcase {
         $lockname = 'tool_coursebank_cronlock';
         $this->resetAfterTest(true);
         $now = time();
-        $TIMEOUT = tool_coursebank::CRON_LOCK_TIMEOUT;
+        $timeout = tool_coursebank::CRON_LOCK_TIMEOUT;
 
         // Default behaviour: should clear lock after a day:
-        tool_coursebank_set_cron_lock($now - ($TIMEOUT + 1));
+        tool_coursebank_set_cron_lock($now - ($timeout + 1));
         $this->assertEquals(true, tool_coursebank_cron_lock_can_be_cleared());
-        tool_coursebank_set_cron_lock($now - $TIMEOUT);
+        tool_coursebank_set_cron_lock($now - $timeout);
         $this->assertEquals(true, tool_coursebank_cron_lock_can_be_cleared());
-        tool_coursebank_set_cron_lock($now - ($TIMEOUT - 1));
+        tool_coursebank_set_cron_lock($now - ($timeout - 1));
         $this->assertEquals(false, tool_coursebank_cron_lock_can_be_cleared(), "Lock should be deemed not clearable.");
 
         unset_config($lockname, 'tool_coursebank');

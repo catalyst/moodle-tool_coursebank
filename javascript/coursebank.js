@@ -5,8 +5,7 @@ jQuery(document).ready(function() {
         jQuery('.speedtesturl-div').addClass("hide");
         jQuery('.conncheckbutton-div').removeClass("hide");
         jQuery('.speedtestbutton-div').removeClass("hide");
-    }
-);
+});
 
 function conn_check( event ) {
     event.preventDefault();
@@ -19,23 +18,23 @@ function conn_check( event ) {
         if (xhr.readyState == 4 && xhr.status == 200) {
             var response = JSON.parse(xhr.responseText);
             if (response[1]) {
-            	window.location = response[2];
-            	jQuery(".conncheck-fail").addClass("hide");
-            	jQuery(".conncheck-success").addClass("hide");
+                window.location = response[2];
+                jQuery(".conncheck-fail").addClass("hide");
+                jQuery(".conncheck-success").addClass("hide");
             } else {
-	            if (response[0] == "1") {
-	                jQuery(".check-div").addClass("hide");
-	                jQuery(".conncheck-success").removeClass("hide");
-	                if (!jQuery(".conncheck-fail").hasClass("hide")) {
-	                    jQuery(".conncheck-fail").addClass("hide");
-	                }
-	            } else {
-	                jQuery(".check-div").addClass("hide");
-	                jQuery(".conncheck-fail").removeClass("hide");
-	                if (!jQuery(".conncheck-success").hasClass("hide")) {
-	                    jQuery(".conncheck-success").addClass("hide");
-	                }
-	            }
+                if (response[0] == "1") {
+                    jQuery(".check-div").addClass("hide");
+                    jQuery(".conncheck-success").removeClass("hide");
+                    if (!jQuery(".conncheck-fail").hasClass("hide")) {
+                        jQuery(".conncheck-fail").addClass("hide");
+                    }
+                } else {
+                    jQuery(".check-div").addClass("hide");
+                    jQuery(".conncheck-fail").removeClass("hide");
+                    if (!jQuery(".conncheck-success").hasClass("hide")) {
+                        jQuery(".conncheck-success").addClass("hide");
+                    }
+                }
             }
         }
     };
@@ -53,51 +52,51 @@ function speed_test( event ) {
         if (xhr.readyState == 4 && xhr.status == 200) {
             var response = jQuery.parseJSON( xhr.responseText );
             if (response[1]) {
-            	window.location = response[2];
+                window.location = response[2];
             } else {
-	            if (+(response[0].speed) == 0){
-	                // Connection has failed.
-	                jQuery(".speedtest-div").addClass("hide");
-	                jQuery(".speedtest-fail").removeClass("hide");
-	
-	                // hide the other divs.
-	                if (!jQuery(".speedtest-success").hasClass("hide")) {
-	                    jQuery(".speedtest-success").addClass("hide");
-	                }
-	                if (!jQuery(".speedtest-slow").hasClass("hide")) {
-	                    jQuery(".speedtest-slow").addClass("hide");
-	                }
-	            } else if (+(response[0].speed) >= 256) {
-	                // Good connection.
-	                var speedtestcontent = jQuery('.speedtestsuccess').val();
-	                var speedtestchunk   = jQuery('.speedtestchunk').val();
-	                jQuery(".speedtest-alert-success").text(speedtestcontent + ' ' + response[0].speed + ' kbps. ' + speedtestchunk + ' ' + response[0].chunksize + 'kB.');
-	                jQuery(".speedtest-div").addClass("hide");
-	                jQuery(".speedtest-success").removeClass("hide");
-	
-	                // hide the other divs.
-	                if (!jQuery(".speedtest-fail").hasClass("hide")) {
-	                    jQuery(".speedtest-fail").addClass("hide");
-	                }
-	                if (!jQuery(".speedtest-slow").hasClass("hide")) {
-	                    jQuery(".speedtest-slow").addClass("hide");
-	                }
-	            } else {
-	                // This is a slow connection.
-	                var speedtestcontent = jQuery('.speedtestslow').val();
-	                var speedtestchunk   = jQuery('.speedtestchunk').val();
-	                jQuery(".speedtest-alert-slow").text(speedtestcontent + ' ' + response[0].speed + ' kbps. ' + speedtestchunk + ' ' + response[0].chunksize + 'kB.');
-	                jQuery(".speedtest-div").addClass("hide");
-	                jQuery(".speedtest-slow").removeClass("hide");
-	
-	                // hide the other divs.
-	                if (!jQuery(".speedtest-fail").hasClass("hide")) {
-	                    jQuery(".speedtest-fail").addClass("hide");
-	                }
-	                if (!jQuery(".speedtest-success").hasClass("hide")) {
-	                    jQuery(".speedtest-success").addClass("hide");
-	                }
-	            }
+                if ( + (response[0].speed) == 0){
+                    // Connection has failed.
+                    jQuery(".speedtest-div").addClass("hide");
+                    jQuery(".speedtest-fail").removeClass("hide");
+
+                    // Hide the other divs.
+                    if (!jQuery(".speedtest-success").hasClass("hide")) {
+                        jQuery(".speedtest-success").addClass("hide");
+                    }
+                    if (!jQuery(".speedtest-slow").hasClass("hide")) {
+                        jQuery(".speedtest-slow").addClass("hide");
+                    }
+                } else if ( + (response[0].speed) >= 256) {
+                    // Good connection.
+                    var speedtestcontent = jQuery('.speedtestsuccess').val();
+                    var speedtestchunk   = jQuery('.speedtestchunk').val();
+                    jQuery(".speedtest-alert-success").text(speedtestcontent + ' ' + response[0].speed + ' kbps. ' + speedtestchunk + ' ' + response[0].chunksize + 'kB.');
+                    jQuery(".speedtest-div").addClass("hide");
+                    jQuery(".speedtest-success").removeClass("hide");
+
+                    // Hide the other divs.
+                    if (!jQuery(".speedtest-fail").hasClass("hide")) {
+                        jQuery(".speedtest-fail").addClass("hide");
+                    }
+                    if (!jQuery(".speedtest-slow").hasClass("hide")) {
+                        jQuery(".speedtest-slow").addClass("hide");
+                    }
+                } else {
+                    // This is a slow connection.
+                    var speedtestcontent = jQuery('.speedtestslow').val();
+                    var speedtestchunk   = jQuery('.speedtestchunk').val();
+                    jQuery(".speedtest-alert-slow").text(speedtestcontent + ' ' + response[0].speed + ' kbps. ' + speedtestchunk + ' ' + response[0].chunksize + 'kB.');
+                    jQuery(".speedtest-div").addClass("hide");
+                    jQuery(".speedtest-slow").removeClass("hide");
+
+                    // Hide the other divs.
+                    if (!jQuery(".speedtest-fail").hasClass("hide")) {
+                        jQuery(".speedtest-fail").addClass("hide");
+                    }
+                    if (!jQuery(".speedtest-success").hasClass("hide")) {
+                        jQuery(".speedtest-success").addClass("hide");
+                    }
+                }
             }
         }
     };

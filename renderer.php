@@ -277,8 +277,8 @@ class tool_coursebank_renderer extends plugin_renderer_base {
         $text = get_string('download', 'tool_coursebank');
         $icon = html_writer::empty_tag('img',
                 array('src' => $this->pix_url('t/download')->out(false),
-                    'alt' => $text
-                ));
+                    'alt' => $text)
+                );
 
         $url = $this->course_bank_get_download_url($result);
 
@@ -375,8 +375,8 @@ class tool_coursebank_renderer extends plugin_renderer_base {
                 $text = get_string('stop', 'tool_coursebank');
                 $icon = html_writer::empty_tag('img',
                         array('src' => $this->pix_url('t/block')->out(false),
-                            'alt' => $text
-                        ));
+                            'alt' => $text)
+                        );
                 $url = new moodle_url($this->page->url, array('action' => 'stop', 'id' => $result->id));
                 $buttons[] = html_writer::link($url, $icon, array('title' => $text));
             }
@@ -385,8 +385,8 @@ class tool_coursebank_renderer extends plugin_renderer_base {
                 $text = get_string('go', 'tool_coursebank');
                 $icon = html_writer::empty_tag('img',
                         array('src' => $this->pix_url('t/collapsed')->out(false),
-                            'alt' => $text
-                        ));
+                            'alt' => $text)
+                        );
                 $url = new moodle_url($this->page->url, array('action' => 'go', 'id' => $result->id));
                 $buttons[] = html_writer::link($url, $icon, array('title' => $text));
             }
@@ -394,8 +394,8 @@ class tool_coursebank_renderer extends plugin_renderer_base {
             $text = get_string('delete', 'tool_coursebank');
             $icon = html_writer::empty_tag('img',
                     array('src' => $this->pix_url('t/delete')->out(false),
-                        'alt' => $text
-                    ));
+                        'alt' => $text)
+                    );
             $url = new moodle_url($this->page->url, array('action' => 'delete', 'id' => $result->id));
             $buttons[] = html_writer::link($url, $icon, array('title' => $text));
 
