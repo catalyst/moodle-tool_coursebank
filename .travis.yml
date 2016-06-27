@@ -17,14 +17,16 @@ php:
 
 env:
   global:
-    - MOODLE_BRANCH=MOODLE_28_STABLE
-    - MOODLE_BRANCH=MOODLE_29_STABLE
-    - MOODLE_BRANCH=MOODLE_30_STABLE
-    - MOODLE_BRANCH=master
-    - IGNORE_PATHS=javascript/jquery-1.11.0.js
+    - IGNORE_Names=javascript
   matrix:
-    - DB=pgsql
-    - DB=mysqli
+    - DB=pgsql MOODLE_BRANCH=MOODLE_28_STABLE
+    - DB=pgsql MOODLE_BRANCH=MOODLE_29_STABLE
+    - DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE
+    - DB=pgsql MOODLE_BRANCH=master
+    - DB=mysqli MOODLE_BRANCH=MOODLE_28_STABLE
+    - DB=mysqli MOODLE_BRANCH=MOODLE_29_STABLE
+    - DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE
+    - DB=mysqli MOODLE_BRANCH=master
 
 before_install:
   - phpenv config-rm xdebug.ini
