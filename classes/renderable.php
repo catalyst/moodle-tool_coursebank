@@ -124,7 +124,7 @@ class tool_coursebank_renderable implements renderable {
     public function __construct($lagacy, $logreader = "", $userid = 0, $showreport = true, $showselectorform = true, $url = "",
             $date = 0, $type = "", $logformat='showashtml', $page = 0, $perpage = 100, $order = "timecreated ASC") {
 
-        global $PAGE;
+        global $PAGE, $CFG;
 
         $this->lagacy = $lagacy;
 
@@ -138,6 +138,14 @@ class tool_coursebank_renderable implements renderable {
                 $logreader = null;
             }
         }
+
+        // If Moodle vsersion is >= 2.9.
+        if ((float)$CFG->version >= 2015051100) {
+            $this->sqlreader = 'core\log\sql_reader';
+        } else {
+            $this->sqlreader = 'core\log\sql_select_reader';
+        }
+
         // Use page url if empty.
         if (empty($url)) {
             $url = new moodle_url($PAGE->url);
@@ -173,7 +181,7 @@ class tool_coursebank_renderable implements renderable {
             $this->logmanager = get_log_manager();
         }
 
-        $readers = $this->logmanager->get_readers('core\log\sql_select_reader');
+        $readers = $this->logmanager->get_readers($this->sqlreader);
         if ($nameonly) {
             foreach ($readers as $pluginname => $reader) {
                 $readers[$pluginname] = $reader->get_name();
