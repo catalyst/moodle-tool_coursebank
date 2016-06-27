@@ -19,10 +19,16 @@ env:
   global:
     - IGNORE_PATHS=javascript
   matrix:
+    - DB=pgsql MOODLE_BRANCH=MOODLE_25_STABLE
+    - DB=pgsql MOODLE_BRANCH=MOODLE_26_STABLE
+    - DB=pgsql MOODLE_BRANCH=MOODLE_27_STABLE
     - DB=pgsql MOODLE_BRANCH=MOODLE_28_STABLE
     - DB=pgsql MOODLE_BRANCH=MOODLE_29_STABLE
     - DB=pgsql MOODLE_BRANCH=MOODLE_30_STABLE
     - DB=pgsql MOODLE_BRANCH=master
+    - DB=mysqli MOODLE_BRANCH=MOODLE_25_STABLE
+    - DB=mysqli MOODLE_BRANCH=MOODLE_26_STABLE
+    - DB=mysqli MOODLE_BRANCH=MOODLE_27_STABLE
     - DB=mysqli MOODLE_BRANCH=MOODLE_28_STABLE
     - DB=mysqli MOODLE_BRANCH=MOODLE_29_STABLE
     - DB=mysqli MOODLE_BRANCH=MOODLE_30_STABLE
@@ -40,7 +46,7 @@ install:
 
 script:
   - moodle-plugin-ci phplint
-  - moodle-plugin-ci phpcpd
+#  - moodle-plugin-ci phpcpd        #temp disable
 #  - moodle-plugin-ci phpmd         # phpmd is a bit overzealous
   - moodle-plugin-ci codechecker
   - moodle-plugin-ci csslint
