@@ -18,56 +18,20 @@
  * PHPUnit data generator tests
  *
  * @package   tool_coursebank
- * @copyright 2015 onwards Catalyst IT
+ * @copyright 2018 Catalyst IT
  * @author    Adam Riddell <adamr@catalyst-au.net>
+ * @author     Srdjan <srdjan@catalyst.net.nz>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
-require_once($CFG->dirroot.'/admin/tool/coursebank/locallib.php');
-require_once($CFG->dirroot.'/admin/tool/coursebank/lib.php');
+require_once(__DIR__.'/../locallib.php');
+require_once(__DIR__.'/../lib.php');
+require_once('fixtures/tool_coursebank_testclasses.php');
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 
-class coursebank_ws_manager_tester extends coursebank_ws_manager {
-    private $testresponse;
-
-    /**
-     * Override the constructor so that it doesn't initialise a curl handler.
-     */
-    public function __construct() {
-        $this->curlhandle = null;
-    }
-    /**
-     * Override the close function so that it doesn't try to close a curl
-     * handler when called by functions.
-     */
-    public function close() {
-    }
-    /**
-     * Set the method to be tested. Dummy data generated will vary depending
-     * on which request method is to be tested.
-     *
-     * @param mixed $method  Test response.
-     */
-    public function set_response($testresponse) {
-        $this->testresponse = $testresponse;
-    }
-    /**
-     * Override the send function and generate dummy data based on the contents
-     * $testmethod to test the various function which use send, without having
-     * actually make web service calls.
-     *
-     * @param null $resource
-     * @param null $data
-     * @param null $method
-     * @param null $auth
-     * @param null $retries
-     */
-    protected function send($resource=null, $data=null, $method=null, $auth=null, $retries=null, $timeoutsecs=30) {
-        return $this->testresponse;
-    }
-}
 class tool_coursebank_testcase extends advanced_testcase {
     /**
      * @group tool_coursebank
@@ -632,4 +596,45 @@ class tool_coursebank_testcase extends advanced_testcase {
         $this->assertEquals(true, tool_coursebank_cron_lock_can_be_cleared(1), "Lock should be clearable.");
     }
 
+    public function test_fetch_backups() {
+        global $CFG, $USER, $DB;
+
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+        // $userid = $USER->id;
+        $userid = 2; // admin
+
+        $starttime = time();
+
+        // XXX
+        tool_coursebank_tester::cancel_old_backups($starttime);
+        try {
+            tool_coursebank_tester::fetch_backups();
+        } catch (Exception $e) {
+            $this->fail("Exception thrown: $e");
+        }
+
+        $course = $this->getDataGenerator()->create_course();
+        // Create backup file and save it to the backup location
+        $bc = new backup_controller(backup::TYPE_1COURSE, $course->id, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO, backup::MODE_GENERAL, $userid);
+        $bc->execute_plan();
+        $results = $bc->get_results();
+        $file = $results['backup_destination'];
+        $this->assertEquals($file->get_filename(), TEMP_BACKUP_FILE_NAME);
+
+        // Disable all loggers
+        // $CFG->backup_error_log_logger_level = backup::LOG_NONE;
+        // $CFG->backup_file_logger_level = backup::LOG_NONE;
+        // $CFG->backup_database_logger_level = backup::LOG_NONE;
+        // $CFG->backup_file_logger_level_extra = backup::LOG_NONE;
+
+        try {
+            tool_coursebank_tester::fetch_backups();
+        } catch (Exception $e) {
+            $this->fail("Exception thrown: $e");
+        }
+
+        $bc->destroy();
+    }
 }
