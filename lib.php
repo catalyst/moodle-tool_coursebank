@@ -29,6 +29,7 @@ require_once($CFG->dirroot.'/lib/adminlib.php');
 
 define('CRON_MOODLE', 1);
 define('CRON_EXTERNAL', 2);
+define('TEMP_BACKUP_FILE_NAME', 'backup.mbz');
 
 /**
  * Recursively delete a directory that is not empty
