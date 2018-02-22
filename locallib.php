@@ -1255,6 +1255,7 @@ abstract class tool_coursebank {
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
                 AND   f.timecreated >= :maxbackuptime1
                 AND   f.filename <> :tmp_bkp_filename
+                AND   f.component <> 'tool_recyclebin'
                 UNION
                 " . $sqlselect . "
                 INNER JOIN {tool_coursebank} tcs on tcs.fileid = f.id
@@ -1262,6 +1263,7 @@ abstract class tool_coursebank {
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
                 AND   tcs.status IN (:statusnotstarted2, :statusinprogress2, :statuserror2)
                 AND   f.timecreated >= :maxbackuptime2
+                AND   f.component <> 'tool_recyclebin'
                 UNION
                 " . $sqlselect . "
                 RIGHT JOIN {tool_coursebank} tcs on tcs.fileid = f.id
