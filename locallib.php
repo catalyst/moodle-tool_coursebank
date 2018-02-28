@@ -19,7 +19,7 @@
  * @package    tool_coursebank
  * @author     Adam Riddell <adamr@catalyst-au.net>
  * @author     Ghada El-Zoghbi <ghada@catalyst-au.net>
- * @copyright  2015 Catalyst IT
+ * @copyright  2018 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -1255,6 +1255,7 @@ abstract class tool_coursebank {
                 AND   f.mimetype IN ('application/vnd.moodle.backup', 'application/x-gzip')
                 AND   f.timecreated >= :maxbackuptime1
                 AND   f.component <> 'tool_recyclebin'
+                AND   f.filename <> :tmp_bkp_filename
                 UNION
                 " . $sqlselect . "
                 INNER JOIN {tool_coursebank} tcs on tcs.fileid = f.id
@@ -1284,6 +1285,7 @@ abstract class tool_coursebank {
                         'maxbackuptime1'    => $maxbackuptime,
                         'maxbackuptime2'    => $maxbackuptime,
                         'maxbackuptime3'    => $maxbackuptime,
+                        'tmp_bkp_filename'  => TEMP_BACKUP_FILE_NAME,
                         );
         $recordset = $DB->get_recordset_sql($sql, $params);
 
