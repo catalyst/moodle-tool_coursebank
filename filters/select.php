@@ -23,6 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot.'/user/filters/lib.php');
 
 class coursebank_filter_select extends user_filter_select {
@@ -51,4 +53,3 @@ class coursebank_filter_select extends user_filter_select {
         return $params;
     }
 }
-

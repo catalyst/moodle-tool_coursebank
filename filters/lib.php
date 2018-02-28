@@ -23,13 +23,13 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot.'/admin/tool/coursebank/filters/coursebank_filter_forms.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/filters/filesize.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/filters/text.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/filters/date.php');
 require_once($CFG->dirroot.'/admin/tool/coursebank/filters/select.php');
-
-
 
 class coursebank_filtering {
     private $prefix;

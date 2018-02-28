@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 class coursebank_ws_manager_tester extends coursebank_ws_manager {
     private $testresponse;
 
