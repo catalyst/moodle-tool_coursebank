@@ -35,7 +35,7 @@ class provider implements
     \core_privacy\local\request\data_provider
 {
     use \core_privacy\local\legacy_polyfill;
-    
+
     /**
      * Returns meta data about this system.
      *
@@ -43,8 +43,7 @@ class provider implements
      *
      * @return collection A listing of user data stored through this system.
      */
-    public static function get_metadata(collection $items) : collection
-    {
+    public static function get_metadata(collection $items) : collection {
         $items->add_external_location_link(
             '',
             [

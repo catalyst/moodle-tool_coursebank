@@ -189,10 +189,11 @@ $string['eventtimeoutreached'] = 'Cron time out reached';
 $string['ERROR_TIMEOUT']              = 'The connection has timed out.';
 $string['ERROR_MAX_ATTEMPTS_REACHED'] = 'Maximum attempts reached.';
 
+// Privacy metadata.
+$string['privacy:metadata'] = "In order to integrate with CourseBank, user data needs to be exchanged with that service.";
+$string['privacy:metadata:userid'] = 'The userid of the Moodle user';
+
 // These strings exist in Moodle 2.7+ in lang/en/filters.php but not for Moodle 2.6 and below.
 // Will include here as they are making the unit tests fail for Moodle 2.6 and below.
 $string['limiterfor'] = '{$a} field limiter';
 $string['valuefor'] = '{$a} value';
-
-$string['privacy:metadata'] = 'In order to integrate with Course Bank, user data needs to be exchanged with that service.';
-$string['privacy:metadata:userid'] = 'The userid of the Moodle user';
